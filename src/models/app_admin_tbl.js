@@ -1,0 +1,64 @@
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema(
+  {
+    kh_username: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      index: true,
+    },
+
+    kh_admin_name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    kh_password: {
+      type: String,
+      required: true,
+    },
+
+    kh_admin_email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      // unique: true,
+      index: true,
+    },
+
+    kh_admin_phone: {
+      type: Number,
+      required: true,
+    },
+
+    kh_role: {
+      type: Number,
+      default: null,
+      enum: [1, 2, 3, 4, null],
+      // 1 = admin, 2 = manager, 3 = operator, 4 = accounts
+    },
+
+    kh_pic: {
+      type: String,
+      required: true,
+    },
+
+    kh_status: {
+      type: Number,
+      default: 1,
+    },
+  },
+  {
+    timestamps: {
+      createdAt: "kh_added_on",
+      updatedAt: "updated_at",
+    },
+    versionKey: false,
+  }
+);
+
+module.exports = mongoose.model("app_admin_tbl", userSchema);
