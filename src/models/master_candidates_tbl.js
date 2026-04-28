@@ -21,6 +21,12 @@ const candidateSchema = new mongoose.Schema({
   c_password_update: { type: String,  enum:[0,1] // 0=no, 1=yes 
   },
 
+//   c_role: {
+//   type: String,
+//   enum: ["user", "admin"],
+//   default: "user"
+// },
+
   c_contact: { type: Number,default: null  },
   c_alt_contact: { type: Number, default: null  },
 

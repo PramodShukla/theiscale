@@ -3,13 +3,14 @@ const mongoose = require("mongoose");
 const courseSchema = new mongoose.Schema(
   {
     course_id: {
-      type: Number,
-      default: null,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "master_course_tbl",
+      required: true,
     },
 
     course_slug: {
       type: String,
-      required: true,
+      // required: true,
       maxlength: 200,
     },
 
@@ -24,7 +25,7 @@ const courseSchema = new mongoose.Schema(
     },
 
     created_by: {
-      type: Number,
+      type: String,
       default: null,
     },
 
@@ -52,7 +53,7 @@ const courseSchema = new mongoose.Schema(
   },
   {
     timestamps: false, // because you already have created/updated fields
-  }
+  },
 );
 
 module.exports = mongoose.model("master_course_faq", courseSchema);

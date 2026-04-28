@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema(
   {
     kh_username: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
       unique: true,
       index: true,
@@ -37,8 +37,8 @@ const userSchema = new mongoose.Schema(
 
     kh_role: {
       type: Number,
-      default: null,
-      enum: [1, 2, 3, 4, null],
+      default: 1,
+      enum: [1, 2, 3, 4],
       // 1 = admin, 2 = manager, 3 = operator, 4 = accounts
     },
 

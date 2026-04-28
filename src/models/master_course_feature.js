@@ -8,35 +8,40 @@ const featureSchema = new mongoose.Schema(
     // },
 
     m_feature_course: {
-      type: Number,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "master_course_tbl",
       required: true,
     },
 
     m_feature_course_slug: {
       type: String,
-      required: true,
+      // required: true,
       maxlength: 200,
     },
 
     m_feature_image: {
       type: String,
-      required: true,
-      maxlength: 255,
+      // required: true,
+      default: null,
     },
 
     m_feature_title: {
       type: String,
       required: true,
       maxlength: 250,
+      trim: true,
     },
 
     m_feature_desc: {
       type: String,
-      required: true,
+      // required: true,
+      trim: true,
     },
 
     m_feature_status: {
       type: Number,
+      enum: [0, 1],
+      default: 1,
       required: true,
     },
 
@@ -48,7 +53,7 @@ const featureSchema = new mongoose.Schema(
   },
   {
     timestamps: false,
-  }
+  },
 );
 
 module.exports = mongoose.model("master_course_feature", featureSchema);

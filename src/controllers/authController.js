@@ -1,6 +1,7 @@
 const Candidate = require("../models/master_candidates_tbl");
-const jwt = require("jsonwebtoken");
+// const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { generateTokenUser } = require("../utils/token");
 
 
 // REGISTER
@@ -49,7 +50,7 @@ exports.register = async (req, res) => {
 
       c_whatsapp: whatsapp,
       c_gender: gender,
-      c_dob: "NA",
+      c_dob: null,
       c_age: 0,
 
       c_bio: "NA",
@@ -164,12 +165,8 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 🔥 TOKEN
-    const token = jwt.sign(
-      { id: user._id, email: user.c_email },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    // Generate token for user
+    const token = generateTokenUser(user);
 
     res.status(200).send({
       status: true,

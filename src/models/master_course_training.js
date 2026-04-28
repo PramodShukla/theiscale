@@ -4,18 +4,19 @@ const navigationSchema = new mongoose.Schema(
   {
     type: {
       type: Number,
-      default: null, 
-      enum:[1, 2, 3, 4] // 1 => course, 2 => test, 3 => notes, 4 => webinar
+      default: null,
+      enum: [1, 2, 3, 4], // 1 => course, 2 => test, 3 => notes, 4 => webinar
     },
 
     course_id: {
-      type: Number,
-      default: 0,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "master_course_tbl",
+      required: true,
     },
 
     course_slug: {
       type: String,
-      required: true,
+      // required: true,
       maxlength: 200,
     },
 
@@ -53,6 +54,7 @@ const navigationSchema = new mongoose.Schema(
     title: {
       type: String,
       default: null,
+      required: true,
       maxlength: 255,
     },
 
@@ -69,7 +71,7 @@ const navigationSchema = new mongoose.Schema(
   },
   {
     timestamps: false,
-  }
+  },
 );
 
 module.exports = mongoose.model("master_course_training", navigationSchema);

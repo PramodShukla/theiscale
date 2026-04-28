@@ -7,6 +7,11 @@ const testSchema = new mongoose.Schema({
   test_code: { type: String, default: null },
   test_category: { type: String, default: null },
 
+  test_package: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "master_test_package_tbl"
+},
+
   test_state: { type: Number, required: true },
   test_city: { type: String, default: null },
   exam_city: { type: String, required: true },

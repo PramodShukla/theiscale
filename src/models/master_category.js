@@ -9,45 +9,48 @@ const categorySchema = new mongoose.Schema({
 
   m_category_for: {
     type: Number,
-    required: true,
+    // required: true,
     enum:[1,2,3] // 1=course, 2=testseries, 3=notes
   },
 
   m_category_name: {
     type: String,
-    required: true
+    required: true,
+    trim: true,
   },
 
   m_category_slug: {
     type: String,
-    required: true,
-    maxlength: 200
+    // required: true,
+    maxlength: 200,
+    trim: true,
   },
 
   m_category_desc: {
     type: String,
-    required: true
+    required: true,
+    trim: true,
   },
 
   m_category_icon: {
     type: String,
-    required: true
+    // required: true
   },
 
   m_category_banner: {
     type: String,
-    required: true
+    // required: true
   },
 
   m_category_status: {
     type: Number,
-    required: true,
+    // required: true,
     enum:[0,1] // 0=active, 1=inactive
   },
 
   m_category_order: {
     type: Number,
-    required: true
+    // required: true
   },
 
   m_category_keywords: {
