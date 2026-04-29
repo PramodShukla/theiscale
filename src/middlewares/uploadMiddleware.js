@@ -41,6 +41,12 @@ const storage = multer.diskStorage({
       folder = "src/uploads/test-packages";
     } else if (file.fieldname === "th_icon") {
       folder = "src/uploads/training-highlights";
+    } else if (file.fieldname === "m_quiz_icon") {
+      folder = "src/uploads/quiz/icon";
+    } else if (file.fieldname === "m_quiz_banner") {
+      folder = "src/uploads/quiz/banner";
+    } else if (file.fieldname === "m_instructor_profile") {
+      folder = "src/uploads/instructors";
     }
 
     // folder create if not exists
@@ -166,6 +172,33 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // Quiz icon - only images
+  else if (file.fieldname === "m_quiz_icon") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for quiz icon"), false);
+    }
+  }
+
+  // Quiz banner - only images
+  else if (file.fieldname === "m_quiz_banner") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for quiz banner"), false);
+    }
+  }
+
+  // Instructor profile image - only images
+  else if (file.fieldname === "m_instructor_profile") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for instructor profile"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -205,7 +238,14 @@ const packageUpload = upload.fields([{ name: "m_package_image", maxCount: 1 }]);
 
 const thUpload = upload.fields([{ name: "th_icon", maxCount: 1 }]);
 
+const quizUpload = upload.fields([
+  { name: "m_quiz_icon", maxCount: 1 },
+  { name: "m_quiz_banner", maxCount: 1 },
+]);
 
+const instructorUpload = upload.fields([
+  { name: "m_instructor_profile", maxCount: 1 },
+]);
 
 module.exports = {
   upload,
@@ -215,5 +255,7 @@ module.exports = {
   subjectUpload,
   topicUpload,
   packageUpload,
-  thUpload
+  thUpload,
+  quizUpload,
+  instructorUpload,
 };

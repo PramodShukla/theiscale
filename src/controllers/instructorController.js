@@ -1,6 +1,7 @@
 const Instructor = require("../models/master_instructor_tbl");
 const slugify = require("slugify");
 const mongoose = require("mongoose");
+const fs = require("fs");
 
 // ===============================
 // ADD INSTRUCTOR
@@ -11,6 +12,7 @@ const addInstructor = async (req, res) => {
       m_instructor_name,
       m_instructor_email,
       m_instructor_phone,
+      m_linkedin_profile,
       m_instructor_bio,
       m_instructor_experience,
       m_instructor_skills,
@@ -62,23 +64,48 @@ const addInstructor = async (req, res) => {
     if (slugExists) slug += "-" + Date.now();
 
     // SKILLS (ARRAY ONLY)
+    // let skills = [];
+    // if (m_instructor_skills) {
+    //   if (Array.isArray(m_instructor_skills)) {
+    //     skills = m_instructor_skills;
+    //   } else {
+    //     return res.status(400).json({
+    //       status: false,
+    //       message: "Skills must be an array",
+    //     });
+    //   }
+    // }
+
     let skills = [];
     if (m_instructor_skills) {
-      if (Array.isArray(m_instructor_skills)) {
-        skills = m_instructor_skills;
-      } else {
+      try {
+        // Agar skills string hai to parse karo, nahi to direct use karo
+        skills =
+          typeof m_instructor_skills === "string"
+            ? JSON.parse(m_instructor_skills)
+            : m_instructor_skills;
+
+        if (!Array.isArray(skills)) throw new Error(); // Check karein ki result array hai ya nahi
+      } catch (e) {
         return res.status(400).json({
           status: false,
-          message: "Skills must be an array",
+          message:
+            'Skills must be a valid JSON array string. e.g., \'["JS","React"]\'',
         });
       }
     }
+
+    const imagePath = req.files?.m_instructor_profile
+      ? req.files.m_instructor_profile[0].path
+      : null;
 
     const newInstructor = new Instructor({
       m_instructor_name,
       m_instructor_slug: slug,
       m_instructor_email,
       m_instructor_phone,
+      m_linkedin_profile,
+      m_instructor_profile: imagePath,
       m_instructor_bio,
       m_instructor_experience,
       m_instructor_skills: skills,
@@ -97,9 +124,12 @@ const addInstructor = async (req, res) => {
       data: saved,
     });
   } catch (err) {
+    if (req.files?.m_instructor_profile) {
+      fs.unlinkSync(req.files.m_instructor_profile[0].path);
+    }
     res.status(500).json({
       status: false,
-      message: err.message,
+      message: "Error adding instructor: " + err.message,
     });
   }
 };
@@ -183,6 +213,7 @@ const updateInstructor = async (req, res) => {
       m_instructor_email,
       m_instructor_phone,
       m_instructor_bio,
+      m_linkedin_profile,
       m_instructor_experience,
       m_instructor_skills,
       m_instructor_status,
@@ -208,6 +239,18 @@ const updateInstructor = async (req, res) => {
       instructor.m_instructor_email = m_instructor_email;
     }
 
+    if (req.files?.m_instructor_profile) {
+      // Delete old image if it exists
+      if (
+        instructor.m_instructor_profile &&
+        fs.existsSync(instructor.m_instructor_profile)
+      ) {
+        fs.unlinkSync(instructor.m_instructor_profile);
+      }
+      // Update with new image path
+      instructor.m_instructor_profile = req.files.m_instructor_profile[0].path;
+    }
+
     // NAME + SLUG UPDATE
     if (m_instructor_name) {
       instructor.m_instructor_name = m_instructor_name;
@@ -227,23 +270,45 @@ const updateInstructor = async (req, res) => {
       instructor.m_instructor_slug = slug;
     }
 
-    if (m_instructor_phone)
-      instructor.m_instructor_phone = m_instructor_phone;
+    if (m_instructor_phone) instructor.m_instructor_phone = m_instructor_phone;
 
-    if (m_instructor_bio)
-      instructor.m_instructor_bio = m_instructor_bio;
+    if (m_linkedin_profile !== undefined) {
+      instructor.m_linkedin_profile = m_linkedin_profile;
+    }
+
+    if (m_instructor_bio) instructor.m_instructor_bio = m_instructor_bio;
 
     if (m_instructor_experience)
       instructor.m_instructor_experience = m_instructor_experience;
 
     // SKILLS UPDATE
+    // if (m_instructor_skills) {
+    //   if (Array.isArray(m_instructor_skills)) {
+    //     instructor.m_instructor_skills = m_instructor_skills;
+    //   } else {
+    //     return res.status(400).json({
+    //       status: false,
+    //       message: "Skills must be an array",
+    //     });
+    //   }
+    // }
+
     if (m_instructor_skills) {
-      if (Array.isArray(m_instructor_skills)) {
-        instructor.m_instructor_skills = m_instructor_skills;
-      } else {
+      try {
+        // Agar skills string hai to parse karo, nahi to direct use karo
+        const skills =
+          typeof m_instructor_skills === "string"
+            ? JSON.parse(m_instructor_skills)
+            : m_instructor_skills;
+
+        if (!Array.isArray(skills)) throw new Error(); // Check karein ki result array hai ya nahi
+
+        instructor.m_instructor_skills = skills; // Database me update karein
+      } catch (e) {
         return res.status(400).json({
           status: false,
-          message: "Skills must be an array",
+          message:
+            'Skills must be a valid JSON array string. e.g., \'["JS","React"]\'',
         });
       }
     }
@@ -264,6 +329,9 @@ const updateInstructor = async (req, res) => {
       data: updated,
     });
   } catch (err) {
+    if (req.files?.m_instructor_profile) {
+      fs.unlinkSync(req.files.m_instructor_profile[0].path);
+    }
     res.status(500).json({
       status: false,
       message: err.message,
@@ -292,6 +360,13 @@ const deleteInstructor = async (req, res) => {
         status: false,
         message: "Instructor not found",
       });
+    }
+
+    if (
+      instructor.m_instructor_profile &&
+      fs.existsSync(instructor.m_instructor_profile)
+    ) {
+      fs.unlinkSync(instructor.m_instructor_profile);
     }
 
     await Instructor.findByIdAndDelete(id);

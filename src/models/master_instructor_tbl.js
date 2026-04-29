@@ -35,6 +35,11 @@ const instructorSchema = new mongoose.Schema(
       default: null,
     },
 
+    m_linkedin_profile: {
+      type: String, 
+      default: null,
+    },
+
     m_instructor_bio: {
       type: String,
       default: null,

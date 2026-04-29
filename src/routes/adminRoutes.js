@@ -12,6 +12,12 @@ const subjectRoutes = require("./subjectRoutes");
 const topicsRoutes = require("./topicsRoutes");
 const testPackageRoutes = require("./testPackageRoutes");
 const trainingRoutes = require("./trainingRoutes");
+const quizRoutes = require("./quizRoutes");
+const instructionsRoutes = require("./instructionsRoutes");
+const questionRoutes = require("./questionRoutes");
+
+
+
 
 router.use("/auth", authAdminRoutes);
 router.use("/category", categoryRoutes);
@@ -24,5 +30,11 @@ router.use("/subject", subjectRoutes);
 router.use("/topics", topicsRoutes);
 router.use("/test-package", testPackageRoutes);
 router.use("/training", trainingRoutes);
+router.use("/quiz", quizRoutes);
+router.use("/instructions", instructionsRoutes);
+router.use("/question", questionRoutes);
+
+
+
 
 module.exports = router;

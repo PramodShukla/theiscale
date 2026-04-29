@@ -72,6 +72,7 @@ const courseSchema = new mongoose.Schema(
 
     m_course_description: {
       type: String,
+      trim: true,
       // required: true,
     },
 
