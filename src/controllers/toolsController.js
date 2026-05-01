@@ -1,5 +1,5 @@
-const Tool = require("../models/master_course_tools");
-const Course = require("../models/master_course_tbl");
+const Tool = require("../models/course_tools");
+const Course = require("../models/course");
 const fs = require("fs");
 const mongoose = require("mongoose");
 

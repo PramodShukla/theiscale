@@ -1,4 +1,4 @@
-const Admin = require("../models/app_admin_tbl");
+const Admin = require("../models/app_admin");
 const bcrypt = require("bcrypt");
 // const jwt = require("jsonwebtoken");
 const { generateTokenAdmin } = require("../utils/token");

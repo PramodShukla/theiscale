@@ -1,4 +1,4 @@
-const Instructor = require("../models/master_instructor_tbl");
+const Instructor = require("../models/instructor");
 const slugify = require("slugify");
 const mongoose = require("mongoose");
 const fs = require("fs");

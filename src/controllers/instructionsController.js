@@ -1,5 +1,5 @@
-const Instruction = require("../models/master_quiz_instructions");
-const Quiz = require("../models/master_quizs_tbl");
+const Instruction = require("../models/quiz_instructions");
+const Quiz = require("../models/quizs");
 const mongoose = require("mongoose");
 
 // ===============================

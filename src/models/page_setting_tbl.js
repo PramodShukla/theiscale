@@ -53,4 +53,4 @@ const pageSchema = new mongoose.Schema({
   versionKey: false
 });
 
-module.exports = mongoose.model('master_page_setting_tbl', pageSchema);
+module.exports = mongoose.model('page_setting', pageSchema);

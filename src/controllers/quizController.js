@@ -1,4 +1,4 @@
-const Quiz = require("../models/master_quizs_tbl");
+const Quiz = require("../models/quizs");
 const fs = require("fs");
 
 // ===============================

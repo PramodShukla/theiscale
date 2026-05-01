@@ -1,5 +1,5 @@
-const Training = require("../models/master_course_training");
-const Course = require("../models/master_course_tbl");
+const Training = require("../models/course_training");
+const Course = require("../models/course");
 const fs = require("fs");
 
 // ===============================

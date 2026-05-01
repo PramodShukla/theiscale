@@ -15,6 +15,8 @@ const trainingRoutes = require("./trainingRoutes");
 const quizRoutes = require("./quizRoutes");
 const instructionsRoutes = require("./instructionsRoutes");
 const questionRoutes = require("./questionRoutes");
+const stdTestimonialRoutes = require("./stdTestimonialRoutes");
+const compRequirementRoutes = require("./compRequirementRoutes");
 
 
 
@@ -31,8 +33,10 @@ router.use("/topics", topicsRoutes);
 router.use("/test-package", testPackageRoutes);
 router.use("/training", trainingRoutes);
 router.use("/quiz", quizRoutes);
-router.use("/instructions", instructionsRoutes);
+router.use("/instructions", instructionsRoutes); 
 router.use("/question", questionRoutes);
+router.use("/stdtestimonial", stdTestimonialRoutes);
+router.use("/comp-requirement", compRequirementRoutes);
 
 
 

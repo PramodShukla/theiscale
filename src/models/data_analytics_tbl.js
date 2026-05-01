@@ -75,4 +75,4 @@ const leadDataSchema = new mongoose.Schema({
   versionKey: false
 });
 
-module.exports = mongoose.model('data_analytics_tbl', leadDataSchema);
+module.exports = mongoose.model('data_analytics', leadDataSchema);

@@ -1,4 +1,4 @@
-const Category = require("../models/master_category");
+const Category = require("../models/category");
 
 // helper slug function
 const generateSlug = (name) => {

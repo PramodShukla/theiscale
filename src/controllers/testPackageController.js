@@ -1,5 +1,5 @@
-const Package = require("../models/master_test_package_tbl");
-const Course = require("../models/master_course_tbl");
+const Package = require("../models/test_package");
+const Course = require("../models/course");
 const fs = require("fs");
 
 // ===============================

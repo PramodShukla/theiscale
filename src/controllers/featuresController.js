@@ -1,5 +1,5 @@
-const Feature = require("../models/master_course_feature");
-const Course = require("../models/master_course_tbl");
+const Feature = require("../models/course_feature");
+const Course = require("../models/course");
 const fs = require("fs");
 const mongoose = require("mongoose");
 

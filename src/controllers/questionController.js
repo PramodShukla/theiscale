@@ -1,4 +1,4 @@
-const Question = require("../models/master_questions_tbl"); // Make sure the path is correct
+const Question = require("../models/questions"); // Make sure the path is correct
 const mongoose = require("mongoose");
 
 // ===============================

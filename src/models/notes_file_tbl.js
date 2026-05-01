@@ -38,4 +38,4 @@ const nfFileSchema = new mongoose.Schema({
   versionKey: false
 });
 
-module.exports = mongoose.model('master_notes_file_tbl', nfFileSchema);
+module.exports = mongoose.model('notes_file', nfFileSchema);

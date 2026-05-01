@@ -1,4 +1,4 @@
-const Candidate = require("../models/master_candidates_tbl");
+const Candidate = require("../models/candidates");
 // const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { generateTokenUser } = require("../utils/token");

@@ -97,4 +97,4 @@ const QuestionSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('master_quesbank_question_tbl', QuestionSchema);
+module.exports = mongoose.model('quesbank_question', QuestionSchema);

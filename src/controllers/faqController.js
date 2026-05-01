@@ -1,5 +1,5 @@
 const slugify = require("slugify");
-const CourseFAQ = require("../models/master_course_faq");
+const CourseFAQ = require("../models/course_faq");
 const mongoose = require("mongoose");
 
 const addFAQ = async (req, res) => {

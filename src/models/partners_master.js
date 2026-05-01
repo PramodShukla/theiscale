@@ -25,4 +25,4 @@ const partnerSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("master_partners_tbl", partnerSchema);
+module.exports = mongoose.model("partners", partnerSchema);

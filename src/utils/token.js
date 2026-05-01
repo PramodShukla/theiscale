@@ -20,7 +20,7 @@ const generateTokenUser = (user) => {
     {
       id: user._id,
       email: user.c_email,
-      role: "candidate"
+      role: 2
     },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }

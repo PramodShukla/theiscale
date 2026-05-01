@@ -15,4 +15,4 @@ router.delete("/delete-course/:id", authMiddleware, adminMiddleware, deleteCours
 router.get("/popular-courses",authMiddleware,adminMiddleware, getPopularCourses);
 router.get("/recommended-courses",authMiddleware,adminMiddleware, getRecommendedCourses);
 
-module.exports = router;
+module.exports = router; 

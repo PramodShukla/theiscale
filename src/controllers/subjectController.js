@@ -1,5 +1,5 @@
-const Subject = require("../models/master_subject_tbl");
-const Course = require("../models/master_course_tbl");
+const Subject = require("../models/subject");
+const Course = require("../models/course");
 const fs = require("fs");
 const mongoose = require("mongoose");
 

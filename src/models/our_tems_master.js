@@ -58,4 +58,4 @@ const memberSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("master_our_team_tbl", memberSchema);
+module.exports = mongoose.model("our_team", memberSchema);

@@ -47,6 +47,10 @@ const storage = multer.diskStorage({
       folder = "src/uploads/quiz/banner";
     } else if (file.fieldname === "m_instructor_profile") {
       folder = "src/uploads/instructors";
+    } else if (file.fieldname === "m_st_video") {
+      folder = "src/uploads/testimonials/video";
+    } else if (file.fieldname === "company_logo") {
+      folder = "src/uploads/jobs/company-logo";
     }
 
     // folder create if not exists
@@ -199,6 +203,26 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // Testimonial video upload
+  else if (file.fieldname === "m_st_video") {
+    const allowedVideoTypes = ["video/mp4", "video/mkv", "video/avi"];
+
+    if (allowedVideoTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only video allowed"), false);
+    }
+  }
+
+  // Company logo - only images
+  else if (file.fieldname === "company_logo") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for company logo"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -247,6 +271,10 @@ const instructorUpload = upload.fields([
   { name: "m_instructor_profile", maxCount: 1 },
 ]);
 
+const testimonialUpload = upload.fields([{ name: "m_st_video", maxCount: 1 }]);
+
+const jobUpload = upload.fields([{ name: "company_logo", maxCount: 1 }]);
+
 module.exports = {
   upload,
   courseUpload,
@@ -258,4 +286,6 @@ module.exports = {
   thUpload,
   quizUpload,
   instructorUpload,
+  testimonialUpload,
+  jobUpload,
 };

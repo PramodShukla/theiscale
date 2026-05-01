@@ -22,4 +22,4 @@ const owcSchema = new mongoose.Schema({
   versionKey: false
 });
 
-module.exports = mongoose.model('master_offer_wise_course_tbl', owcSchema);
+module.exports = mongoose.model('offer_wise_course', owcSchema);

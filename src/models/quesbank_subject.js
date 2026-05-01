@@ -21,4 +21,4 @@ const QuesBankSubjectSchema = new Schema(
   }
 );
 
-module.exports = mongoose.model('master_quesbank_subject_tbl', QuesBankSubjectSchema);
+module.exports = mongoose.model('quesbank_subject', QuesBankSubjectSchema);

@@ -1,6 +1,6 @@
-const Candidate = require("../models/master_candidates_tbl");
-const Course = require("../models/master_course_tbl");
-const UserCourses = require("../models/user_courses_tbl");
+const Candidate = require("../models/candidates");
+const Course = require("../models/course");
+const UserCourses = require("../models/course");
 
 exports.getDashboard = async (req, res) => {
   try {

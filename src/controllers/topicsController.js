@@ -1,5 +1,5 @@
-const Lecture = require("../models/master_lecture_tbl");
-const Subject = require("../models/master_subject_tbl");
+const Lecture = require("../models/lecture");
+const Subject = require("../models/subject");
 const fs = require("fs");
 
 // ===============================

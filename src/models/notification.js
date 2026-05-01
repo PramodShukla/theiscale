@@ -38,4 +38,4 @@ const notificationSchema = new mongoose.Schema({
   versionKey: false
 });
 
-module.exports = mongoose.model('master_notification_tbl', notificationSchema);
+module.exports = mongoose.model('notification', notificationSchema);

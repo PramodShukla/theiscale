@@ -33,4 +33,4 @@ const questionBankSchema = new mongoose.Schema({
   versionKey: false
 });
 
-module.exports = mongoose.model('master_quesbank_tbl', questionBankSchema);
+module.exports = mongoose.model('quesbank', questionBankSchema);

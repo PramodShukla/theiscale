@@ -1,7 +1,7 @@
-const Course = require("../models/master_course_tbl");
+const Course = require("../models/course");
 const slugify = require("slugify");
 const fs = require("fs");
-const Category = require("../models/master_category");
+const Category = require("../models/category");
 const mongoose = require("mongoose");
 
 // ===============================
