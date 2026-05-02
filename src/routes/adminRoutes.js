@@ -17,6 +17,12 @@ const instructionsRoutes = require("./instructionsRoutes");
 const questionRoutes = require("./questionRoutes");
 const stdTestimonialRoutes = require("./stdTestimonialRoutes");
 const compRequirementRoutes = require("./compRequirementRoutes");
+const eventCategoryRoutes = require("./eventCategoryRoutes");
+const eventRoutes = require("./eventRoutes");
+const pptRoutes = require("./pptRoutes");
+const clientRoutes = require("./clientRoutes");
+const successStoryRoutes = require("./successStoryRoutes");
+const alliedRoutes = require("./alliedRoutes");
 
 
 
@@ -37,7 +43,12 @@ router.use("/instructions", instructionsRoutes);
 router.use("/question", questionRoutes);
 router.use("/stdtestimonial", stdTestimonialRoutes);
 router.use("/comp-requirement", compRequirementRoutes);
-
+router.use("/event-category", eventCategoryRoutes);
+router.use("/event", eventRoutes);
+router.use("/ppt", pptRoutes);
+router.use("/client", clientRoutes);
+router.use("/success-story", successStoryRoutes);
+router.use("/allied", alliedRoutes);
 
 
 

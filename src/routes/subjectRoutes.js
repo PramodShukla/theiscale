@@ -68,4 +68,21 @@ router.get(
   getSubjectDropdownByCourse
 );
 
+
+
+
+
+
+
+
+
+
+
+
+
+router.get(
+  "/public-get-subjects/:courseId",
+  getSubjectsByCourse,
+);
+
 module.exports = router;

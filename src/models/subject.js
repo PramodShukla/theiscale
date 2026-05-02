@@ -1,14 +1,17 @@
 const mongoose = require('mongoose');
 
 const ModuleSchema = new mongoose.Schema({
-  id: {
-    type: Number,
-    required: true,
-    unique: true
-  },
-  title: {
+  m_subject_course: {
     type: String,
     required: true
+  },
+  m_subject_title: {
+    type: String,
+    required: true
+  },
+  m_subject_desc: {
+    type: String,
+    // required: true
   },
   code: {
     type: String,
@@ -16,7 +19,7 @@ const ModuleSchema = new mongoose.Schema({
   },
   type: {
     type: Number,
-    required: true // 1=compulsory module, 2=domain module
+    // required: true // 1=compulsory module, 2=domain module
   },
   is_writing: {
     type: Number,

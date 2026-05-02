@@ -13,4 +13,8 @@ router.put("/update-instructor/:id", authMiddleware, adminMiddleware,instructorU
 router.delete("/delete-instructor/:id", authMiddleware, adminMiddleware, deleteInstructor);
 router.get("/instructors-dropdown", authMiddleware, adminMiddleware, getInstructorDropdown);
 
+
+router.get("/public-get-all-instructors", getAllInstructors);
+
+
 module.exports = router;

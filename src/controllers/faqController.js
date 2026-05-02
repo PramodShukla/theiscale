@@ -53,7 +53,7 @@ const addFAQ = async (req, res) => {
 
 const getFAQsByCourse = async (req, res) => {
   try {
-    const { course_id } = req.query;
+    const { course_id } = req.params;
 
     if (!course_id) {
       return res.status(400).json({

@@ -38,4 +38,4 @@ const mNewsSchema = new mongoose.Schema({
   m_news_addedby: { type: Number, required: true }
 });
 
-module.exports = mongoose.model('news', mNewsSchema);
+module.exports = mongoose.model('news&update', mNewsSchema);

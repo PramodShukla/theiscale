@@ -940,6 +940,107 @@ const getRecommendedCourses = async (req, res) => {
   }
 };
 
+
+
+
+// ===============================
+// GET SINGLE COURSE BY ID
+// ===============================
+const getCourseById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // =========================
+    // VALIDATION
+    // =========================
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid course id",
+      });
+    }
+
+    // =========================
+    // FETCH COURSE
+    // =========================
+    const course = await Course.findById(id);
+
+    if (!course) {
+      return res.status(404).json({
+        status: false,
+        message: "Course not found",
+      });
+    }
+
+    // =========================
+    // CATEGORY NAME FETCH
+    // =========================
+    let categoryName = "N/A";
+
+    if (course.m_course_category) {
+      const category = await Category.findById(course.m_course_category);
+      if (category) {
+        categoryName = category.m_category_name;
+      }
+    }
+
+    // =========================
+    // FINAL RESPONSE
+    // =========================
+    const finalData = {
+      _id: course._id,
+      title: course.m_course_title,
+      slug: course.m_course_slug,
+      code: course.m_course_code,
+      category: categoryName,
+
+      banner: course.m_course_banner,
+      pdf: course.m_course_pdf,
+      fee_structure: course.m_course_feestructure,
+      brochure: course.m_course_brochure,
+
+      video_link: course.m_course_video_link,
+      video_id: course.m_course_video_id,
+
+      description: course.m_course_description,
+
+      course_type: course.m_course_type === 1 ? "Free" : "Paid",
+      price: course.m_course_price,
+      offer_price: course.m_course_offer_price,
+
+      status: course.m_course_status === 1 ? "Active" : "Inactive",
+      status_web: course.m_course_status_web === 1 ? "Active" : "Inactive",
+
+      duration_app: course.m_course_duration_app,
+      duration_web: course.m_course_duration_web,
+
+      popular: course.m_course_popular,
+      recommended: course.m_course_recomended,
+
+      created_at: course.createdAt,
+      updated_at: course.m_course_modified,
+    };
+
+    return res.json({
+      status: true,
+      message: "Course fetched successfully",
+      data: finalData,
+    });
+
+  } catch (error) {
+    console.error("Get Course By ID Error:", error);
+
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
 module.exports = {
   addCourse,
   getAllCourses,
@@ -948,4 +1049,5 @@ module.exports = {
   deleteCourse,
   getPopularCourses,
   getRecommendedCourses,
+  getCourseById
 };

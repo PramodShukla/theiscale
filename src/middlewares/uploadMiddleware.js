@@ -51,6 +51,22 @@ const storage = multer.diskStorage({
       folder = "src/uploads/testimonials/video";
     } else if (file.fieldname === "company_logo") {
       folder = "src/uploads/jobs/company-logo";
+    } else if (file.fieldname === "m_ec_icon") {
+      folder = "src/uploads/event-category/icon";
+    } else if (file.fieldname === "m_ec_banner") {
+      folder = "src/uploads/event-category/banner";
+    } else if (file.fieldname === "m_event_banner") {
+      folder = "src/uploads/events/banner";
+    } else if (file.fieldname === "m_event_file") {
+      folder = "src/uploads/events/files";
+    } else if (file.fieldname === "m_pre_image") {
+      folder = "src/uploads/ppt/person";
+    } else if (file.fieldname === "m_pre_company_img") {
+      folder = "src/uploads/ppt/company";
+    } else if (file.fieldname === "m_client_logo") {
+      folder = "src/uploads/clients/logo";
+    } else if (file.fieldname === "m_allied_image") {
+      folder = "src/uploads/allied";
     }
 
     // folder create if not exists
@@ -223,6 +239,63 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // Event category icon/banner - only images
+  else if (file.fieldname === "m_ec_icon" || file.fieldname === "m_ec_banner") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for event category"), false);
+    }
+  }
+
+  // Event banner - only images
+  else if (file.fieldname === "m_event_banner") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for event banner"), false);
+    }
+  }
+
+  // Event file - only PDF
+  else if (file.fieldname === "m_event_file") {
+    if (allowedPdfTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF allowed for event file"), false);
+    }
+  }
+
+  // Pre-placement testimonial images - only images
+  else if (
+    file.fieldname === "m_pre_image" ||
+    file.fieldname === "m_pre_company_img"
+  ) {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for PPT"), false);
+    }
+  }
+
+  // Our Client logo - only images
+  else if (file.fieldname === "m_client_logo") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for client logo"), false);
+    }
+  }
+
+  // Allied image - only images
+  else if (file.fieldname === "m_allied_image") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for allied"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -275,6 +348,25 @@ const testimonialUpload = upload.fields([{ name: "m_st_video", maxCount: 1 }]);
 
 const jobUpload = upload.fields([{ name: "company_logo", maxCount: 1 }]);
 
+const eventCategoryUpload = upload.fields([
+  { name: "m_ec_icon", maxCount: 1 },
+  { name: "m_ec_banner", maxCount: 1 },
+]);
+
+const eventUpload = upload.fields([
+  { name: "m_event_banner", maxCount: 1 },
+  { name: "m_event_file", maxCount: 1 },
+]);
+
+const pptUpload = upload.fields([
+  { name: "m_pre_image", maxCount: 1 },
+  { name: "m_pre_company_img", maxCount: 1 },
+]);
+
+const clientUpload = upload.fields([{ name: "m_client_logo", maxCount: 1 }]);
+
+const alliedUpload = upload.fields([{ name: "m_allied_image", maxCount: 1 }]);
+
 module.exports = {
   upload,
   courseUpload,
@@ -288,4 +380,9 @@ module.exports = {
   instructorUpload,
   testimonialUpload,
   jobUpload,
+  eventCategoryUpload,
+  eventUpload,
+  pptUpload,
+  clientUpload,
+  alliedUpload,
 };

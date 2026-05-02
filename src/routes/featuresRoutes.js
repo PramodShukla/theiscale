@@ -11,4 +11,7 @@ router.put("/update-feature/:id", authMiddleware, adminMiddleware, featureUpload
 router.delete("/delete-feature/:id", authMiddleware, adminMiddleware, deleteFeature);
 
 
+router.get("/public-get-all-features/:id", getFeaturesByCourse);
+
+
 module.exports = router;

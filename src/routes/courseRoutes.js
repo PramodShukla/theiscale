@@ -5,7 +5,7 @@ const upload = require("../middlewares/uploadMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 const { courseUpload } = require("../middlewares/uploadMiddleware");
-const { addCourse,getAllCourses,getCategoryDropdown,updateCourse,deleteCourse,getPopularCourses,getRecommendedCourses } = require("../controllers/courseController"); 
+const { addCourse,getAllCourses,getCategoryDropdown,updateCourse,deleteCourse,getPopularCourses,getRecommendedCourses,getCourseById } = require("../controllers/courseController"); 
 
 router.post("/add-course", authMiddleware, adminMiddleware, courseUpload, addCourse);
 router.get("/all-courses", authMiddleware, adminMiddleware, getAllCourses);
@@ -14,5 +14,10 @@ router.put("/update-course/:id", authMiddleware, adminMiddleware, courseUpload, 
 router.delete("/delete-course/:id", authMiddleware, adminMiddleware, deleteCourse);
 router.get("/popular-courses",authMiddleware,adminMiddleware, getPopularCourses);
 router.get("/recommended-courses",authMiddleware,adminMiddleware, getRecommendedCourses);
+router.get("/course/:id", authMiddleware, adminMiddleware, getCourseById);
+
+
+router.get("/public-all-courses", getAllCourses);
+router.get("/public-course/:id", getCourseById);
 
 module.exports = router; 

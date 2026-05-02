@@ -28,4 +28,11 @@ router.put("/update-th/:id", authMiddleware, adminMiddleware, thUpload, updateTH
 // DELETE
 router.delete("/delete-th/:id", authMiddleware, adminMiddleware, deleteTH);
 
+
+
+
+
+
+router.get("/public-get-th/:course_id", getTHByCourse);
+
 module.exports = router;

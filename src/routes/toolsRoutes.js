@@ -35,4 +35,9 @@ router.put(
 // DELETE
 router.delete("/delete-tool/:id", authMiddleware, adminMiddleware, deleteTool);
 
+
+
+
+router.get("/public-get-tools/:courseId", getToolsByCourse);
+
 module.exports = router;
