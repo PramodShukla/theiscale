@@ -30,11 +30,22 @@ const courseSchema = new mongoose.Schema(
       trim: true,
     },
 
+    m_course_access_type: {
+      type: String,
+      enum: ["lifetime", "limited"],
+      default: "lifetime",
+    },
+
+    m_course_access_days: {
+      type: Number,
+      default: null, // e.g. 90 days
+    },
+
     m_course_slug: {
       type: String,
       maxlength: 200,
       unique: true,
-      sparse: true, // Allows null values but enforces uniqueness when present
+      //sparse: true, // Allows null values but enforces uniqueness when present
     },
 
     m_course_intro: {

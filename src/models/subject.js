@@ -1,21 +1,29 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const ModuleSchema = new mongoose.Schema({
+  // m_subject_course: {
+  //   type: String,
+  //   required: true
+  // },
+
   m_subject_course: {
-    type: String,
-    required: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "course",
+    required: true,
   },
   m_subject_title: {
     type: String,
-    required: true
+    required: true,
+    trim: true,
   },
   m_subject_desc: {
     type: String,
+    trim: true,
     // required: true
   },
   code: {
     type: String,
-    default: null
+    default: null,
   },
   type: {
     type: Number,
@@ -23,18 +31,18 @@ const ModuleSchema = new mongoose.Schema({
   },
   is_writing: {
     type: Number,
-    default: 0
+    default: 0,
   },
   created_at: {
     type: Date,
     required: true,
-    default: Date.now
+    default: Date.now,
   },
   updated_at: {
     type: Date,
     required: true,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('subject', ModuleSchema);
+module.exports = mongoose.model("subject", ModuleSchema);

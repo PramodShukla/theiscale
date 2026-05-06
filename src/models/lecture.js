@@ -7,9 +7,13 @@ const mLectureSchema = new mongoose.Schema({
   //   unique: true
   // },
   ml_category: { type: Number, default: null, required: false },
-  ml_course: { type: Number, default: null, required: false },
+  // ml_course: { type: Number, default: null, required: false },
+  ml_course: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "course"
+},
   ml_subject: { type: String, required: true },
-  ml_title: { type: String, default: null, required: true },
+  ml_title: { type: String, default: null, required: true, trim: true },
   ml_code: { type: String, default: null, required: false },
   ml_status: { type: Number, default: null, required: false  }, // 1 = Active
   ml_type: { type: Number, default: null, required: false }, // 1 Link, 2 Video, 3 Audio, 4 Image, 5 PDF, 6 Other

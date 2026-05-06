@@ -67,6 +67,10 @@ const storage = multer.diskStorage({
       folder = "src/uploads/clients/logo";
     } else if (file.fieldname === "m_allied_image") {
       folder = "src/uploads/allied";
+    } else if (file.fieldname === "m_news_image") {
+      folder = "src/uploads/news&updates";
+    } else if (file.fieldname === "m_snews_image") {
+      folder = "src/uploads/news";
     }
 
     // folder create if not exists
@@ -296,6 +300,24 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // news & update images-only images
+  else if (file.fieldname === "m_news_image") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for news & updates"), false);
+    }
+  }
+
+  // news images-only images
+  else if (file.fieldname === "m_snews_image") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for news"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -367,6 +389,12 @@ const clientUpload = upload.fields([{ name: "m_client_logo", maxCount: 1 }]);
 
 const alliedUpload = upload.fields([{ name: "m_allied_image", maxCount: 1 }]);
 
+const newsupdatesUpload = upload.fields([
+  { name: "m_news_image", maxCount: 1 },
+]);
+
+const newsUpload = upload.fields([{ name: "m_snews_image", maxCount: 1 }]);
+
 module.exports = {
   upload,
   courseUpload,
@@ -385,4 +413,6 @@ module.exports = {
   pptUpload,
   clientUpload,
   alliedUpload,
+  newsupdatesUpload,
+  newsUpload,
 };

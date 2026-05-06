@@ -23,7 +23,7 @@ const candidateSchema = new mongoose.Schema({
 
 //   c_role: {
 //   type: String,
-//   enum: ["user", "admin"],
+//   enum: ["user", "admin"], 
 //   default: "user"
 // },
 

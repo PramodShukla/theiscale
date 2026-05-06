@@ -5,11 +5,15 @@ const {
   addTopic,
   getTopicsBySubject,
   updateTopic,
-  deleteTopic
+  deleteTopic,
+  getPublicTopics,
+  getPrivateTopics,
 } = require("../controllers/topicsController");
 
 const { authMiddleware } = require("../middlewares/authMiddleware");
+const { userMiddleware } = require("../middlewares/userMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
+const { checkCourseAccessMiddleware } = require("../middlewares/checkCourseAccessMiddleware");
 const { topicUpload } = require("../middlewares/uploadMiddleware");
 
 // ADD
@@ -18,7 +22,7 @@ router.post(
   authMiddleware,
   adminMiddleware,
   topicUpload,
-  addTopic
+  addTopic,
 );
 
 // GET BY SUBJECT
@@ -26,7 +30,7 @@ router.get(
   "/get-topics/:subject_id",
   authMiddleware,
   adminMiddleware,
-  getTopicsBySubject
+  getTopicsBySubject,
 );
 
 // UPDATE
@@ -35,7 +39,7 @@ router.put(
   authMiddleware,
   adminMiddleware,
   topicUpload,
-  updateTopic
+  updateTopic,
 );
 
 // DELETE
@@ -43,7 +47,19 @@ router.delete(
   "/delete-topic/:id",
   authMiddleware,
   adminMiddleware,
-  deleteTopic
+  deleteTopic,
+);
+
+// PUBLIC (No auth)
+router.get("/public/:subject_id", getPublicTopics);
+
+// PRIVATE (Protected)
+router.get(
+  "/private/:subject_id",
+  authMiddleware,
+  userMiddleware,
+  checkCourseAccessMiddleware,
+  getPrivateTopics,
 );
 
 module.exports = router;

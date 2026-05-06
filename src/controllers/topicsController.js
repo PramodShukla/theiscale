@@ -70,6 +70,52 @@ const addTopic = async (req, res) => {
 };
 
 
+// get public topics (for users, only active topics with id and title)
+const getPublicTopics = async (req, res) => {
+  try {
+    const { subject_id } = req.params;
+
+    const topics = await Lecture.find({
+      ml_subject: subject_id,
+      ml_status: 1,
+    })
+      .select("_id ml_title") //  only safe fields
+      .sort({ _id: -1 });
+
+    res.json({
+      status: true,
+      data: topics,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
+  }
+};
+
+const getPrivateTopics = async (req, res) => {
+  try {
+    const { subject_id } = req.params;
+
+    const topics = await Lecture.find({
+      ml_subject: subject_id,
+      ml_status: 1,
+    }).sort({ _id: -1 });
+
+    res.json({
+      status: true,
+      data: topics,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
+  }
+};
+
+
 // ===============================
 // GET TOPICS BY SUBJECT
 // ===============================
@@ -200,4 +246,6 @@ module.exports = {
   getTopicsBySubject,
   updateTopic,
   deleteTopic,
+  getPublicTopics,
+  getPrivateTopics,
 };
