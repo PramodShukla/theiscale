@@ -44,6 +44,7 @@ const addTopic = async (req, res) => {
     }
 
     const newTopic = new Lecture({
+      ml_course: subject.m_subject_course,
       ml_subject,
       ml_title,
       ml_code,
@@ -169,6 +170,12 @@ const updateTopic = async (req, res) => {
     if (ml_stype) topic.ml_stype = ml_stype;
     if (ml_video_id) topic.ml_video_id = ml_video_id;
     if (ml_status !== undefined) topic.ml_status = Number(ml_status);
+    if (!topic.ml_course) {
+      const subject = await Subject.findById(topic.ml_subject);
+      if (subject?.m_subject_course) {
+        topic.ml_course = subject.m_subject_course;
+      }
+    }
 
     // ===============================
     // FILE UPDATE
