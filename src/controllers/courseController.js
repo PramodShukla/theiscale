@@ -3,6 +3,11 @@ const slugify = require("slugify");
 const fs = require("fs");
 const Category = require("../models/category");
 const mongoose = require("mongoose");
+const LectureProgress = require("../models/lecture_progress");
+const Subject = require("../models/subject");
+const Lecture = require("../models/lecture");
+const Enrollment = require("../models/course_enrollment");
+
 
 // ===============================
 // ADD COURSE
@@ -975,6 +980,16 @@ const getCourseById = async (req, res) => {
   }
 };
 
+
+
+
+// =====================================================
+// GET FULL COURSE CONTENT
+// Course -> Subjects -> Lectures -> Progress
+// =====================================================
+
+
+
 module.exports = {
   addCourse,
   getAllCourses,
@@ -984,4 +999,5 @@ module.exports = {
   getPopularCourses,
   getRecommendedCourses,
   getCourseById,
+ 
 };

@@ -212,7 +212,7 @@ const getSubjectDropdownByCourse = async (req, res) => {
     // ✅ fetch subjects of that course
     const subjects = await Subject.find({
       m_subject_course: m_course_id,
-      m_subject_status: 1, // only active
+     // m_subject_status: 1, // only active
     }).select("_id m_subject_title");
 
     res.status(200).json({

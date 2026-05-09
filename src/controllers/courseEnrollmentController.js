@@ -80,13 +80,24 @@ const enrollCourse = async (req, res) => {
         );
       }
 
-      if (course.m_course_access_type === "limited") {
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + course.m_course_access_days);
+      // if (course.m_course_access_type === "limited") {
+      //   const expiryDate = new Date();
+      //   expiryDate.setDate(expiryDate.getDate() + course.m_course_access_days);
 
-        enrollment.expiry_date = expiryDate;
+      //   enrollment.expiry_date = expiryDate;
+      // } else {
+      //   enrollment.expiry_date = null;
+      // }
+
+      if (course.m_course_access_type === "limited") {
+        access_type = "limited";
+
+        expiry_date = new Date();
+        expiry_date.setDate(
+          expiry_date.getDate() + course.m_course_access_days,
+        );
       } else {
-        enrollment.expiry_date = null;
+        expiry_date = null;
       }
 
       const enroll = await Enrollment.create({

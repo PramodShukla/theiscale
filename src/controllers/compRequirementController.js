@@ -250,6 +250,15 @@ const applyJob = async (req, res) => {
       });
     }
 
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({
+        status: false,
+        message: "Job not found",
+      });
+    }
+
     const exists = await JobApplication.findOne({
       job_id: jobId,
       user_id: req.user.id, // req.user._id nahi, token me id hai

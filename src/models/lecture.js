@@ -12,7 +12,12 @@ const mLectureSchema = new mongoose.Schema({
   type: mongoose.Schema.Types.ObjectId,
   ref: "course"
 },
-  ml_subject: { type: String, required: true },
+  // ml_subject: { type: String, required: true },
+  ml_subject: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "subject",
+  required: true,
+},
   ml_title: { type: String, default: null, required: true, trim: true },
   ml_code: { type: String, default: null, required: false },
   ml_status: { type: Number, default: null, required: false  }, // 1 = Active

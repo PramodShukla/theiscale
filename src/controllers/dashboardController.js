@@ -1,57 +1,83 @@
 const Candidate = require("../models/candidates");
+const Enrollment = require("../models/course_enrollment");
 const Course = require("../models/course");
-const UserCourses = require("../models/course");
 
 exports.getDashboard = async (req, res) => {
   try {
-    const userId = req.user.id; // from JWT middleware
 
-    // 1. Get user
-    const user = await Candidate.findById(userId);
+    const userId = req.user.id;
+
+    // ===============================
+    // USER
+    // ===============================
+    const user = await Candidate.findById(userId)
+      .select("c_first_name c_last_name");
 
     if (!user) {
-      return res.status(404).send({
+      return res.status(404).json({
         status: false,
         message: "User not found",
       });
     }
 
-    // 2. Get enrolled courses
-    const enrollments = await UserCourses.find({
-      t_reg_user: userId,
-    });
+    // ===============================
+    // ENROLLMENTS
+    // ===============================
+    const enrollments = await Enrollment.find({
+      user_id: userId,
+      status: "active",
+    }).select("course_id");
 
-    const courseIds = enrollments.map(e => e.t_reg_course);
+    const courseIds = enrollments.map(
+      (e) => e.course_id
+    );
 
-    // 3. Get course details
+    // ===============================
+    // COURSES
+    // ===============================
     const courses = await Course.find({
       _id: { $in: courseIds },
+    }).select("m_course_type");
+
+    // ===============================
+    // COUNT
+    // ===============================
+    let freeCourses = 0;
+    let premiumCourses = 0;
+
+    courses.forEach((course) => {
+
+      if (course.m_course_type === 1) {
+        freeCourses++;
+      }
+
+      if (course.m_course_type === 2) {
+        premiumCourses++;
+      }
+
     });
 
-    // 4. Count logic
-    let freeCount = 0;
-    let premiumCount = 0;
-
-    courses.forEach((c) => {
-      if (c.m_course_type === 1) freeCount++;
-      if (c.m_course_type === 2) premiumCount++;
-    });
-
-    // 5. Response
-    res.status(200).send({
+    // ===============================
+    // RESPONSE
+    // ===============================
+    res.status(200).json({
       status: true,
       data: {
-        name: `${user.c_first_name} ${user.c_last_name}`,
-        freeCourses: freeCount,
-        premiumCourses: premiumCount,
+        name:
+          `${user.c_first_name} ${user.c_last_name}`,
+        freeCourses,
+        premiumCourses,
       },
     });
 
   } catch (error) {
+
     console.log(error);
-    res.status(500).send({
+
+    res.status(500).json({
       status: false,
       message: error.message,
     });
+
   }
 };
