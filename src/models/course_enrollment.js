@@ -1,14 +1,89 @@
+// const mongoose = require("mongoose");
+
+// const courseEnrollmentSchema = new mongoose.Schema(
+//   {
+
+//     user_id: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "candidates",
+//       required: true,
+//     },
+
+//     course_id: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "course",
+//       required: true,
+//     },
+
+//     course_type: {
+//       type: String,
+//       enum: ["free", "paid"],
+//       required: true,
+//     },
+
+//     payment_status: {
+//       type: String,
+//       enum: ["pending", "success", "failed"],
+//       default: "pending",
+//     },
+
+//     amount: {
+//       type: Number,
+//       default: 0,
+//     },
+
+//     access_type: {
+//       type: String,
+//       enum: ["lifetime", "limited"],
+//       default: "lifetime",
+//     },
+
+//     expiry_date: {
+//       type: Date,
+//       default: null,
+//     },
+
+//     enrolled_on: {
+//       type: Date,
+//       default: Date.now,
+//     },
+
+//     progress: {
+//       type: Number,
+//       default: 0, // percentage (0–100)
+//       min: 0,
+//       max: 100,
+//     },
+
+//     status: {
+//       type: String,
+//       enum: ["active", "expired"],
+//       default: "active",
+//     },
+//   },
+//   {
+//     timestamps: true,
+//   }
+// );
+
+// // to stop duplicate enrolments
+// courseEnrollmentSchema.index({ user_id: 1, course_id: 1 }, { unique: true });
+
+// module.exports = mongoose.model("course_enrollment", courseEnrollmentSchema);
+
 const mongoose = require("mongoose");
 
 const courseEnrollmentSchema = new mongoose.Schema(
   {
-    
+    // =====================================
+    // USER + COURSE
+    // =====================================
+
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "candidates",
       required: true,
     },
-
 
     course_id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -16,13 +91,19 @@ const courseEnrollmentSchema = new mongoose.Schema(
       required: true,
     },
 
-    
+    // =====================================
+    // COURSE TYPE
+    // =====================================
+
     course_type: {
       type: String,
       enum: ["free", "paid"],
       required: true,
     },
 
+    // =====================================
+    // PAYMENT
+    // =====================================
 
     payment_status: {
       type: String,
@@ -35,7 +116,45 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: 0,
     },
 
-    
+    original_amount: {
+      type: Number,
+      default: null,
+    },
+
+    offer_amount: {
+      type: Number,
+      default: null,
+    },
+
+    discount_amount: {
+      type: Number,
+      default: null,
+    },
+
+    payable_amount: {
+      type: Number,
+      default: null,
+    },
+
+    coupon_code: {
+      type: String,
+      default: null,
+    },
+
+    invoice_no: {
+      type: String,
+      default: null,
+    },
+
+    invoice_pdf: {
+      type: String,
+      default: null,
+    },
+
+    // =====================================
+    // ACCESS
+    // =====================================
+
     access_type: {
       type: String,
       enum: ["lifetime", "limited"],
@@ -47,34 +166,123 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: null,
     },
 
-    
+    // =====================================
+    // ENROLLMENT
+    // =====================================
+
     enrolled_on: {
       type: Date,
       default: Date.now,
     },
 
-
     progress: {
       type: Number,
-      default: 0, // percentage (0–100)
+      default: 0,
       min: 0,
       max: 100,
     },
 
-    
     status: {
       type: String,
       enum: ["active", "expired"],
       default: "active",
     },
+
+    // =====================================
+    // BATCH
+    // =====================================
+
+    batch_name: {
+      type: String,
+      default: null,
+    },
+
+    // =====================================
+    // PLATFORM STATUS
+    // =====================================
+
+    app_status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
+
+    android_status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
+
+    ios_status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
+
+    // =====================================
+    // CONTENT STATUS
+    // =====================================
+
+    test_series_status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "inactive",
+    },
+
+    live_class_status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "inactive",
+    },
+
+    // =====================================
+    // CERTIFICATE
+    // =====================================
+
+    certificate_status: {
+      type: String,
+      enum: ["not_requested","pending", "approved", "declined"],
+      default: "not_requested",
+    },
+
+    certificate_approved_at: {
+      type: Date,
+      default: null,
+    },
+
+    certificate_declined_reason: {
+      type: String,
+      default: null,
+    },
+
+    certificate_no: {
+      type: String,
+      default: null,
+    },
+
+    certificate_pdf: {
+      type: String,
+      default: null,
+    },
+
+    // =====================================
+    // ADMIN NOTE
+    // =====================================
+
+    admin_note: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
+// =====================================
+// PREVENT DUPLICATE ENROLLMENTS
+// =====================================
 
-// to stop duplicate enrolments 
 courseEnrollmentSchema.index({ user_id: 1, course_id: 1 }, { unique: true });
 
 module.exports = mongoose.model("course_enrollment", courseEnrollmentSchema);

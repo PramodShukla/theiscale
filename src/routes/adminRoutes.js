@@ -25,6 +25,8 @@ const successStoryRoutes = require("./successStoryRoutes");
 const alliedRoutes = require("./alliedRoutes");
 const newsupdateRoutes = require("./news&updateRoutes");
 const newsRoutes = require("./newsRoutes");
+const adminRegistrationsSectionRoutes = require("./adminRegistrationsSectionRoutes");
+const certificateRoutes = require("./certificateRoutes");
 
 
 
@@ -53,6 +55,8 @@ router.use("/success-story", successStoryRoutes);
 router.use("/allied", alliedRoutes);
 router.use("/news&updates", newsupdateRoutes);
 router.use("/news", newsRoutes);
+router.use("/registrations", adminRegistrationsSectionRoutes);
+router.use("/certificate", certificateRoutes);
 
 
 

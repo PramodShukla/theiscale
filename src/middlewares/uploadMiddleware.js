@@ -71,6 +71,8 @@ const storage = multer.diskStorage({
       folder = "src/uploads/news&updates";
     } else if (file.fieldname === "m_snews_image") {
       folder = "src/uploads/news";
+    } else if (file.fieldname === "certificate_pdf") {
+      folder = "src/uploads/certificates";
     }
 
     // folder create if not exists
@@ -318,6 +320,15 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // Certificate PDF upload
+  else if (file.fieldname === "certificate_pdf") {
+    if (allowedPdfTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF allowed for certificate"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -395,6 +406,8 @@ const newsupdatesUpload = upload.fields([
 
 const newsUpload = upload.fields([{ name: "m_snews_image", maxCount: 1 }]);
 
+const certificateUpload = upload.fields([{ name: "certificate_pdf", maxCount: 1 }]);
+
 module.exports = {
   upload,
   courseUpload,
@@ -415,4 +428,5 @@ module.exports = {
   alliedUpload,
   newsupdatesUpload,
   newsUpload,
+  certificateUpload,
 };

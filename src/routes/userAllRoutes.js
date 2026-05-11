@@ -29,6 +29,7 @@ const topicsRoutes = require("./topicsRoutes");
 const lectureProgressRoutes = require("./lectureProgressRoutes");
 const enrolledCoursesRoutes = require("./enrolledCoursesRoutes");
 const enrolledEventsRoutes = require("./enrolledEventsRoutes");
+const certificateRoutes = require("./certificateRoutes");
 
 
 
@@ -61,6 +62,7 @@ router.use("/topics", topicsRoutes);
 router.use("/lecture-progress", lectureProgressRoutes);
 router.use("/enrolled-courses", enrolledCoursesRoutes);
 router.use("/enrolled-events", enrolledEventsRoutes);
+router.use("/certificate", certificateRoutes);
 
 
 
