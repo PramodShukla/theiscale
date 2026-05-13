@@ -9,18 +9,19 @@ const addPackage = async (req, res) => {
   try {
     const {
       m_package_course,
+      m_package_test_category,
       m_package_title,
       m_package_language,
       m_package_order,
       m_package_intro,
       m_package_description,
-      m_package_status
+      m_package_status,
     } = req.body;
 
     if (!m_package_course || !m_package_title || !m_package_language) {
       return res.status(400).json({
         status: false,
-        message: "course, title and language are required"
+        message: "course, title and language are required",
       });
     }
 
@@ -28,7 +29,7 @@ const addPackage = async (req, res) => {
     if (!course) {
       return res.status(404).json({
         status: false,
-        message: "Course not found"
+        message: "Course not found",
       });
     }
 
@@ -38,13 +39,14 @@ const addPackage = async (req, res) => {
 
     const newPackage = new Package({
       m_package_course,
+      m_package_test_category: m_package_test_category || null,
       m_package_title,
       m_package_language,
       m_package_image: image,
       m_package_order,
       m_package_intro,
       m_package_description,
-      m_package_status: m_package_status ? Number(m_package_status) : 1
+      m_package_status: m_package_status ? Number(m_package_status) : 1,
     });
 
     const saved = await newPackage.save();
@@ -52,14 +54,12 @@ const addPackage = async (req, res) => {
     res.status(201).json({
       status: true,
       message: "Package added successfully",
-      data: saved
+      data: saved,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // ===============================
 // GET ALL PACKAGES
@@ -70,14 +70,12 @@ const getAllPackages = async (req, res) => {
 
     res.json({
       status: true,
-      data
+      data,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // ===============================
 // GET BY COURSE ID
@@ -87,19 +85,17 @@ const getPackagesByCourse = async (req, res) => {
     const { course_id } = req.params;
 
     const data = await Package.find({
-      m_package_course: course_id
+      m_package_course: course_id,
     }).sort({ _id: -1 });
 
     res.json({
       status: true,
-      data
+      data,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // ===============================
 // UPDATE PACKAGE
@@ -112,26 +108,45 @@ const updatePackage = async (req, res) => {
     if (!pkg) {
       return res.status(404).json({
         status: false,
-        message: "Package not found"
+        message: "Package not found",
       });
     }
 
     const {
       m_package_title,
+      m_package_test_category,
       m_package_language,
       m_package_order,
       m_package_intro,
       m_package_description,
-      m_package_status
+      m_package_status,
+      m_package_type,
+      m_package_price,
+      m_package_offer_price,
     } = req.body;
 
     if (m_package_title) pkg.m_package_title = m_package_title;
+    if (m_package_test_category !== undefined) {
+      pkg.m_package_test_category = m_package_test_category || null;
+    }
     if (m_package_language) pkg.m_package_language = m_package_language;
     if (m_package_order) pkg.m_package_order = m_package_order;
     if (m_package_intro) pkg.m_package_intro = m_package_intro;
-    if (m_package_description) pkg.m_package_description = m_package_description;
+    if (m_package_description)
+      pkg.m_package_description = m_package_description;
     if (m_package_status !== undefined)
       pkg.m_package_status = Number(m_package_status);
+    if (m_package_type !== undefined) {
+      pkg.m_package_type = m_package_type;
+    }
+
+    if (m_package_price !== undefined) {
+      pkg.m_package_price = Number(m_package_price);
+    }
+
+    if (m_package_offer_price !== undefined) {
+      pkg.m_package_offer_price = Number(m_package_offer_price);
+    }
 
     // image update
     if (req.files?.m_package_image) {
@@ -146,14 +161,12 @@ const updatePackage = async (req, res) => {
     res.json({
       status: true,
       message: "Package updated successfully",
-      data: updated
+      data: updated,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // ===============================
 // DELETE PACKAGE
@@ -166,7 +179,7 @@ const deletePackage = async (req, res) => {
     if (!pkg) {
       return res.status(404).json({
         status: false,
-        message: "Package not found"
+        message: "Package not found",
       });
     }
 
@@ -178,9 +191,8 @@ const deletePackage = async (req, res) => {
 
     res.json({
       status: true,
-      message: "Package deleted successfully"
+      message: "Package deleted successfully",
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -191,5 +203,5 @@ module.exports = {
   getAllPackages,
   getPackagesByCourse,
   updatePackage,
-  deletePackage
+  deletePackage,
 };

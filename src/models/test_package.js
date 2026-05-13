@@ -4,49 +4,70 @@ const testPackageSchema = new mongoose.Schema({
   m_package_course: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "course",
-    required: true
+    required: true,
   },
 
   m_package_title: {
     type: String,
-    required: true
+    required: true,
   },
 
   m_package_language: {
     type: String,
-    required: true
+    required: true,
   },
 
   m_package_image: {
     type: String,
-    default: null
+    default: null,
   },
 
   m_package_order: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   m_package_intro: {
     type: String,
-    default: null
+    default: null,
   },
 
   m_package_description: {
     type: String,
-    default: null
+    default: null,
+  },
+
+  m_package_test_category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "test_categories",
+    default: null,
+  },
+
+  m_package_type: {
+    type: String,
+    enum: ["free", "paid"],
+    default: null,
+  },
+
+  m_package_price: {
+    type: Number,
+    default: null,
+  },
+
+  m_package_offer_price: {
+    type: Number,
+    default: null,
   },
 
   m_package_status: {
     type: Number,
-    default: 1
+    default: 1,
   },
 
   m_package_created: {
     type: Date,
-    default: Date.now
-  }
-
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("test_package", testPackageSchema);

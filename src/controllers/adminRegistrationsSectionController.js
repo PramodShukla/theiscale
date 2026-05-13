@@ -1,6 +1,8 @@
 const Enrollment = require("../models/course_enrollment");
 const Lecture = require("../models/lecture");
 const LectureProgress = require("../models/lecture_progress");
+const TestPackageEnrollment = require("../models/test_package_enrollment");
+const TestPackage = require("../models/test_package");
 
 // =======================================================
 // GET COURSE REGISTRATIONS
@@ -272,6 +274,377 @@ const getCourseRegistrations = async (req, res) => {
   }
 };
 
+const getCoursePurchaseDetails = async (req, res) => {
+  try {
+    const enrollmentId = req.params.enrollment_id;
+
+    const enrollment = await Enrollment.findById(enrollmentId)
+      .populate({
+        path: "user_id",
+        select: `
+          c_first_name
+          c_last_name
+          c_email
+          c_contact
+          c_address
+          c_alt_contact
+          c_city
+        `,
+      })
+      .populate({
+        path: "course_id",
+        select: `
+          m_course_title
+          m_course_code
+          m_course_type
+          m_course_price
+          m_course_offer_price
+          m_course_description
+        `,
+      })
+      .lean();
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    const totalLectures = await Lecture.countDocuments({
+      ml_course: enrollment.course_id?._id,
+    });
+
+    const completedLectures = await LectureProgress.countDocuments({
+      user_id: enrollment.user_id?._id,
+      course_id: enrollment.course_id?._id,
+      is_completed: true,
+    });
+
+    const progress =
+      totalLectures === 0
+        ? 0
+        : Math.round((completedLectures / totalLectures) * 100);
+
+    return res.status(200).json({
+      status: true,
+
+      data: {
+        // =====================
+        // STUDENT DETAILS
+        // =====================
+        student: {
+          name: `${enrollment.user_id?.c_first_name || ""} ${enrollment.user_id?.c_last_name || ""}`,
+          email: enrollment.user_id?.c_email,
+          phone: enrollment.user_id?.c_contact,
+          alt_phone: enrollment.user_id?.c_alt_contact || null,
+          address: `${enrollment.user_id?.c_current_address1 || ""} ${enrollment.user_id?.c_current_address2 || ""}`,
+          city: enrollment.user_id?.c_current_city,
+        },
+
+        // =====================
+        // COURSE DETAILS
+        // =====================
+        course: {
+          title: enrollment.course_id?.m_course_title,
+          code: enrollment.course_id?.m_course_code,
+          type: enrollment.course_id?.m_course_type,
+          price: enrollment.course_id?.m_course_price,
+          offer_price: enrollment.course_id?.m_course_offer_price,
+          description: enrollment.course_id?.m_course_description,
+        },
+
+        // =====================
+        // REGISTRATION DETAILS
+        // =====================
+        registration: {
+          registration_date: enrollment.enrolled_on,
+          access_type: enrollment.access_type,
+          expiry_date: enrollment.expiry_date,
+          progress: progress,
+        },
+
+        // =====================
+        // PAYMENT DETAILS
+        // =====================
+        payment: {
+          purchased_price: enrollment.amount,
+          original_price: enrollment.original_amount,
+          discount: enrollment.discount_amount,
+          coupon: enrollment.coupon_code,
+          payment_status: enrollment.payment_status,
+          payment_mode: enrollment.payment_mode || "online",
+          transaction_id: enrollment.transaction_id || null,
+          remark: enrollment.remark || null,
+        },
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+// ======================================================
+// ADMIN - ALL ENROLLMENTS
+// ======================================================
+
+const getAllTestPackageEnrollments = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+
+    const limit = parseInt(req.query.limit) || 10;
+
+    const skip = (page - 1) * limit;
+
+    const search = req.query.search || "";
+
+    const payment_status = req.query.payment_status;
+
+    const package_id = req.query.package_id;
+
+    const filter = {};
+
+    // =========================
+    // FILTERS
+    // =========================
+
+    if (payment_status) {
+      filter.payment_status = payment_status;
+    }
+
+    if (package_id) {
+      filter.test_package_id = package_id;
+    }
+
+    let data = await TestPackageEnrollment.find(filter)
+      .populate({
+        path: "user_id",
+        select: `
+            c_first_name
+            c_last_name
+            c_email
+            c_contact
+          `,
+      })
+      .populate({
+        path: "test_package_id",
+        select: `
+            m_package_title
+            m_package_type
+          `,
+      })
+      .sort({
+        createdAt: -1,
+      })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // =========================
+    // SEARCH
+    // =========================
+
+    if (search) {
+      const text = search.toLowerCase();
+
+      data = data.filter((item) => {
+        const userName =
+          `${item.user_id?.c_first_name || ""} ${item.user_id?.c_last_name || ""}`.toLowerCase();
+
+        const email = item.user_id?.c_email?.toLowerCase() || "";
+
+        const packageName =
+          item.test_package_id?.m_package_title?.toLowerCase() || "";
+
+        return (
+          userName.includes(text) ||
+          email.includes(text) ||
+          packageName.includes(text)
+        );
+      });
+    }
+
+    const totalRecords = await TestPackageEnrollment.countDocuments(filter);
+
+    return res.status(200).json({
+      status: true,
+
+      current_page: page,
+
+      total_records: totalRecords,
+
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
+// ======================================================
+// ADMIN - SINGLE ENROLLMENT DETAILS
+// ======================================================
+
+const getSingleTestPackageEnrollment = async (req, res) => {
+  try {
+    const enrollmentId = req.params.id;
+
+    const data = await TestPackageEnrollment.findById(enrollmentId)
+      .populate({
+        path: "user_id",
+        select: `
+              c_first_name
+              c_last_name
+              c_email
+              c_contact
+              c_alt_contact
+              c_current_city
+              c_current_address1
+            `,
+      })
+      .populate({
+        path: "test_package_id",
+        populate: [
+          {
+            path: "m_package_course",
+            select: `
+                  m_course_title
+                `,
+          },
+          {
+            path: "m_package_test_category",
+            select: `
+                  test_categoryName
+                `,
+          },
+        ],
+      });
+
+    if (!data) {
+      return res.status(404).json({
+        status: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
+// ======================================================
+// ADMIN - DELETE TEST PACKAGE ENROLLMENT
+// ======================================================
+
+const deleteTestPackageEnrollment = async (req, res) => {
+  try {
+    const enrollmentId = req.params.id;
+
+    const enrollment = await TestPackageEnrollment.findById(enrollmentId);
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+
+        message: "Enrollment not found",
+      });
+    }
+
+    await TestPackageEnrollment.findByIdAndDelete(enrollmentId);
+
+    return res.status(200).json({
+      status: true,
+
+      message: "Test package enrollment deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
+// ======================================================
+// CHANGE ACCESS STATUS (ACTIVE / INACTIVE)
+// ======================================================
+
+const changeTestPackageAccessStatus = async (
+  req,
+  res,
+) => {
+  try {
+    const enrollmentId = req.params.id;
+
+    // =========================
+    // FIND ENROLLMENT
+    // =========================
+
+    const enrollment =
+      await TestPackageEnrollment.findById(
+        enrollmentId,
+      );
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    // =========================
+    // TOGGLE STATUS
+    // =========================
+
+    enrollment.access_status =
+      enrollment.access_status === "active"
+        ? "inactive"
+        : "active";
+
+    await enrollment.save();
+
+    return res.status(200).json({
+      status: true,
+
+      message: `Access status changed to ${enrollment.access_status}`,
+
+      data: {
+        _id: enrollment._id,
+
+        access_status:
+          enrollment.access_status,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getCourseRegistrations,
+  getCoursePurchaseDetails,
+  getAllTestPackageEnrollments,
+  getSingleTestPackageEnrollment,
+  deleteTestPackageEnrollment,
+  changeTestPackageAccessStatus,
 };

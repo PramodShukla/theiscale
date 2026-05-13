@@ -73,6 +73,10 @@ const storage = multer.diskStorage({
       folder = "src/uploads/news";
     } else if (file.fieldname === "certificate_pdf") {
       folder = "src/uploads/certificates";
+    } else if (file.fieldname === "test_category_icon") {
+      folder = "src/uploads/test-category/icon";
+    } else if (file.fieldname === "test_category_banner") {
+      folder = "src/uploads/test-category/banner";
     }
 
     // folder create if not exists
@@ -329,6 +333,18 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // Test category icon/banner - only images
+  else if (
+    file.fieldname === "test_category_icon" ||
+    file.fieldname === "test_category_banner"
+  ) {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for test category"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -406,7 +422,14 @@ const newsupdatesUpload = upload.fields([
 
 const newsUpload = upload.fields([{ name: "m_snews_image", maxCount: 1 }]);
 
-const certificateUpload = upload.fields([{ name: "certificate_pdf", maxCount: 1 }]);
+const certificateUpload = upload.fields([
+  { name: "certificate_pdf", maxCount: 1 },
+]);
+
+const testCategoryUpload = upload.fields([
+  { name: "test_category_icon", maxCount: 1 },
+  { name: "test_category_banner", maxCount: 1 },
+]);
 
 module.exports = {
   upload,
@@ -429,4 +452,5 @@ module.exports = {
   newsupdatesUpload,
   newsUpload,
   certificateUpload,
+  testCategoryUpload
 };

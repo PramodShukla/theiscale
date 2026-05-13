@@ -27,6 +27,8 @@ const newsupdateRoutes = require("./news&updateRoutes");
 const newsRoutes = require("./newsRoutes");
 const adminRegistrationsSectionRoutes = require("./adminRegistrationsSectionRoutes");
 const certificateRoutes = require("./certificateRoutes");
+const testCategoryRoutes = require("./testCategoryRoutes");
+const enrolledTestPackageRoutes = require("./enrolledTestPackageRoutes");
 
 
 
@@ -57,7 +59,8 @@ router.use("/news&updates", newsupdateRoutes);
 router.use("/news", newsRoutes);
 router.use("/registrations", adminRegistrationsSectionRoutes);
 router.use("/certificate", certificateRoutes);
-
+router.use("/test-category", testCategoryRoutes);
+router.use("/enrolled-test-packages", enrolledTestPackageRoutes);
 
 
 module.exports = router;
