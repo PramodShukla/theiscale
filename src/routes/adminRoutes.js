@@ -29,6 +29,8 @@ const adminRegistrationsSectionRoutes = require("./adminRegistrationsSectionRout
 const certificateRoutes = require("./certificateRoutes");
 const testCategoryRoutes = require("./testCategoryRoutes");
 const enrolledTestPackageRoutes = require("./enrolledTestPackageRoutes");
+const notesCategoryRoutes = require("./notesCategoryRoutes");
+const notesSubCategoryRoutes = require("./notesSubCategoryRoutes");
 
 
 
@@ -61,6 +63,6 @@ router.use("/registrations", adminRegistrationsSectionRoutes);
 router.use("/certificate", certificateRoutes);
 router.use("/test-category", testCategoryRoutes);
 router.use("/enrolled-test-packages", enrolledTestPackageRoutes);
-
-
+router.use("/notes-category", notesCategoryRoutes);
+router.use("/notes-sub-category", notesSubCategoryRoutes);
 module.exports = router;

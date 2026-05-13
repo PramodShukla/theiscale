@@ -77,6 +77,14 @@ const storage = multer.diskStorage({
       folder = "src/uploads/test-category/icon";
     } else if (file.fieldname === "test_category_banner") {
       folder = "src/uploads/test-category/banner";
+    } else if (file.fieldname === "nc_icon") {
+      folder = "src/uploads/notes-category/icon";
+    } else if (file.fieldname === "nc_banner") {
+      folder = "src/uploads/notes-category/banner";
+    } else if (file.fieldname === "notes_subcategory_icon") {
+      folder = "src/uploads/notes-subcategory/icon";
+    } else if (file.fieldname === "notes_subcategory_banner") {
+      folder = "src/uploads/notes-subcategory/banner";
     }
 
     // folder create if not exists
@@ -97,7 +105,12 @@ const storage = multer.diskStorage({
 // FILE FILTER (Updated)
 // ==================
 const fileFilter = (req, file, cb) => {
-  const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg"];
+  const allowedImageTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "image/webp",
+  ];
   const allowedPdfTypes = ["application/pdf"];
 
   // Category fields - only images
@@ -345,6 +358,24 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // Notes category icon/banner - only images
+  else if (file.fieldname === "nc_icon" || file.fieldname === "nc_banner") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for notes category"), false);
+    }
+  }
+
+  // Notes subcategory icon/banner - only images
+  else if (file.fieldname === "notes_subcategory_icon" || file.fieldname === "notes_subcategory_banner") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for notes subcategory"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -431,6 +462,18 @@ const testCategoryUpload = upload.fields([
   { name: "test_category_banner", maxCount: 1 },
 ]);
 
+const notesCategoryUpload = upload.fields([
+  { name: "nc_icon", maxCount: 1 },
+
+  { name: "nc_banner", maxCount: 1 },
+]);
+
+const notesSubCategoryUpload = upload.fields([
+  { name: "notes_subcategory_icon", maxCount: 1 },
+
+  { name: "notes_subcategory_banner", maxCount: 1 },
+]);
+
 module.exports = {
   upload,
   courseUpload,
@@ -452,5 +495,7 @@ module.exports = {
   newsupdatesUpload,
   newsUpload,
   certificateUpload,
-  testCategoryUpload
+  testCategoryUpload,
+  notesCategoryUpload,
+  notesSubCategoryUpload,
 };
