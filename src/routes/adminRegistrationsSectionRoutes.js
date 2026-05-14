@@ -10,6 +10,8 @@ const {
   getSingleTestPackageEnrollment,
   deleteTestPackageEnrollment,
   changeTestPackageAccessStatus,
+  getNotesRegistrations,
+  deleteNotesEnrollment,
 } = require("../controllers/adminRegistrationsSectionController");
 
 
@@ -56,6 +58,20 @@ router.patch(
   authMiddleware,
   adminMiddleware,
   changeTestPackageAccessStatus,
+);
+
+router.get(
+  "/enrolled-notes",
+  authMiddleware,
+  adminMiddleware,
+  getNotesRegistrations
+);
+
+router.delete(
+  "/delete-notes-enrollment/:id",
+  authMiddleware,
+  adminMiddleware,
+  deleteNotesEnrollment
 );
 
 module.exports = router;

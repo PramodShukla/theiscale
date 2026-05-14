@@ -85,6 +85,10 @@ const storage = multer.diskStorage({
       folder = "src/uploads/notes-subcategory/icon";
     } else if (file.fieldname === "notes_subcategory_banner") {
       folder = "src/uploads/notes-subcategory/banner";
+    } else if (file.fieldname === "notes_image") {
+      folder = "src/uploads/notes/notesimage";
+    } else if (file.fieldname === "notes_pdf") {
+      folder = "src/uploads/notes/pdf";
     }
 
     // folder create if not exists
@@ -368,11 +372,32 @@ const fileFilter = (req, file, cb) => {
   }
 
   // Notes subcategory icon/banner - only images
-  else if (file.fieldname === "notes_subcategory_icon" || file.fieldname === "notes_subcategory_banner") {
+  else if (
+    file.fieldname === "notes_subcategory_icon" ||
+    file.fieldname === "notes_subcategory_banner"
+  ) {
     if (allowedImageTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(new Error("Only image allowed for notes subcategory"), false);
+    }
+  }
+
+  // Notes image - only images
+  else if (file.fieldname === "notes_image") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for notes"), false);
+    }
+  }
+
+  // Notes PDF - only pdf
+  else if (file.fieldname === "notes_pdf") {
+    if (allowedPdfTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF allowed for notes"), false);
     }
   }
 
@@ -474,6 +499,12 @@ const notesSubCategoryUpload = upload.fields([
   { name: "notes_subcategory_banner", maxCount: 1 },
 ]);
 
+const notesUpload = upload.fields([
+  { name: "notes_image", maxCount: 1 },
+
+  { name: "notes_pdf", maxCount: 1 },
+]);
+
 module.exports = {
   upload,
   courseUpload,
@@ -498,4 +529,5 @@ module.exports = {
   testCategoryUpload,
   notesCategoryUpload,
   notesSubCategoryUpload,
+  notesUpload,
 };

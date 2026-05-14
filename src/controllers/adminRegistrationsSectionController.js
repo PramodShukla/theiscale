@@ -3,6 +3,8 @@ const Lecture = require("../models/lecture");
 const LectureProgress = require("../models/lecture_progress");
 const TestPackageEnrollment = require("../models/test_package_enrollment");
 const TestPackage = require("../models/test_package");
+const NotesEnrollment = require("../models/notes_enrollment");
+const Notes = require("../models/notes");
 
 // =======================================================
 // GET COURSE REGISTRATIONS
@@ -585,10 +587,7 @@ const deleteTestPackageEnrollment = async (req, res) => {
 // CHANGE ACCESS STATUS (ACTIVE / INACTIVE)
 // ======================================================
 
-const changeTestPackageAccessStatus = async (
-  req,
-  res,
-) => {
+const changeTestPackageAccessStatus = async (req, res) => {
   try {
     const enrollmentId = req.params.id;
 
@@ -596,10 +595,7 @@ const changeTestPackageAccessStatus = async (
     // FIND ENROLLMENT
     // =========================
 
-    const enrollment =
-      await TestPackageEnrollment.findById(
-        enrollmentId,
-      );
+    const enrollment = await TestPackageEnrollment.findById(enrollmentId);
 
     if (!enrollment) {
       return res.status(404).json({
@@ -613,9 +609,7 @@ const changeTestPackageAccessStatus = async (
     // =========================
 
     enrollment.access_status =
-      enrollment.access_status === "active"
-        ? "inactive"
-        : "active";
+      enrollment.access_status === "active" ? "inactive" : "active";
 
     await enrollment.save();
 
@@ -627,9 +621,293 @@ const changeTestPackageAccessStatus = async (
       data: {
         _id: enrollment._id,
 
-        access_status:
-          enrollment.access_status,
+        access_status: enrollment.access_status,
       },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
+const getNotesRegistrations = async (req, res) => {
+  try {
+    // ======================================================
+    // QUERY PARAMS
+    // ======================================================
+
+    const page = parseInt(req.query.page) || 1;
+
+    const limit = parseInt(req.query.limit) || 10;
+
+    const skip = (page - 1) * limit;
+
+    const search = req.query.search || "";
+
+    const notes_id = req.query.notes_id || "";
+
+    const enrollment_status = req.query.enrollment_status || "";
+
+    const from_date = req.query.from_date;
+
+    const to_date = req.query.to_date;
+
+    const sortBy = req.query.sortBy || "createdAt";
+
+    const order = req.query.order === "asc" ? 1 : -1;
+
+    // ======================================================
+    // FILTER
+    // ======================================================
+
+    let filter = {};
+
+    // =========================
+    // NOTES FILTER
+    // =========================
+
+    if (notes_id) {
+      filter.notes_id = notes_id;
+    }
+
+    // =========================
+    // STATUS FILTER
+    // =========================
+
+    if (enrollment_status) {
+      filter.enrollment_status = enrollment_status;
+    }
+
+    // =========================
+    // DATE FILTER
+    // =========================
+
+    if (from_date || to_date) {
+      filter.createdAt = {};
+
+      // from date
+      if (from_date) {
+        filter.createdAt.$gte = new Date(from_date);
+      }
+
+      // to date
+      if (to_date) {
+        const endDate = new Date(to_date);
+
+        endDate.setHours(23, 59, 59, 999);
+
+        filter.createdAt.$lte = endDate;
+      }
+    }
+
+    // ======================================================
+    // GET ENROLLMENTS
+    // ======================================================
+
+    let enrollments = await NotesEnrollment.find(filter)
+
+      .populate({
+        path: "user_id",
+        select: `
+        c_first_name
+        c_last_name
+        c_email
+        c_contact
+        c_alt_contact
+        c_current_city
+        c_current_address1
+      `,
+      })
+
+      .populate({
+        path: "notes_id",
+        populate: [
+          {
+            path: "notes_category_id",
+            select: `
+            nc_name
+          `,
+          },
+          {
+            path: "notes_subcategory_id",
+            select: `
+            notes_subcategory_name
+          `,
+          },
+        ],
+      })
+
+      .sort({
+        [sortBy]: order,
+      })
+
+      .skip(skip)
+
+      .limit(limit)
+
+      .lean();
+
+    // ======================================================
+    // SEARCH FILTER
+    // ======================================================
+
+    if (search) {
+      const text = search.toLowerCase();
+
+      enrollments = enrollments.filter((item) => {
+        const studentName =
+          `${item.user_id?.c_first_name || ""} ${item.user_id?.c_last_name || ""}`.toLowerCase();
+
+        const email = item.user_id?.c_email?.toLowerCase() || "";
+
+        const phone = String(item.user_id?.c_contact || "");
+
+        const notesName = item.notes_id?.notes_name?.toLowerCase() || "";
+
+        const category =
+          item.notes_id?.notes_category_id?.nc_name?.toLowerCase() || "";
+
+        const subCategory =
+          item.notes_id?.notes_subcategory_id?.notes_subcategory_name?.toLowerCase() ||
+          "";
+
+        return (
+          studentName.includes(text) ||
+          email.includes(text) ||
+          phone.includes(text) ||
+          notesName.includes(text) ||
+          category.includes(text) ||
+          subCategory.includes(text)
+        );
+      });
+    }
+
+    // ======================================================
+    // FINAL RESPONSE DATA
+    // ======================================================
+
+    const finalData = enrollments.map((item) => {
+      return {
+        enrollment_id: item._id,
+
+        // =========================
+        // USER DETAILS
+        // =========================
+
+        user: {
+          _id: item.user_id?._id || null,
+
+          name: `${item.user_id?.c_first_name || ""} ${item.user_id?.c_last_name || ""}`,
+
+          email: item.user_id?.c_email || null,
+
+          phone: item.user_id?.c_contact || null,
+
+          alt_phone: item.user_id?.c_alt_contact || null,
+
+          city: item.user_id?.c_current_city || null,
+
+          address: item.user_id?.c_current_address1 || null,
+        },
+
+        // =========================
+        // NOTES DETAILS
+        // =========================
+
+        notes: {
+          _id: item.notes_id?._id || null,
+
+          notes_name: item.notes_id?.notes_name || null,
+
+          notes_image: item.notes_id?.notes_image || null,
+
+          notes_pdf: item.notes_id?.notes_pdf || null,
+
+          notes_price: item.notes_id?.notes_price || 0,
+
+          notes_offer_price: item.notes_id?.notes_offer_price || 0,
+
+          category: item.notes_id?.notes_category_id?.nc_name || null,
+
+          subcategory:
+            item.notes_id?.notes_subcategory_id?.notes_subcategory_name || null,
+        },
+
+        // =========================
+        // ENROLLMENT DETAILS
+        // =========================
+
+        enrollment_status: item.enrollment_status || "active",
+
+        enrolled_at: item.enrolled_at || item.createdAt,
+
+        createdAt: item.createdAt,
+      };
+    });
+
+    // ======================================================
+    // TOTAL RECORDS
+    // ======================================================
+
+    const totalRecords = await NotesEnrollment.countDocuments(filter);
+
+    // ======================================================
+    // RESPONSE
+    // ======================================================
+
+    return res.status(200).json({
+      status: true,
+
+      message: "Notes registrations fetched successfully",
+
+      current_page: page,
+
+      total_pages: Math.ceil(totalRecords / limit),
+
+      total_records: totalRecords,
+
+      data: finalData,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
+const deleteNotesEnrollment = async (req, res) => {
+  try {
+    const enrollmentId = req.params.id;
+
+    // =========================
+    // FIND ENROLLMENT
+    // =========================
+
+    const enrollment = await NotesEnrollment.findById(enrollmentId);
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+
+        message: "Notes enrollment not found",
+      });
+    }
+
+    // =========================
+    // DELETE
+    // =========================
+
+    await NotesEnrollment.findByIdAndDelete(enrollmentId);
+
+    return res.status(200).json({
+      status: true,
+
+      message: "Notes enrollment deleted successfully",
     });
   } catch (error) {
     return res.status(500).json({
@@ -647,4 +925,6 @@ module.exports = {
   getSingleTestPackageEnrollment,
   deleteTestPackageEnrollment,
   changeTestPackageAccessStatus,
+  getNotesRegistrations,
+  deleteNotesEnrollment,
 };

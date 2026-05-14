@@ -31,6 +31,7 @@ const testCategoryRoutes = require("./testCategoryRoutes");
 const enrolledTestPackageRoutes = require("./enrolledTestPackageRoutes");
 const notesCategoryRoutes = require("./notesCategoryRoutes");
 const notesSubCategoryRoutes = require("./notesSubCategoryRoutes");
+const notesRoutes = require("./notesRoutes");
 
 
 
@@ -65,4 +66,8 @@ router.use("/test-category", testCategoryRoutes);
 router.use("/enrolled-test-packages", enrolledTestPackageRoutes);
 router.use("/notes-category", notesCategoryRoutes);
 router.use("/notes-sub-category", notesSubCategoryRoutes);
+router.use("/notes", notesRoutes);
+
+
+
 module.exports = router;

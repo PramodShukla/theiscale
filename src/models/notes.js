@@ -1,29 +1,110 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const mNotesSchema = new mongoose.Schema({
-  // m_notes_id: {
-  //   type: Number,
-  //   required: true,
-  //   unique: true
-  // },
-  m_notes_category: { type: Number, required: true },
-  m_notes_subcategory: { type: Number, required: true },
-  m_notes_title: { type: String, required: true },
-  m_notes_intro: { type: String, required: true },
-  m_notes_desc: { type: String, required: true },
-  m_notes_banner: { type: String, required: true },
-  m_notes_type: { type: Number, required: true }, // 1-free 2-paid
-  m_notes_price: { type: Number, required: true },
-  m_notes_offer_price: { type: Number, required: true },
-  m_notes_file: { type: String, required: true },
-  m_notes_rating: { type: Number, required: true },
-  m_notes_total_enrolled: { type: Number, default: null },
-  m_notes_modified: {
-    type: Date,
-    default: Date.now
+const notesSchema = new mongoose.Schema(
+  {
+    notes_category_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "notes_categories",
+      default: null,
+    },
+
+    notes_subcategory_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "notes_subcategory",
+      default: null,
+    },
+
+    notes_name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    notes_keywords: {
+      type: String,
+      default: null,
+    },
+
+    notes_intro: {
+      type: String,
+      default: null,
+    },
+
+    notes_description: {
+      type: String,
+      default: null,
+    },
+
+    notes_image: {
+      type: String,
+      default: null,
+    },
+
+    notes_pdf: {
+      type: String,
+      default: null,
+    },
+
+    notes_status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
+
+    notes_type: {
+      type: String,
+      enum: ["free", "paid"],
+      default: "free",
+    },
+
+    notes_price: {
+      type: Number,
+      default: 0,
+    },
+
+    notes_offer_price: {
+      type: Number,
+      default: 0,
+    },
+
+    no_of_ratings: {
+      type: Number,
+      default: 0,
+    },
+
+    no_of_students_enrolled: {
+      type: Number,
+      default: 0,
+    },
+
+    subjects: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "subject",
+        },
+      ],
+      default: null,
+    },
+
+    training_highlights: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "course_training",
+        },
+      ],
+      default: null,
+    },
+
+    notes_created: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  m_notes_status: { type: Number, required: true },
-  m_notes_share: { type: Number, default: 0 }
-});
+  {
+    timestamps: true,
+  },
+);
 
-module.exports = mongoose.model('notes', mNotesSchema);
+module.exports = mongoose.model("notes", notesSchema);

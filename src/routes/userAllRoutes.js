@@ -32,6 +32,7 @@ const enrolledEventsRoutes = require("./enrolledEventsRoutes");
 const certificateRoutes = require("./certificateRoutes");
 const testCategoryRoutes = require("./testCategoryRoutes");
 const enrolledTestPackageRoutes = require("./enrolledTestPackageRoutes");
+const notesRoutes = require("./notesRoutes");
 
 
 
@@ -67,7 +68,7 @@ router.use("/enrolled-events", enrolledEventsRoutes);
 router.use("/certificate", certificateRoutes);
 router.use("/test-category", testCategoryRoutes);
 router.use("/enrolled-test-packages", enrolledTestPackageRoutes);
-
+router.use("/notes", notesRoutes);
 
 
 
