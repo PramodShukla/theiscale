@@ -2,9 +2,7 @@ const Event = require("../models/event");
 const slugify = require("slugify");
 const fs = require("fs");
 
-// ===============================
-// 🔥 COMMON FILE DELETE HELPER
-// ===============================
+
 const deleteUploadedFiles = (files) => {
   if (!files) return;
 
@@ -17,9 +15,7 @@ const deleteUploadedFiles = (files) => {
   });
 };
 
-// ===============================
-// ADD EVENT
-// ===============================
+
 const addEvent = async (req, res) => {
   try {
     const { m_event_title } = req.body;
@@ -82,7 +78,7 @@ const addEvent = async (req, res) => {
 
   } catch (err) {
 
-    // 🔥 ERROR → FILE DELETE
+    //  ERROR → FILE DELETE
     deleteUploadedFiles(req.files);
 
     res.status(500).json({
@@ -92,9 +88,7 @@ const addEvent = async (req, res) => {
   }
 };
 
-// ===============================
-// GET ALL EVENTS
-// ===============================
+
 const getAllEvents = async (req, res) => {
   try {
     let {
@@ -121,26 +115,26 @@ const getAllEvents = async (req, res) => {
     }
 
     // =========================
-    // 📂 CATEGORY FILTER
+    //  CATEGORY FILTER
     // =========================
     if (category) {
       filter.m_event_category = category;
     }
 
     // =========================
-    // 🔄 STATUS FILTER
+    //  STATUS FILTER
     // =========================
     if (status) {
       filter.m_event_status = status;
     }
 
     // =========================
-    // 📊 TOTAL COUNT
+    //  TOTAL COUNT
     // =========================
     const total = await Event.countDocuments(filter);
 
     // =========================
-    // 📦 FETCH DATA
+    //  FETCH DATA
     // =========================
     const data = await Event.find(filter)
       .populate("m_event_category", "m_ec_title")
@@ -149,7 +143,7 @@ const getAllEvents = async (req, res) => {
       .limit(limit);
 
     // =========================
-    // 🚀 RESPONSE
+    //  RESPONSE
     // =========================
     res.json({
       status: true,
@@ -172,9 +166,6 @@ const getAllEvents = async (req, res) => {
 };
 
 
-// ===============================
-// UPDATE EVENT
-// ===============================
 const updateEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -190,7 +181,7 @@ const updateEvent = async (req, res) => {
       event[key] = req.body[key];
     });
 
-    // 🔥 banner update
+    //  banner update
     if (req.files?.m_event_banner) {
       if (event.m_event_banner && fs.existsSync(event.m_event_banner)) {
         fs.unlinkSync(event.m_event_banner);
@@ -198,7 +189,7 @@ const updateEvent = async (req, res) => {
       event.m_event_banner = req.files.m_event_banner[0].path;
     }
 
-    // 🔥 pdf update
+    //  pdf update
     if (req.files?.m_event_file) {
       if (event.m_event_file && fs.existsSync(event.m_event_file)) {
         fs.unlinkSync(event.m_event_file);
@@ -216,16 +207,14 @@ const updateEvent = async (req, res) => {
 
   } catch (err) {
 
-    // 🔥 ERROR → NEW FILE DELETE
+    //  ERROR → NEW FILE DELETE
     deleteUploadedFiles(req.files);
 
     res.status(500).json({ status: false, message: err.message });
   }
 };
 
-// ===============================
-// DELETE EVENT
-// ===============================
+
 const deleteEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -237,7 +226,7 @@ const deleteEvent = async (req, res) => {
       });
     }
 
-    // 🔥 delete files
+    //  delete files
     [event.m_event_banner, event.m_event_file].forEach((file) => {
       if (file && fs.existsSync(file)) {
         fs.unlinkSync(file);
@@ -256,9 +245,99 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+
+
+const getAllEventsDropdown = async (req, res) => {
+  try {
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+    } = req.query;
+
+    page = parseInt(page) || 1;
+
+    limit = parseInt(limit) || 10;
+
+    // ======================================
+    // FILTER
+    // ======================================
+
+    const filter = {
+      m_event_status: "active",
+    };
+
+    // ======================================
+    // SEARCH
+    // ======================================
+
+    if (search) {
+      filter.m_event_title = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    // ======================================
+    // TOTAL
+    // ======================================
+
+    const totalRecords =
+      await Event.countDocuments(filter);
+
+    // ======================================
+    // DATA
+    // ======================================
+
+    const data = await Event.find(filter)
+      .select(`
+        _id
+        m_event_title
+      `)
+
+      .sort({
+        m_event_title: 1,
+      })
+
+      .skip((page - 1) * limit)
+
+      .limit(limit)
+
+      .lean();
+
+    // ======================================
+    // RESPONSE
+    // ======================================
+
+    return res.status(200).json({
+      status: true,
+
+      current_page: page,
+
+      total_pages: Math.ceil(
+        totalRecords / limit,
+      ),
+
+      total_records: totalRecords,
+
+      has_more:
+        page * limit < totalRecords,
+
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addEvent,
   getAllEvents,
   updateEvent,
   deleteEvent,
+  getAllEventsDropdown,
 };
+  

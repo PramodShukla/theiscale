@@ -5,10 +5,13 @@ const TestPackageEnrollment = require("../models/test_package_enrollment");
 const TestPackage = require("../models/test_package");
 const NotesEnrollment = require("../models/notes_enrollment");
 const Notes = require("../models/notes");
+const EventEnrollment = require("../models/event_enrollment");
+const Event = require("../models/event");
+const JobApplication = require(
+  "../models/company_requirement_application",
+);
 
-// =======================================================
-// GET COURSE REGISTRATIONS
-// =======================================================
+
 
 const getCourseRegistrations = async (req, res) => {
   try {
@@ -389,9 +392,7 @@ const getCoursePurchaseDetails = async (req, res) => {
   }
 };
 
-// ======================================================
-// ADMIN - ALL ENROLLMENTS
-// ======================================================
+
 
 const getAllTestPackageEnrollments = async (req, res) => {
   try {
@@ -489,9 +490,7 @@ const getAllTestPackageEnrollments = async (req, res) => {
   }
 };
 
-// ======================================================
-// ADMIN - SINGLE ENROLLMENT DETAILS
-// ======================================================
+
 
 const getSingleTestPackageEnrollment = async (req, res) => {
   try {
@@ -549,9 +548,7 @@ const getSingleTestPackageEnrollment = async (req, res) => {
   }
 };
 
-// ======================================================
-// ADMIN - DELETE TEST PACKAGE ENROLLMENT
-// ======================================================
+
 
 const deleteTestPackageEnrollment = async (req, res) => {
   try {
@@ -583,9 +580,7 @@ const deleteTestPackageEnrollment = async (req, res) => {
   }
 };
 
-// ======================================================
-// CHANGE ACCESS STATUS (ACTIVE / INACTIVE)
-// ======================================================
+
 
 const changeTestPackageAccessStatus = async (req, res) => {
   try {
@@ -918,6 +913,726 @@ const deleteNotesEnrollment = async (req, res) => {
   }
 };
 
+
+
+
+const getAllEventRegistrations = async (req, res) => {
+  try {
+    // ======================================================
+    // QUERY PARAMS
+    // ======================================================
+
+    const page = parseInt(req.query.page) || 1;
+
+    const limit = parseInt(req.query.limit) || 10;
+
+    const skip = (page - 1) * limit;
+
+    const search = req.query.search || "";
+
+    const event_id = req.query.event_id;
+
+    const status = req.query.status;
+
+    const from_date = req.query.from_date;
+
+    const to_date = req.query.to_date;
+
+    const sortBy = req.query.sortBy || "createdAt";
+
+    const order = req.query.order === "asc" ? 1 : -1;
+
+    // ======================================================
+    // FILTER
+    // ======================================================
+
+    const filter = {};
+
+    // ======================================================
+    // EVENT FILTER
+    // ======================================================
+
+    if (event_id) {
+      filter.event_id = event_id;
+    }
+
+    // ======================================================
+    // STATUS FILTER
+    // ======================================================
+
+    if (status) {
+      filter.status = status;
+    }
+
+    // ======================================================
+    // DATE FILTER
+    // ======================================================
+
+    if (from_date || to_date) {
+      filter.createdAt = {};
+
+      // FROM DATE
+      if (from_date) {
+        filter.createdAt.$gte = new Date(from_date);
+      }
+
+      // TO DATE
+      if (to_date) {
+        const endDate = new Date(to_date);
+
+        endDate.setHours(23, 59, 59, 999);
+
+        filter.createdAt.$lte = endDate;
+      }
+    }
+
+    // ======================================================
+    // GET REGISTRATIONS
+    // ======================================================
+
+    let data = await EventEnrollment.find(filter)
+
+      .populate({
+        path: "user_id",
+
+        select: `
+          c_first_name
+          c_last_name
+          c_email
+          c_contact
+          c_alt_contact
+          c_current_city
+          c_current_address1
+          c_current_address2
+        `,
+      })
+
+      .populate({
+        path: "event_id",
+
+        select: `
+          m_event_title
+          m_event_banner
+          m_event_date_start
+          m_event_date_end
+          m_event_time_start
+          m_event_time_end
+          m_event_skill_level
+          m_event_certificate
+          m_event_lang
+          m_event_host
+          m_event_status
+        `,
+      })
+
+      .sort({
+        [sortBy]: order,
+      })
+
+      .skip(skip)
+
+      .limit(limit)
+
+      .lean();
+
+    // ======================================================
+    // SEARCH
+    // ======================================================
+
+    if (search) {
+      const text = search.toLowerCase();
+
+      data = data.filter((item) => {
+        const userName =
+          `${item.user_id?.c_first_name || ""} ${item.user_id?.c_last_name || ""}`.toLowerCase();
+
+        const email =
+          item.user_id?.c_email?.toLowerCase() || "";
+
+        const phone =
+          String(item.user_id?.c_contact || "");
+
+        const eventTitle =
+          item.event_id?.m_event_title?.toLowerCase() || "";
+
+        return (
+          userName.includes(text) ||
+          email.includes(text) ||
+          phone.includes(text) ||
+          eventTitle.includes(text)
+        );
+      });
+    }
+
+    // ======================================================
+    // FINAL DATA
+    // ======================================================
+
+    const finalData = data.map((item) => {
+      return {
+        registration_id: item._id,
+
+        // =====================================
+        // USER DETAILS
+        // =====================================
+
+        user: {
+          user_id: item.user_id?._id || null,
+
+          full_name: `${item.user_id?.c_first_name || ""} ${item.user_id?.c_last_name || ""}`,
+
+          email: item.user_id?.c_email || null,
+
+          mobile: item.user_id?.c_contact || null,
+        },
+
+        // =====================================
+        // EVENT DETAILS
+        // =====================================
+
+        event: {
+          event_id: item.event_id?._id || null,
+
+          title: item.event_id?.m_event_title || null,
+
+          banner: item.event_id?.m_event_banner || null,
+
+          start_date:
+            item.event_id?.m_event_date_start || null,
+
+          end_date:
+            item.event_id?.m_event_date_end || null,
+
+          start_time:
+            item.event_id?.m_event_time_start || null,
+
+          end_time:
+            item.event_id?.m_event_time_end || null,
+
+          host: item.event_id?.m_event_host || null,
+
+          language:
+            item.event_id?.m_event_lang || null,
+
+          skill_level:
+            item.event_id?.m_event_skill_level || null,
+
+          certificate:
+            item.event_id?.m_event_certificate || null,
+
+          event_status:
+            item.event_id?.m_event_status || null,
+        },
+
+        // =====================================
+        // REGISTRATION
+        // =====================================
+
+        enrollment_date: item.enrolled_on,
+
+        registration_status: item.status,
+
+        createdAt: item.createdAt,
+      };
+    });
+
+    // ======================================================
+    // TOTAL
+    // ======================================================
+
+    const totalRecords =
+      await EventEnrollment.countDocuments(filter);
+
+    // ======================================================
+    // RESPONSE
+    // ======================================================
+
+    return res.status(200).json({
+      status: true,
+
+      message:
+        "Event registrations fetched successfully",
+
+      current_page: page,
+
+      total_pages: Math.ceil(totalRecords / limit),
+
+      total_records: totalRecords,
+
+      data: finalData,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
+
+
+const getSingleEventRegistration = async (
+  req,
+  res,
+) => {
+  try {
+    const registrationId = req.params.id;
+
+    const data = await EventEnrollment.findById(
+      registrationId,
+    )
+
+      .populate({
+        path: "user_id",
+
+        select: `
+          c_first_name
+          c_last_name
+          c_email
+          c_contact
+          c_alt_contact
+          c_current_city
+          c_current_address1
+          c_current_address2
+        `,
+      })
+
+      .populate({
+        path: "event_id",
+      })
+
+      .lean();
+
+    if (!data) {
+      return res.status(404).json({
+        status: false,
+
+        message:
+          "Event registration not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+
+      data: {
+        registration_id: data._id,
+
+        // =====================================
+        // USER
+        // =====================================
+
+        user: {
+          user_id: data.user_id?._id || null,
+
+          first_name:
+            data.user_id?.c_first_name || null,
+
+          last_name:
+            data.user_id?.c_last_name || null,
+
+          full_name:
+            `${data.user_id?.c_first_name || ""} ${data.user_id?.c_last_name || ""}`,
+
+          email:
+            data.user_id?.c_email || null,
+
+          mobile:
+            data.user_id?.c_contact || null,
+
+          alternate_mobile:
+            data.user_id?.c_alt_contact || null,
+
+          city:
+            data.user_id?.c_current_city || null,
+
+          address: `
+            ${data.user_id?.c_current_address1 || ""}
+            ${data.user_id?.c_current_address2 || ""}
+          `,
+        },
+
+        // =====================================
+        // EVENT
+        // =====================================
+
+        event: data.event_id,
+
+        // =====================================
+        // REGISTRATION
+        // =====================================
+
+        enrolled_on: data.enrolled_on,
+
+        registration_status: data.status,
+
+        createdAt: data.createdAt,
+
+        updatedAt: data.updatedAt,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
+
+
+const deleteEventRegistration = async (
+  req,
+  res,
+) => {
+  try {
+    const registrationId = req.params.id;
+
+    const registration =
+      await EventEnrollment.findById(
+        registrationId,
+      );
+
+    if (!registration) {
+      return res.status(404).json({
+        status: false,
+
+        message:
+          "Event registration not found",
+      });
+    }
+
+    // ======================================================
+    // OPTIONAL:
+    // EVENT ENROLL COUNT DECREASE
+    // ======================================================
+
+    await Event.findByIdAndUpdate(
+      registration.event_id,
+      {
+        $inc: {
+          m_event_no_of_enroll: -1,
+        },
+      },
+    );
+
+    // ======================================================
+    // DELETE
+    // ======================================================
+
+    await EventEnrollment.findByIdAndDelete(
+      registrationId,
+    );
+
+    return res.status(200).json({
+      status: true,
+
+      message:
+        "Event registration deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
+
+const getAllJobApplications = async (
+  req,
+  res,
+) => {
+  try {
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+      job_id,
+      company_name,
+      from_date,
+      to_date,
+    } = req.query;
+
+    page = parseInt(page) || 1;
+
+    limit = parseInt(limit) || 10;
+
+    const skip = (page - 1) * limit;
+
+    // ======================================================
+    // FILTER
+    // ======================================================
+
+    let filter = {};
+
+    // ======================================================
+    // JOB FILTER
+    // ======================================================
+
+    if (job_id) {
+      filter.job_id = job_id;
+    }
+
+    // ======================================================
+    // DATE FILTER
+    // ======================================================
+
+    if (from_date || to_date) {
+      filter.applied_at = {};
+
+      if (from_date) {
+        filter.applied_at.$gte =
+          new Date(from_date);
+      }
+
+      if (to_date) {
+        const endDate =
+          new Date(to_date);
+
+        endDate.setHours(
+          23,
+          59,
+          59,
+          999,
+        );
+
+        filter.applied_at.$lte =
+          endDate;
+      }
+    }
+
+    // ======================================================
+    // GET DATA
+    // ======================================================
+
+    let data =
+      await JobApplication.find(
+        filter,
+      )
+
+        .populate({
+          path: "user_id",
+
+          select: `
+            c_first_name
+            c_last_name
+            c_email
+            c_contact
+            c_current_city
+          `,
+        })
+
+        .populate({
+          path: "job_id",
+
+          select: `
+            job_title
+            company_name
+            job_locations
+            salary
+            experience
+          `,
+        })
+
+        .sort({
+          applied_at: -1,
+        })
+
+        .skip(skip)
+
+        .limit(limit)
+
+        .lean();
+
+    // ======================================================
+    // COMPANY FILTER
+    // ======================================================
+
+    if (company_name) {
+      data = data.filter((item) =>
+        item.job_id?.company_name
+          ?.toLowerCase()
+          .includes(
+            company_name.toLowerCase(),
+          ),
+      );
+    }
+
+    // ======================================================
+    // SEARCH FILTER
+    // ======================================================
+
+    if (search) {
+      const text =
+        search.toLowerCase();
+
+      data = data.filter((item) => {
+        const userName =
+          `${item.user_id?.c_first_name || ""} ${item.user_id?.c_last_name || ""}`.toLowerCase();
+
+        const email =
+          item.user_id?.c_email?.toLowerCase() ||
+          "";
+
+        const mobile = String(
+          item.user_id?.c_contact ||
+            "",
+        );
+
+        const jobTitle =
+          item.job_id?.job_title?.toLowerCase() ||
+          "";
+
+        const company =
+          item.job_id?.company_name?.toLowerCase() ||
+          "";
+
+        return (
+          userName.includes(text) ||
+          email.includes(text) ||
+          mobile.includes(text) ||
+          jobTitle.includes(text) ||
+          company.includes(text)
+        );
+      });
+    }
+
+    // ======================================================
+    // TOTAL
+    // ======================================================
+
+    const totalRecords =
+      data.length;
+
+    // ======================================================
+    // RESPONSE
+    // ======================================================
+
+    return res.status(200).json({
+      status: true,
+
+      current_page: page,
+
+      total_pages: Math.ceil(
+        totalRecords / limit,
+      ),
+
+      total_records:
+        totalRecords,
+
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
+
+
+const getSingleJobApplication =
+  async (req, res) => {
+    try {
+      const applicationId =
+        req.params.id;
+
+      const data =
+        await JobApplication.findById(
+          applicationId,
+        )
+
+          .populate({
+            path: "user_id",
+
+            select: `
+            c_first_name
+            c_last_name
+            c_email
+            c_contact
+            c_alt_contact
+            c_current_city
+            c_current_address1
+            c_current_address2
+          `,
+          })
+
+          .populate({
+            path: "job_id",
+          });
+
+      if (!data) {
+        return res.status(404).json({
+          status: false,
+
+          message:
+            "Job application not found",
+        });
+      }
+
+      return res.status(200).json({
+        status: true,
+
+        data,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: false,
+
+        message: error.message,
+      });
+    }
+  };
+
+
+
+const deleteJobApplication =
+  async (req, res) => {
+    try {
+      const applicationId =
+        req.params.id;
+
+      const application =
+        await JobApplication.findById(
+          applicationId,
+        );
+
+      if (!application) {
+        return res.status(404).json({
+          status: false,
+
+          message:
+            "Job application not found",
+        });
+      }
+
+      await JobApplication.findByIdAndDelete(
+        applicationId,
+      );
+
+      return res.status(200).json({
+        status: true,
+
+        message:
+          "Job application deleted successfully",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: false,
+
+        message: error.message,
+      });
+    }
+  };
+
+
+
 module.exports = {
   getCourseRegistrations,
   getCoursePurchaseDetails,
@@ -927,4 +1642,10 @@ module.exports = {
   changeTestPackageAccessStatus,
   getNotesRegistrations,
   deleteNotesEnrollment,
+  getAllEventRegistrations,
+  getSingleEventRegistration,
+  deleteEventRegistration,
+  getAllJobApplications,
+  getSingleJobApplication,
+  deleteJobApplication,
 };

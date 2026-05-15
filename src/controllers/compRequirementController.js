@@ -1,9 +1,7 @@
 const Job = require("../models/company_requirement");
 const JobApplication = require("../models/company_requirement_application");
 
-// ===============================
-// ADD JOB
-// ===============================
+
 const addJob = async (req, res) => {
   try {
     const jobData = {
@@ -54,9 +52,7 @@ const addJob = async (req, res) => {
   }
 };
 
-// ===============================
-// GET ALL JOBS (FILTER + PAGINATION)
-// ===============================
+
 const getAllJobs = async (req, res) => {
   try {
     let {
@@ -118,9 +114,7 @@ const getAllJobs = async (req, res) => {
   }
 };
 
-// ===============================
-// GET JOB BY ID
-// ===============================
+
 const getJobById = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
@@ -141,9 +135,7 @@ const getJobById = async (req, res) => {
   }
 };
 
-// ===============================
-// UPDATE JOB
-// ===============================
+
 const updateJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
@@ -211,9 +203,7 @@ const updateJob = async (req, res) => {
   }
 };
 
-// ===============================
-// DELETE JOB
-// ===============================
+
 const deleteJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
@@ -236,9 +226,7 @@ const deleteJob = async (req, res) => {
   }
 };
 
-// ===============================
-// APPLY JOB (LOGIN REQUIRED - middleware se control)
-// ===============================
+
 const applyJob = async (req, res) => {
   try {
     const { jobId } = req.params;
@@ -289,6 +277,37 @@ const applyJob = async (req, res) => {
   }
 };
 
+
+
+
+const getAllUniqueJobTitles = async (
+  req,
+  res,
+) => {
+  try {
+    const data = await Job.distinct(
+      "job_title",
+      {
+        status: 1,
+      },
+    );
+
+    return res.status(200).json({
+      status: true,
+
+      total: data.length,
+
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addJob,
   getAllJobs,
@@ -296,4 +315,5 @@ module.exports = {
   updateJob,
   deleteJob,
   applyJob,
+  getAllUniqueJobTitles
 };

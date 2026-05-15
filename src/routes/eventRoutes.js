@@ -9,6 +9,7 @@ const {
   getAllEvents,
   updateEvent,
   deleteEvent,
+  getAllEventsDropdown,
 } = require("../controllers/eventController");
 
 router.post("/add-event",authMiddleware,adminMiddleware, eventUpload, addEvent);
@@ -18,6 +19,8 @@ router.get("/get-events",authMiddleware,adminMiddleware, getAllEvents);
 router.put("/update-event/:id",authMiddleware,adminMiddleware, eventUpload, updateEvent);
 
 router.delete("/delete-event/:id",authMiddleware,adminMiddleware, deleteEvent);
+
+router.get("/get-events-dropdown",authMiddleware,adminMiddleware, getAllEventsDropdown);
 
 
 

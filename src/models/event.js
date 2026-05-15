@@ -11,7 +11,7 @@ const eventSchema = new mongoose.Schema({
     type: String,
   },
 
-  // 🔥 ObjectId (important)
+  //  ObjectId (important)
   m_event_category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "event_category",

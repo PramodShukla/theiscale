@@ -42,4 +42,6 @@ router.get("/user-get-job/:id", jobController.getJobById);
 // Apply Job (login required)
 router.post("/user-apply-job/:jobId", authMiddleware, userMiddleware, jobController.applyJob);
 
+router.get("/job-titles-dropdown",authMiddleware, adminMiddleware, jobController.getAllUniqueJobTitles);
+
 module.exports = router;
