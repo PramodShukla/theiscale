@@ -2,9 +2,6 @@ const Package = require("../models/test_package");
 const Course = require("../models/course");
 const fs = require("fs");
 
-// ===============================
-// ADD PACKAGE
-// ===============================
 const addPackage = async (req, res) => {
   try {
     const {
@@ -61,9 +58,6 @@ const addPackage = async (req, res) => {
   }
 };
 
-// ===============================
-// GET ALL PACKAGES
-// ===============================
 const getAllPackages = async (req, res) => {
   try {
     const data = await Package.find().sort({ _id: -1 });
@@ -77,9 +71,6 @@ const getAllPackages = async (req, res) => {
   }
 };
 
-// ===============================
-// GET BY COURSE ID
-// ===============================
 const getPackagesByCourse = async (req, res) => {
   try {
     const { course_id } = req.params;
@@ -97,9 +88,6 @@ const getPackagesByCourse = async (req, res) => {
   }
 };
 
-// ===============================
-// UPDATE PACKAGE
-// ===============================
 const updatePackage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -168,9 +156,6 @@ const updatePackage = async (req, res) => {
   }
 };
 
-// ===============================
-// DELETE PACKAGE
-// ===============================
 const deletePackage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -198,10 +183,82 @@ const deletePackage = async (req, res) => {
   }
 };
 
+const getTestPackageDropdown = async (req, res) => {
+  try {
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+    } = req.query;
+
+    page = parseInt(page) || 1;
+
+    limit = parseInt(limit) || 10;
+
+    const skip =
+      (page - 1) * limit;
+
+    let filter = {
+      m_package_status: 1,
+    };
+
+    if (search) {
+      filter.m_package_title = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    const total =
+      await Package.countDocuments(
+        filter,
+      );
+
+    const data =
+      await Package.find(filter)
+
+        .select(`
+          _id
+          m_package_title
+        `)
+
+        .sort({
+          m_package_title: 1,
+        })
+
+        .skip(skip)
+
+        .limit(limit)
+
+        .lean();
+
+    return res.status(200).json({
+      status: true,
+
+      current_page: page,
+
+      total_pages: Math.ceil(
+        total / limit,
+      ),
+
+      total_records: total,
+
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addPackage,
   getAllPackages,
   getPackagesByCourse,
   updatePackage,
   deletePackage,
+  getTestPackageDropdown,
 };

@@ -33,6 +33,7 @@ const certificateRoutes = require("./certificateRoutes");
 const testCategoryRoutes = require("./testCategoryRoutes");
 const enrolledTestPackageRoutes = require("./enrolledTestPackageRoutes");
 const notesRoutes = require("./notesRoutes");
+const userWishlistRoutes = require("./userWishlistRoutes");
 
 
 
@@ -69,6 +70,7 @@ router.use("/certificate", certificateRoutes);
 router.use("/test-category", testCategoryRoutes);
 router.use("/enrolled-test-packages", enrolledTestPackageRoutes);
 router.use("/notes", notesRoutes);
+router.use("/user-wishlist", userWishlistRoutes);
 
 
 

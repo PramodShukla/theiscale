@@ -6,7 +6,8 @@ const {
   getAllPackages,
   getPackagesByCourse,
   updatePackage,
-  deletePackage
+  deletePackage,
+  getTestPackageDropdown
 } = require("../controllers/testPackageController");
 
 const { authMiddleware } = require("../middlewares/authMiddleware");
@@ -27,5 +28,8 @@ router.put("/update-package/:id", authMiddleware, adminMiddleware, packageUpload
 
 // DELETE
 router.delete("/delete-package/:id", authMiddleware, adminMiddleware, deletePackage);
+
+// GET ALL FOR DROPDOWN
+router.get("/dropdown", authMiddleware,adminMiddleware, getTestPackageDropdown);
 
 module.exports = router;    
