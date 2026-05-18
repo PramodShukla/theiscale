@@ -1,0 +1,537 @@
+const fs = require("fs");
+const path = require("path");
+
+const MasterBatch = require("../models/batch");
+
+// =================================
+// DELETE FILE HELPER
+// =================================
+const deleteFile = (filePath) => {
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (error) {
+    console.log("File delete error:", error.message);
+  }
+};
+
+// =================================
+// CHECK EMPTY VALUE
+// =================================
+const isValidValue = (value) => {
+  return (
+    value !== undefined &&
+    value !== null &&
+    value !== "" &&
+    value !== "null" &&
+    value !== "undefined"
+  );
+};
+
+// =================================
+// PARSE DAYS
+// =================================
+const parseDays = (days) => {
+  let parsedDays = [];
+
+  if (!isValidValue(days)) {
+    return parsedDays;
+  }
+
+  // already array
+  if (Array.isArray(days)) {
+    parsedDays = days;
+  }
+
+  // string
+  else if (typeof days === "string") {
+    // JSON array
+    if (days.startsWith("[")) {
+      parsedDays = JSON.parse(days);
+    }
+
+    // comma separated
+    else {
+      parsedDays = days
+        .split(",")
+        .map((day) => day.trim().toLowerCase())
+        .filter((day) => day);
+    }
+  }
+
+  if (!Array.isArray(parsedDays)) {
+    throw new Error("Invalid m_batch_days format");
+  }
+
+  return parsedDays;
+};
+
+// =================================
+// ADD BATCH
+// =================================
+const addBatch = async (req, res) => {
+  try {
+    const uploadedImage =
+      req.files?.m_batch_image?.[0]?.filename || "";
+
+    const {
+      batch_name,
+      batch_instructor_id,
+      batch_instructor,
+      batch_course,
+      batch_date,
+      start_time,
+      end_time,
+      strength,
+      m_batch_notice_desc,
+      m_batch_notice_link,
+      order,
+      subject,
+      m_batch_days,
+      m_batch_status,
+    } = req.body;
+
+    // =================================
+    // VALIDATION
+    // =================================
+    if (!isValidValue(batch_name)) {
+      if (uploadedImage) {
+        deleteFile(path.join("src/uploads/batches", uploadedImage));
+      }
+
+      return res.status(400).json({
+        status: false,
+        message: "Batch name is required",
+      });
+    }
+
+    // =================================
+    // CREATE OBJECT
+    // =================================
+    const batchData = {};
+
+    // required
+    batchData.batch_name = batch_name;
+
+    // optional fields
+    if (isValidValue(batch_instructor_id)) {
+      batchData.batch_instructor_id = batch_instructor_id;
+    }
+
+    if (isValidValue(batch_instructor)) {
+      batchData.batch_instructor = batch_instructor;
+    }
+
+    // single course only
+    if (isValidValue(batch_course)) {
+      batchData.batch_course = batch_course;
+    }
+
+    if (isValidValue(batch_date)) {
+      batchData.batch_date = batch_date;
+    }
+
+    if (isValidValue(start_time)) {
+      batchData.start_time = start_time;
+    }
+
+    if (isValidValue(end_time)) {
+      batchData.end_time = end_time;
+    }
+
+    if (isValidValue(strength)) {
+      batchData.strength = Number(strength);
+    }
+
+    if (isValidValue(m_batch_notice_desc)) {
+      batchData.m_batch_notice_desc = m_batch_notice_desc;
+    }
+
+    if (isValidValue(m_batch_notice_link)) {
+      batchData.m_batch_notice_link = m_batch_notice_link;
+    }
+
+    if (isValidValue(order)) {
+      batchData.order = Number(order);
+    }
+
+    if (isValidValue(subject)) {
+      batchData.subject = subject;
+    }
+
+    if (isValidValue(m_batch_status)) {
+      batchData.m_batch_status = Number(m_batch_status);
+    }
+
+    // days
+    if (isValidValue(m_batch_days)) {
+      batchData.m_batch_days = parseDays(m_batch_days);
+    }
+
+    // image
+    if (uploadedImage) {
+      batchData.m_batch_image = uploadedImage;
+    }
+
+    // =================================
+    // CREATE
+    // =================================
+    const batch = await MasterBatch.create(batchData);
+
+    return res.status(201).json({
+      status: true,
+      message: "Batch added successfully",
+      data: batch,
+    });
+  } catch (error) {
+    // delete uploaded image if error
+    if (req.files?.m_batch_image?.[0]?.filename) {
+      deleteFile(
+        path.join(
+          "src/uploads/batches",
+          req.files.m_batch_image[0].filename
+        )
+      );
+    }
+
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+// =================================
+// UPDATE BATCH
+// =================================
+const updateBatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const uploadedImage =
+      req.files?.m_batch_image?.[0]?.filename || "";
+
+    // =================================
+    // FIND BATCH
+    // =================================
+    const existingBatch = await MasterBatch.findById(id);
+
+    if (!existingBatch) {
+      if (uploadedImage) {
+        deleteFile(path.join("src/uploads/batches", uploadedImage));
+      }
+
+      return res.status(404).json({
+        status: false,
+        message: "Batch not found",
+      });
+    }
+
+    // =================================
+    // UPDATE OBJECT
+    // =================================
+    const updateData = {};
+
+    // update only filled fields
+
+    if (isValidValue(req.body.batch_name)) {
+      updateData.batch_name = req.body.batch_name;
+    }
+
+    if (isValidValue(req.body.batch_instructor_id)) {
+      updateData.batch_instructor_id =
+        req.body.batch_instructor_id;
+    }
+
+    if (isValidValue(req.body.batch_instructor)) {
+      updateData.batch_instructor =
+        req.body.batch_instructor;
+    }
+
+    // single course only
+    if (isValidValue(req.body.batch_course)) {
+      updateData.batch_course =
+        req.body.batch_course;
+    }
+
+    if (isValidValue(req.body.batch_date)) {
+      updateData.batch_date = req.body.batch_date;
+    }
+
+    if (isValidValue(req.body.start_time)) {
+      updateData.start_time = req.body.start_time;
+    }
+
+    if (isValidValue(req.body.end_time)) {
+      updateData.end_time = req.body.end_time;
+    }
+
+    if (isValidValue(req.body.strength)) {
+      updateData.strength = Number(req.body.strength);
+    }
+
+    if (isValidValue(req.body.m_batch_notice_desc)) {
+      updateData.m_batch_notice_desc =
+        req.body.m_batch_notice_desc;
+    }
+
+    if (isValidValue(req.body.m_batch_notice_link)) {
+      updateData.m_batch_notice_link =
+        req.body.m_batch_notice_link;
+    }
+
+    if (isValidValue(req.body.order)) {
+      updateData.order = Number(req.body.order);
+    }
+
+    if (isValidValue(req.body.subject)) {
+      updateData.subject = req.body.subject;
+    }
+
+    if (isValidValue(req.body.m_batch_status)) {
+      updateData.m_batch_status =
+        Number(req.body.m_batch_status);
+    }
+
+    // days
+    if (isValidValue(req.body.m_batch_days)) {
+      updateData.m_batch_days = parseDays(
+        req.body.m_batch_days
+      );
+    }
+
+    // new image
+    if (uploadedImage) {
+      updateData.m_batch_image = uploadedImage;
+    }
+
+    // =================================
+    // UPDATE
+    // =================================
+    const updatedBatch =
+      await MasterBatch.findByIdAndUpdate(
+        id,
+        updateData,
+        {
+          new: true,
+        }
+      );
+
+    // =================================
+    // DELETE OLD IMAGE
+    // =================================
+    if (
+      uploadedImage &&
+      existingBatch.m_batch_image
+    ) {
+      deleteFile(
+        path.join(
+          "src/uploads/batches",
+          existingBatch.m_batch_image
+        )
+      );
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Batch updated successfully",
+      data: updatedBatch,
+    });
+  } catch (error) {
+    // delete newly uploaded image if error
+    if (req.files?.m_batch_image?.[0]?.filename) {
+      deleteFile(
+        path.join(
+          "src/uploads/batches",
+          req.files.m_batch_image[0].filename
+        )
+      );
+    }
+
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+// =================================
+// GET ALL BATCHES
+// =================================
+const getAllBatches = async (req, res) => {
+  try {
+    let {
+      page = 1,
+      limit = 10,
+      search,
+      fromDate,
+      toDate,
+    } = req.query;
+
+    page = Number(page);
+    limit = Number(limit);
+
+    const filter = {};
+
+    // =================================
+    // SEARCH
+    // =================================
+    if (isValidValue(search)) {
+      filter.$or = [
+        {
+          batch_name: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          batch_instructor: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          subject: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    // =================================
+    // DATE FILTER
+    // =================================
+    if (
+      isValidValue(fromDate) ||
+      isValidValue(toDate)
+    ) {
+      filter.batch_date = {};
+
+      if (isValidValue(fromDate)) {
+        filter.batch_date.$gte =
+          new Date(fromDate);
+      }
+
+      if (isValidValue(toDate)) {
+        filter.batch_date.$lte =
+          new Date(toDate);
+      }
+    }
+
+    // =================================
+    // TOTAL
+    // =================================
+    const total =
+      await MasterBatch.countDocuments(filter);
+
+    // =================================
+    // GET DATA
+    // =================================
+    const batches = await MasterBatch.find(filter)
+      .populate(
+        "batch_course",
+        "m_course_name"
+      )
+      .populate(
+        "batch_instructor_id",
+        "m_instructor_name"
+      )
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    return res.status(200).json({
+      status: true,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      data: batches,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+// =================================
+// GET SINGLE BATCH
+// =================================
+const getSingleBatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const batch = await MasterBatch.findById(id)
+      .populate("batch_course")
+      .populate("batch_instructor_id");
+
+    if (!batch) {
+      return res.status(404).json({
+        status: false,
+        message: "Batch not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      data: batch,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+// =================================
+// DELETE BATCH
+// =================================
+const deleteBatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const batch = await MasterBatch.findById(id);
+
+    if (!batch) {
+      return res.status(404).json({
+        status: false,
+        message: "Batch not found",
+      });
+    }
+
+    // delete image
+    if (batch.m_batch_image) {
+      deleteFile(
+        path.join(
+          "src/uploads/batches",
+          batch.m_batch_image
+        )
+      );
+    }
+
+    // delete batch
+    await MasterBatch.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      status: true,
+      message: "Batch deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+module.exports = {
+  addBatch,
+  updateBatch,
+  getAllBatches,
+  getSingleBatch,
+  deleteBatch,
+};

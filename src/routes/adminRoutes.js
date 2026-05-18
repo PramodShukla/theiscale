@@ -33,6 +33,7 @@ const notesCategoryRoutes = require("./notesCategoryRoutes");
 const notesSubCategoryRoutes = require("./notesSubCategoryRoutes");
 const notesRoutes = require("./notesRoutes");
 const userWishlistRoutes = require("./userWishlistRoutes");
+const batchRoutes = require("./batchRoutes");
 
 
 
@@ -69,6 +70,6 @@ router.use("/notes-category", notesCategoryRoutes);
 router.use("/notes-sub-category", notesSubCategoryRoutes);
 router.use("/notes", notesRoutes);
 router.use("/user-wishlist", userWishlistRoutes);
-
+router.use("/batch", batchRoutes);
 
 module.exports = router;
