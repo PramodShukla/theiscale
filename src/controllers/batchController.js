@@ -528,10 +528,74 @@ const deleteBatch = async (req, res) => {
   }
 };
 
+
+
+
+const getBatchesDropdown = async (req, res) => {
+  try {
+    let {
+      page = 1,
+      limit = 10,
+      search,
+      status,
+    } = req.query;
+
+    page = Number(page);
+    limit = Number(limit);
+
+    const filter = {};
+
+    // =================================
+    // STATUS FILTER
+    // 0 => Upcoming
+    // 1 => Running
+    // =================================
+    if (isValidValue(status)) {
+      filter.m_batch_status = Number(status);
+    } else {
+      filter.m_batch_status = { $in: [0, 1] };
+    }
+
+    
+    // SEARCH
+    
+    if (isValidValue(search)) {
+      filter.batch_name = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    const total =
+      await MasterBatch.countDocuments(filter);
+
+ 
+    const batches = await MasterBatch.find(filter)
+      .select("_id batch_name")
+      .sort({ batch_name: 1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    return res.status(200).json({
+      status: true,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      data: batches,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addBatch,
   updateBatch,
   getAllBatches,
   getSingleBatch,
   deleteBatch,
+  getBatchesDropdown
 };

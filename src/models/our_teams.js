@@ -1,25 +1,28 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const memberSchema = new mongoose.Schema(
   {
     member_name: {
       type: String,
       required: true,
+      trim: true,
     },
 
     member_position: {
       type: String,
-      required: true,
+      default: null,
+      trim: true,
     },
 
     member_image: {
       type: String,
-      required: true,
+      default: null,
     },
 
     member_expertise: {
       type: String,
       default: null,
+      trim: true,
     },
 
     member_experience: {
@@ -30,26 +33,34 @@ const memberSchema = new mongoose.Schema(
     member_linkedin: {
       type: String,
       default: null,
+      trim: true,
     },
 
     member_bio: {
       type: String,
       default: null,
+      trim: true,
     },
 
+    // 1 => Team Member
+    // 2 => Teacher
     member_type: {
       type: Number,
-      default: 0, // 1 => Team, 2 => Teacher
+      enum: [1, 2],
+      default: 1,
     },
 
+    // 1 => Active
+    // 0 => Inactive
     member_status: {
       type: Number,
-      default: 0,
+      enum: [0, 1],
+      default: 1,
     },
 
     member_order: {
       type: Number,
-      default: null,
+      default: 0,
     },
   },
   {
@@ -58,4 +69,4 @@ const memberSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("our_team", memberSchema);
+module.exports = mongoose.model("our_teams", memberSchema);
