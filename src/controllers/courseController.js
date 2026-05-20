@@ -983,10 +983,77 @@ const getCourseById = async (req, res) => {
 
 
 
-// =====================================================
-// GET FULL COURSE CONTENT
-// Course -> Subjects -> Lectures -> Progress
-// =====================================================
+// ===============================
+// GET COURSE DROPDOWN
+// WITH CATEGORY FILTER + PAGINATION
+// ===============================
+const getCourseDropdown = async (req, res) => {
+  try {
+    let {
+      page = 1,
+      limit = 10,
+      category_id,
+      search = "",
+    } = req.query;
+
+    page = Number(page) || 1;
+    limit = Number(limit) || 10;
+
+    // =========================
+    // FILTER
+    // =========================
+    const filter = {
+      m_course_status: 1,
+    };
+
+    // category filter
+    if (
+      category_id &&
+      mongoose.Types.ObjectId.isValid(category_id)
+    ) {
+      filter.m_course_category = category_id;
+    }
+
+    // search filter
+    if (search) {
+      filter.m_course_title = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    // =========================
+    // TOTAL
+    // =========================
+    const total = await Course.countDocuments(filter);
+
+    // =========================
+    // GET COURSES
+    // =========================
+    const courses = await Course.find(filter)
+      .select("_id m_course_title")
+      .sort({ m_course_title: 1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // =========================
+    // RESPONSE
+    // =========================
+    return res.status(200).json({
+      status: true,
+      message: "Course dropdown fetched successfully",
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      data: courses,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
 
 
 
@@ -999,5 +1066,6 @@ module.exports = {
   getPopularCourses,
   getRecommendedCourses,
   getCourseById,
+  getCourseDropdown
  
 };

@@ -36,6 +36,7 @@ const userWishlistRoutes = require("./userWishlistRoutes");
 const batchRoutes = require("./batchRoutes");
 const teamRoutes = require("./teamRoutes");
 const liveClassRoutes = require("./liveClassRoutes");
+const classesRoutes = require("./classesRoutes");
 
 
 
@@ -75,6 +76,7 @@ router.use("/user-wishlist", userWishlistRoutes);
 router.use("/batch", batchRoutes);
 router.use("/team", teamRoutes);
 router.use("/live-class", liveClassRoutes);
+router.use("/classes", classesRoutes);
 
 
 
