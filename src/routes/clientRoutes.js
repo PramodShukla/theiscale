@@ -7,7 +7,7 @@ const {
   getClientImages,
   updateClient,
   deleteClient
-} = require("../controllers/clientcontroller");
+} = require("../controllers/clientController");
 
 const { clientUpload } = require("../middlewares/uploadMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");

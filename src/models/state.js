@@ -1,9 +1,21 @@
 const mongoose = require("mongoose");
 
-const StateSchema = new mongoose.Schema({
-  m_state_id: { type: Number, required: true, unique: true }, // AUTO_INCREMENT handled separately
-  m_state_name: { type: String, required: true },
-  m_state_country: { type: Number, required: true }
-});
+const stateSchema = new mongoose.Schema(
+  {
+    m_state_name: {
+      type: String,
+      required: true,
+      trim: true
+    },
 
-module.exports = mongoose.model("state", StateSchema);
+    // OPTIONAL
+    m_state_country: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "countries",
+      default: null
+    }
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("state", stateSchema);
