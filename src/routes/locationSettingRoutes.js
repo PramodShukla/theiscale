@@ -3,6 +3,9 @@ const express = require("express");
 const router = express.Router();
 
 const locationController = require("../controllers/locationSettingController");
+const {authMiddleware} = require("../middlewares/authMiddleware");
+const {adminMiddleware} = require("../middlewares/adminMiddleware");
+
 
 // ======================================================
 // COUNTRY ROUTES
@@ -10,37 +13,37 @@ const locationController = require("../controllers/locationSettingController");
 
 // ADD COUNTRY
 router.post(
-  "/country/add",
+  "/country/add",authMiddleware,adminMiddleware,
   locationController.addCountry
 );
 
 // UPDATE COUNTRY
 router.put(
-  "/country/update/:id",
+  "/country/update/:id",authMiddleware,adminMiddleware,
   locationController.updateCountry
 );
 
 // GET ALL COUNTRIES
 router.get(
-  "/country/all",
+  "/country/all",authMiddleware,adminMiddleware,
   locationController.getAllCountry
 );
 
 // GET SINGLE COUNTRY
 router.get(
-  "/country/single/:id",
+  "/country/single/:id",authMiddleware,adminMiddleware,
   locationController.getSingleCountry
 );
 
 // COUNTRY DROPDOWN
 router.get(
-  "/country/dropdown",
+  "/country/dropdown",  authMiddleware,adminMiddleware,
   locationController.getCountryDropdown
 );
 
 // DELETE COUNTRY
 router.delete(
-  "/country/delete/:id",
+  "/country/delete/:id",authMiddleware,adminMiddleware,
   locationController.deleteCountry
 );
 
@@ -50,37 +53,37 @@ router.delete(
 
 // ADD STATE
 router.post(
-  "/state/add",
+  "/state/add",authMiddleware,adminMiddleware,
   locationController.addState
 );
 
 // UPDATE STATE
 router.put(
-  "/state/update/:id",
+  "/state/update/:id",authMiddleware,adminMiddleware,
   locationController.updateState
 );
 
 // GET ALL STATES
 router.get(
-  "/state/all",
+  "/state/all",authMiddleware,adminMiddleware,
   locationController.getAllState
 );
 
 // GET SINGLE STATE
 router.get(
-  "/state/single/:id",
+  "/state/single/:id",authMiddleware,adminMiddleware,
   locationController.getSingleState
 );
 
 // STATE DROPDOWN
 router.get(
-  "/state/dropdown",
+  "/state/dropdown",authMiddleware,adminMiddleware,
   locationController.getStateDropdown
 );
 
 // DELETE STATE
 router.delete(
-  "/state/delete/:id",
+  "/state/delete/:id",authMiddleware,adminMiddleware,
   locationController.deleteState
 );
 
@@ -90,37 +93,37 @@ router.delete(
 
 // ADD CITY
 router.post(
-  "/city/add",
+  "/city/add",authMiddleware,adminMiddleware,
   locationController.addCity
 );
 
 // UPDATE CITY
 router.put(
-  "/city/update/:id",
+  "/city/update/:id",authMiddleware,adminMiddleware,
   locationController.updateCity
 );
 
 // GET ALL CITY
 router.get(
-  "/city/all",
+  "/city/all",authMiddleware,adminMiddleware,
   locationController.getAllCity
 );
 
 // GET SINGLE CITY
 router.get(
-  "/city/single/:id",
+  "/city/single/:id",authMiddleware,adminMiddleware,
   locationController.getSingleCity
 );
 
 // CITY DROPDOWN
 router.get(
-  "/city/dropdown",
+  "/city/dropdown",authMiddleware,adminMiddleware,
   locationController.getCityDropdown
 );
 
 // DELETE CITY
 router.delete(
-  "/city/delete/:id",
+  "/city/delete/:id",authMiddleware,adminMiddleware,
   locationController.deleteCity
 );
 

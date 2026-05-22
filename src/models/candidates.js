@@ -7,56 +7,79 @@ const candidateSchema = new mongoose.Schema({
   //   auto: true
   // },
 
-  candidate_idno: { type: String,  },
+  candidate_idno: { type: String },
 
-  c_register_date: { type: Date, },
+  c_register_date: { type: Date },
 
-  c_first_name: { type: String,  },
-  c_last_name: { type: String,  },
-  c_display_name: { type: String,  },
+  c_first_name: { type: String },
+  c_last_name: { type: String },
+  c_display_name: { type: String },
 
   c_email: { type: String, required: true },
 
   c_password: { type: String, required: true },
-  c_password_update: { type: String,  enum:[0,1] // 0=no, 1=yes 
+  c_password_update: {
+    type: String,
+    enum: [0, 1], // 0=no, 1=yes
   },
 
-//   c_role: {
-//   type: String,
-//   enum: ["user", "admin"], 
-//   default: "user"
-// },
+  //   c_role: {
+  //   type: String,
+  //   enum: ["user", "admin"],
+  //   default: "user"
+  // },
 
-  c_contact: { type: Number,default: null  },
-  c_alt_contact: { type: Number, default: null  },
-
-  c_fcm_id: { type: String, default: null  },
-  c_user_session_token: { type: String,  },
-
-  c_user_otp: { type: String,  },
-
-  c_user_status: { type: Number,  enum:[1,3] //1=unvrified, 3=verified
+  c_current_state: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "state",
+    default: null,
   },
 
-  c_whatsapp: { type: Number, default: null  },
+  c_current_city: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "city",
+    default: null,
+  },
+
+  c_user_refer_by: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "app_admin",
+    default: null,
+  },
+
+  c_contact: { type: Number, default: null },
+  c_alt_contact: { type: Number, default: null },
+
+  c_fcm_id: { type: String, default: null },
+  c_user_session_token: { type: String },
+
+  c_user_otp: { type: String },
+
+  c_user_status: {
+    type: Number,
+    enum: [0, 1], //0=unvrified, 1=verified
+    default: 0,
+  },
+
+  c_whatsapp: { type: Number, default: null },
   c_gender: { type: String, default: null },
   c_dob: { type: Date, default: null },
   c_age: { type: Number, default: null },
 
-  c_bio: { type: String, default: null  },
-  m_occupation: { type: String,default: null  },
+  c_bio: { type: String, default: null },
+  m_occupation: { type: String, default: null },
 
-  c_guardian: { type: String,default: null  },
+  c_guardian: { type: String, default: null },
 
-  c_current_address1: { type: String,default: null  },
-  c_current_address2: { type: String,default: null  },
+  c_current_address1: { type: String, default: null },
+  c_current_address2: { type: String, default: null },
 
-  c_current_country: { type: Number,default: null  },   // type =string kar sakte hai 
-  c_current_state: { type: String,default: null  },
-  c_current_city: { type: String,default: null  },
-  c_current_district: { type: String,default: null  },
-  c_current_area: { type: Number,default: null  },
-  c_current_pincode: { type: String, default: null  },  // type = Number kar sakte hai 
+  c_current_country: { type: Number, default: null }, // type =string kar sakte hai
+  // c_current_state: { type: String, default: null },
+  // c_current_city: { type: String, default: null },
+  c_current_district: { type: String, default: null },
+  c_current_area: { type: Number, default: null },
+  c_current_pincode: { type: String, default: null }, // type = Number kar sakte hai
 
   c_permanent_address1: { type: String, default: null },
   c_permanent_address2: { type: String, default: null },
@@ -64,7 +87,7 @@ const candidateSchema = new mongoose.Schema({
   c_permanent_city: { type: String, default: null },
   c_permanent_pincode: { type: String, default: null },
 
-  c_category: { type: String,  },
+  c_category: { type: String },
 
   c_governmentId_number: { type: String },
   c_pan_number: { type: String },
@@ -133,13 +156,21 @@ const candidateSchema = new mongoose.Schema({
 
   c_domicile: { type: String },
 
-  c_profile_updated: { type: Number, enum:[0,1] // 0=no, 1=yes
+  c_profile_updated: {
+    type: Number,
+    enum: [0, 1], // 0=no, 1=yes
   },
-  c_eductional_updated: { type: Number, enum:[0,1] // 0=no, 1=yes
+  c_eductional_updated: {
+    type: Number,
+    enum: [0, 1], // 0=no, 1=yes
   },
-  c_professional_updated: { type: Number, enum:[0,1] // 0=no, 1=yes
+  c_professional_updated: {
+    type: Number,
+    enum: [0, 1], // 0=no, 1=yes
   },
-  c_document_updated: { type: Number, enum:[0,1] // 0=no, 1=yes
+  c_document_updated: {
+    type: Number,
+    enum: [0, 1], // 0=no, 1=yes
   },
 
   remember_token: { type: String },
@@ -156,9 +187,11 @@ const candidateSchema = new mongoose.Schema({
 
   address_type: { type: Number },
 
-  notify_date: { type: Date, },
+  notify_date: { type: Date },
 
-  is_subscribe: { type: Number, enum:[0,1] // 0=no, 1=yes
+  is_subscribe: {
+    type: Number,
+    enum: [0, 1], // 0=no, 1=yes
   },
   subscription_end: { type: Date },
   next_apply_date: { type: Date },
@@ -183,11 +216,19 @@ const candidateSchema = new mongoose.Schema({
 
   c_upi_id: { type: String },
 
-  c_mobile_verified: { type: Number },
-  c_email_verified: { type: Number },
+  c_mobile_verified: {
+    type: Number,
+    enum: [0, 1], //0=unvrified, 1=verified
+    default: 0,
+  },
+  c_email_verified: {
+    type: Number,
+    enum: [0, 1], //0=unvrified, 1=verified
+    default: 0,
+   },
 
   c_assign_batch: { type: Number },
-  c_user_refer_by: { type: Number },
+  // c_user_refer_by: { type: Number },
 
   c_user_referal_code: { type: String },
   c_user_refered_users: { type: Number },

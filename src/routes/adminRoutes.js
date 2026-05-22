@@ -38,6 +38,8 @@ const teamRoutes = require("./teamRoutes");
 const liveClassRoutes = require("./liveClassRoutes");
 const classesRoutes = require("./classesRoutes");
 const locationSettingRoutes = require("./locationSettingRoutes");
+const appUserRoutes = require("./appUserRoutes");
+const appUserEnrollmentsWishlistsDetailsRoutes = require("./appUserEnrollmentsWishlistsDetailsRoutes");
 
 
 
@@ -79,6 +81,8 @@ router.use("/team", teamRoutes);
 router.use("/live-class", liveClassRoutes);
 router.use("/classes", classesRoutes);
 router.use("/location", locationSettingRoutes);
+router.use("/app-users", appUserRoutes);
+router.use("/app-users-enrollments-wishlists-details", appUserEnrollmentsWishlistsDetailsRoutes);
 
 
 

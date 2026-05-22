@@ -13,7 +13,7 @@ const router = express.Router();
 
 const { authMiddleware } = require("../middlewares/authMiddleware");
 
-// 🔥 Protected route
+//  Protected route
 router.get("/profile", authMiddleware, (req, res) => {
   res.send({
     message: "Protected route accessed",

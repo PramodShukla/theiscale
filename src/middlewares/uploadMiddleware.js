@@ -93,6 +93,8 @@ const storage = multer.diskStorage({
       folder = "src/uploads/batches";
     } else if (file.fieldname === "member_image") {
       folder = "src/uploads/team";
+    } else if (file.fieldname === "c_profile_image") {
+      folder = "src/uploads/candidates/profile";
     }
 
     // folder create if not exists
@@ -423,6 +425,15 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // Candidate profile image
+  else if (file.fieldname === "c_profile_image") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for profile image"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -541,6 +552,13 @@ const teamUpload = upload.fields([
   },
 ]);
 
+const candidateUpload = upload.fields([
+  {
+    name: "c_profile_image",
+    maxCount: 1,
+  },
+]);
+
 module.exports = {
   upload,
   courseUpload,
@@ -568,4 +586,5 @@ module.exports = {
   notesUpload,
   batchUpload,
   teamUpload,
+  candidateUpload,
 };
