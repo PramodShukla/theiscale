@@ -1,18 +1,63 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const mOfferSchema = new mongoose.Schema({
-  // m_offer_id: {
-  //   type: Number,
-  //   required: true,
-  //   unique: true
-  // },
-  m_offer_title: { type: String, required: true },
-  m_offer_image: { type: String, required: true },
-  m_offer_des: { type: String, required: true },
-  m_offer_url: { type: String, required: true },
-  m_offer_priority: { type: Number, required: true },
-  m_offer_started: { type: Date, required: true },
-  m_offer_status: { type: Number, required: true }
-});
+const offerSchema = new mongoose.Schema(
+  {
+    m_offer_title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-module.exports = mongoose.model('offers', mOfferSchema);
+  
+
+    m_offer_image: {
+      type: String,
+      default: null,
+    },
+
+
+    m_offer_des: {
+      type: String,
+      default: null,
+      trim:true
+    },
+
+    
+
+    m_offer_url: {
+      type: String,
+      default: null,
+    },
+
+   
+
+    m_offer_priority: {
+      type: Number,
+      default: 0,
+    },
+
+    
+
+    m_offer_started: {
+      type: Date,
+      default: null,
+      trim:true
+    },
+
+    
+    m_offer_status: {
+      type: Number,
+      enum: [0, 1],
+      default: 1,
+      // 1 = Active , 0 = Inactive
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+module.exports = mongoose.model(
+  "offers",
+  offerSchema
+);
