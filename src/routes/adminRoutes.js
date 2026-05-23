@@ -38,8 +38,11 @@ const teamRoutes = require("./teamRoutes");
 const liveClassRoutes = require("./liveClassRoutes");
 const classesRoutes = require("./classesRoutes");
 const locationSettingRoutes = require("./locationSettingRoutes");
+<<<<<<< HEAD
 const appUserRoutes = require("./appUserRoutes");
 const appUserEnrollmentsWishlistsDetailsRoutes = require("./appUserEnrollmentsWishlistsDetailsRoutes");
+=======
+>>>>>>> 29e460a (refactor: rename location models and add location setting management APIs)
 
 
 
