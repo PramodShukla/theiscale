@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const partnerSchema = new mongoose.Schema(
   {
@@ -10,13 +10,13 @@ const partnerSchema = new mongoose.Schema(
 
     partner_url: {
       type: String,
-      required: true,
+      default: null,
       trim: true,
     },
 
     partner_image: {
       type: String,
-      required: true,
+      default: null,
     },
   },
   {

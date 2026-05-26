@@ -42,6 +42,8 @@ const appUserRoutes = require("./appUserRoutes");
 const appUserEnrollmentsDetailsRoutes = require("./appUserEnrollmentsDetailsRoutes");
 const appUserWishlistDetailsRoutes = require("./appUserWishlistDetailsRoutes");
 const offersRoutes = require("./offersRoutes");
+const partnersRoutes = require("./partnersRoutes");
+const testimonialRatingRoutes = require("./testimonialRatingRoutes");
 
 
 
@@ -88,6 +90,9 @@ router.use("/app-users", appUserRoutes);
 router.use("/app-users-enrollments-details", appUserEnrollmentsDetailsRoutes);
 router.use("/app-users-wishlist-details", appUserWishlistDetailsRoutes);
 router.use("/offers", offersRoutes);
+router.use("/partners", partnersRoutes);
+router.use("/testimonial-ratings", testimonialRatingRoutes);
+
 
 
 

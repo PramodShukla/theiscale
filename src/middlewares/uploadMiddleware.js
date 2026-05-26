@@ -97,6 +97,8 @@ const storage = multer.diskStorage({
       folder = "src/uploads/candidates/profile";
     } else if (file.fieldname === "m_offer_image") {
       folder = "src/uploads/offers";
+    } else if (file.fieldname === "partner_image") {
+      folder = "src/uploads/partners";
     }
 
     // folder create if not exists
@@ -445,6 +447,15 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // Partner image - only images
+  else if (file.fieldname === "partner_image") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for partner"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -577,6 +588,13 @@ const offerUpload = upload.fields([
   },
 ]);
 
+const partnerUpload = upload.fields([
+  {
+    name: "partner_image",
+    maxCount: 1,
+  },
+]);
+
 module.exports = {
   upload,
   courseUpload,
@@ -605,5 +623,6 @@ module.exports = {
   batchUpload,
   teamUpload,
   candidateUpload,
-  offerUpload
+  offerUpload,
+  partnerUpload
 };

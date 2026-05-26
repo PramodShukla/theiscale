@@ -106,7 +106,8 @@ const getAllUsers = async (req, res) => {
     // ======================================
 
     const users = await Candidate.find(filter)
-      .select(`
+      .select(
+        `
         c_first_name
         c_last_name
         c_display_name
@@ -114,7 +115,8 @@ const getAllUsers = async (req, res) => {
         c_contact
         c_register_date
         c_user_status
-      `)
+      `,
+      )
       .sort({ c_register_date: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -252,9 +254,7 @@ const editUser = async (req, res) => {
     // ======================================
 
     if (isValidValue(req.body.c_email_verified)) {
-      updateData.c_email_verified = Number(
-        req.body.c_email_verified
-      );
+      updateData.c_email_verified = Number(req.body.c_email_verified);
     }
 
     // ======================================
@@ -270,9 +270,7 @@ const editUser = async (req, res) => {
     // ======================================
 
     if (isValidValue(req.body.c_mobile_verified)) {
-      updateData.c_mobile_verified = Number(
-        req.body.c_mobile_verified
-      );
+      updateData.c_mobile_verified = Number(req.body.c_mobile_verified);
     }
 
     // ======================================
@@ -288,9 +286,7 @@ const editUser = async (req, res) => {
     // ======================================
 
     if (isValidValue(req.body.c_user_status)) {
-      updateData.c_user_status = Number(
-        req.body.c_user_status
-      );
+      updateData.c_user_status = Number(req.body.c_user_status);
     }
 
     // ======================================
@@ -314,8 +310,7 @@ const editUser = async (req, res) => {
     // ======================================
 
     if (isValidValue(req.body.c_current_pincode)) {
-      updateData.c_current_pincode =
-        req.body.c_current_pincode;
+      updateData.c_current_pincode = req.body.c_current_pincode;
     }
 
     // ======================================
@@ -323,8 +318,7 @@ const editUser = async (req, res) => {
     // ======================================
 
     if (isValidValue(req.body.c_current_address1)) {
-      updateData.c_current_address1 =
-        req.body.c_current_address1;
+      updateData.c_current_address1 = req.body.c_current_address1;
     }
 
     // ======================================
@@ -333,20 +327,14 @@ const editUser = async (req, res) => {
 
     if (isValidValue(req.body.c_current_state)) {
       if (req.body.c_current_state !== "others") {
-        if (
-          !mongoose.Types.ObjectId.isValid(
-            req.body.c_current_state
-          )
-        ) {
+        if (!mongoose.Types.ObjectId.isValid(req.body.c_current_state)) {
           return res.status(400).json({
             status: false,
             message: "Invalid state id",
           });
         }
 
-        const stateData = await State.findById(
-          req.body.c_current_state
-        );
+        const stateData = await State.findById(req.body.c_current_state);
 
         if (!stateData) {
           return res.status(404).json({
@@ -355,8 +343,7 @@ const editUser = async (req, res) => {
           });
         }
 
-        updateData.c_current_state =
-          req.body.c_current_state;
+        updateData.c_current_state = req.body.c_current_state;
       } else {
         updateData.c_current_state = "others";
       }
@@ -368,20 +355,14 @@ const editUser = async (req, res) => {
 
     if (isValidValue(req.body.c_current_city)) {
       if (req.body.c_current_city !== "others") {
-        if (
-          !mongoose.Types.ObjectId.isValid(
-            req.body.c_current_city
-          )
-        ) {
+        if (!mongoose.Types.ObjectId.isValid(req.body.c_current_city)) {
           return res.status(400).json({
             status: false,
             message: "Invalid city id",
           });
         }
 
-        const cityData = await City.findById(
-          req.body.c_current_city
-        );
+        const cityData = await City.findById(req.body.c_current_city);
 
         if (!cityData) {
           return res.status(404).json({
@@ -390,12 +371,10 @@ const editUser = async (req, res) => {
           });
         }
 
-        updateData.c_current_city =
-          req.body.c_current_city;
+        updateData.c_current_city = req.body.c_current_city;
 
         // AUTO STATE
-        updateData.c_current_state =
-          cityData.m_city_state;
+        updateData.c_current_state = cityData.m_city_state;
       } else {
         updateData.c_current_city = "others";
       }
@@ -406,8 +385,7 @@ const editUser = async (req, res) => {
     // ======================================
 
     if (isValidValue(req.body.c_user_refer_by)) {
-      updateData.c_user_refer_by =
-        req.body.c_user_refer_by;
+      updateData.c_user_refer_by = req.body.c_user_refer_by;
     }
 
     // ======================================
@@ -415,8 +393,7 @@ const editUser = async (req, res) => {
     // ======================================
 
     if (req.files?.c_profile_image?.[0]?.filename) {
-      updateData.c_profile_image =
-        req.files.c_profile_image[0].filename;
+      updateData.c_profile_image = req.files.c_profile_image[0].filename;
     }
 
     // ======================================
@@ -427,21 +404,14 @@ const editUser = async (req, res) => {
       isValidValue(req.body.password) ||
       isValidValue(req.body.confirm_password)
     ) {
-      if (
-        req.body.password !==
-        req.body.confirm_password
-      ) {
+      if (req.body.password !== req.body.confirm_password) {
         return res.status(400).json({
           status: false,
-          message:
-            "Password and confirm password does not match",
+          message: "Password and confirm password does not match",
         });
       }
 
-      const hashedPassword = await bcrypt.hash(
-        req.body.password,
-        10
-      );
+      const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
       updateData.c_password = hashedPassword;
       updateData.c_password_update = 1;
@@ -451,13 +421,9 @@ const editUser = async (req, res) => {
     // UPDATE USER
     // ======================================
 
-    const updatedUser = await Candidate.findByIdAndUpdate(
-      id,
-      updateData,
-      {
-        new: true,
-      }
-    );
+    const updatedUser = await Candidate.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
 
     return res.status(200).json({
       status: true,
@@ -472,8 +438,120 @@ const editUser = async (req, res) => {
   }
 };
 
+const searchUsersForDropdown = async (req, res) => {
+  try {
+    let { keyword = "", page = 1, limit = 10 } = req.query;
+
+    page = Number(page);
+    limit = Number(limit);
+
+    const filter = {};
+
+    // ======================================
+    // SEARCH
+    // ======================================
+
+    if (keyword && keyword.trim() !== "") {
+      filter.$or = [
+        {
+          c_first_name: {
+            $regex: keyword,
+            $options: "i",
+          },
+        },
+
+        {
+          c_last_name: {
+            $regex: keyword,
+            $options: "i",
+          },
+        },
+
+        {
+          c_display_name: {
+            $regex: keyword,
+            $options: "i",
+          },
+        },
+
+        {
+          c_email: {
+            $regex: keyword,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    // ======================================
+    // TOTAL COUNT
+    // ======================================
+
+    const totalRecords = await Candidate.countDocuments(filter);
+
+    // ======================================
+    // GET USERS
+    // ======================================
+
+    const users = await Candidate.find(filter)
+      .select(`
+        c_first_name
+        c_last_name
+        c_display_name
+        c_email
+      `)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    // ======================================
+    // FORMAT DATA
+    // ======================================
+
+    const finalData = users.map((user) => {
+      return {
+        _id: user._id,
+
+        full_name:
+          user.c_display_name ||
+          `${user.c_first_name || ""} ${user.c_last_name || ""}`.trim(),
+
+        first_name: user.c_first_name || "",
+
+        last_name: user.c_last_name || "",
+
+        email: user.c_email || "",
+      };
+    });
+
+    // ======================================
+    // RESPONSE
+    // ======================================
+
+    return res.status(200).send({
+      status: true,
+
+      pagination: {
+        currentPage: page,
+        perPage: limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+      },
+
+      data: finalData,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getSingleUser,
   editUser,
+
+  searchUsersForDropdown,
 };

@@ -11,7 +11,7 @@ const candidateSchema = new mongoose.Schema({
 
   c_register_date: { type: Date },
 
-  c_first_name: { type: String },
+  c_first_name: { type: String, index: true },
   c_last_name: { type: String },
   c_display_name: { type: String },
 
@@ -225,7 +225,7 @@ const candidateSchema = new mongoose.Schema({
     type: Number,
     enum: [0, 1], //0=unvrified, 1=verified
     default: 0,
-   },
+  },
 
   c_assign_batch: { type: Number },
   // c_user_refer_by: { type: Number },
