@@ -1,7 +1,7 @@
 const News = require("../models/news&update");
 const fs = require("fs");
 
-// 🔥 COMMON FILE DELETE
+//COMMON FILE DELETE
 const deleteUploadedFiles = (files) => {
   if (!files) return;
 
@@ -14,8 +14,6 @@ const deleteUploadedFiles = (files) => {
   });
 };
 
-
-
 const addNews = async (req, res) => {
   try {
     const { m_news_title } = req.body;
@@ -23,7 +21,7 @@ const addNews = async (req, res) => {
     if (!m_news_title) {
       return res.status(400).json({
         status: false,
-        message: "Title is required"
+        message: "Title is required",
       });
     }
 
@@ -36,21 +34,19 @@ const addNews = async (req, res) => {
       m_news_slug: slug,
       m_news_intro: req.body.m_news_intro,
       m_news_description: req.body.m_news_description,
-      m_news_image: image
+      m_news_image: image,
     });
 
     res.json({
       status: true,
       data: news,
-      msg: "News&Updates added successfully"
+      msg: "News&Updates added successfully",
     });
-
   } catch (err) {
     deleteUploadedFiles(req.files); // 🔥 important
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 const updateNews = async (req, res) => {
   try {
@@ -59,17 +55,16 @@ const updateNews = async (req, res) => {
     if (!news) {
       return res.status(404).json({
         status: false,
-        message: "News not found"
+        message: "News not found",
       });
     }
 
-    Object.keys(req.body).forEach(key => {
+    Object.keys(req.body).forEach((key) => {
       news[key] = req.body[key];
     });
 
-    // ✅ IMAGE UPDATE
+    //  IMAGE UPDATE
     if (req.files?.m_news_image) {
-
       // old delete
       if (news.m_news_image && fs.existsSync(news.m_news_image)) {
         fs.unlinkSync(news.m_news_image);
@@ -82,32 +77,30 @@ const updateNews = async (req, res) => {
 
     res.json({
       status: true,
-      data: news
+      data: news,
     });
-
   } catch (err) {
     deleteUploadedFiles(req.files);
     res.status(500).json({ status: false, message: err.message });
   }
 };
 
-
 const getAllNews = async (req, res) => {
   try {
     const data = await News.find()
-      .select("m_news_title m_news_intro m_news_image")
+      .select(
+        "m_news_title m_news_intro m_news_image m_news_description m_news_added_on m_news_status m_news_order",
+      )
       .sort({ _id: -1 });
 
     res.json({
       status: true,
-      data
+      data,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 const getSingleNews = async (req, res) => {
   try {
@@ -116,20 +109,18 @@ const getSingleNews = async (req, res) => {
     if (!data) {
       return res.status(404).json({
         status: false,
-        message: "News not found"
+        message: "News not found",
       });
     }
 
     res.json({
       status: true,
-      data
+      data,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 const deleteNews = async (req, res) => {
   try {
@@ -138,7 +129,7 @@ const deleteNews = async (req, res) => {
     if (!news) {
       return res.status(404).json({
         status: false,
-        message: "Not found"
+        message: "Not found",
       });
     }
 
@@ -151,11 +142,43 @@ const deleteNews = async (req, res) => {
 
     res.json({
       status: true,
-      message: "Deleted"
+      message: "Deleted",
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+const changeNewsStatus = async (req, res) => {
+  try {
+    const news = await News.findById(req.params.id);
+
+    if (!news) {
+      return res.status(404).json({
+        status: false,
+        message: "News not found",
+      });
+    }
+
+    // TOGGLE STATUS
+    news.m_news_status =
+      news.m_news_status === "active" ? "inactive" : "active";
+
+    await news.save();
+
+    res.json({
+      status: true,
+      message: "Status updated successfully",
+      data: {
+        _id: news._id,
+        m_news_status: news.m_news_status,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
   }
 };
 
@@ -164,5 +187,6 @@ module.exports = {
   updateNews,
   getAllNews,
   getSingleNews,
-  deleteNews
+  deleteNews,
+  changeNewsStatus
 };

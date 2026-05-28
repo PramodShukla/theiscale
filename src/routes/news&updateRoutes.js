@@ -6,7 +6,8 @@ const {
   updateNews,
   getAllNews,
   getSingleNews,
-  deleteNews
+  deleteNews,
+  changeNewsStatus
 } = require("../controllers/news&updateController");
 
 const { newsupdatesUpload } = require("../middlewares/uploadMiddleware");
@@ -22,6 +23,8 @@ router.get("/all-news&updates", authMiddleware, adminMiddleware, getAllNews);
 router.get("/single-news&updates/:id", authMiddleware, adminMiddleware, getSingleNews); 
 
 router.delete("/delete-news&updates/:id", authMiddleware, adminMiddleware, deleteNews);
+
+router.patch("/status/:id", authMiddleware, adminMiddleware, changeNewsStatus);
 
 router.get("/public-all-news&updates", getAllNews);
 

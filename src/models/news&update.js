@@ -27,8 +27,9 @@ const newsSchema = new mongoose.Schema({
   },
 
   m_news_status: {
-    type: Number,
-    default: 1, // 1-active, 0-inactive
+    type: String,
+    enum :["active", "inactive"],
+    default: "active", 
   },
 
   m_news_order: {
