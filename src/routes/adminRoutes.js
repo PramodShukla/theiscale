@@ -44,6 +44,10 @@ const appUserWishlistDetailsRoutes = require("./appUserWishlistDetailsRoutes");
 const offersRoutes = require("./offersRoutes");
 const partnersRoutes = require("./partnersRoutes");
 const testimonialRatingRoutes = require("./testimonialRatingRoutes");
+const subjectRatingRoutes = require("./subjectRatingRoutes");
+const userReviewsRoutes = require("./userReviewsRoutes");
+const bannerRoutes = require("./bannerRoutes");
+const leadGenerateRoutes = require("./leadGenerateRoutes");
 
 
 
@@ -92,6 +96,10 @@ router.use("/app-users-wishlist-details", appUserWishlistDetailsRoutes);
 router.use("/offers", offersRoutes);
 router.use("/partners", partnersRoutes);
 router.use("/testimonial-ratings", testimonialRatingRoutes);
+router.use("/subject-ratings", subjectRatingRoutes);
+router.use("/user-reviews", userReviewsRoutes);
+router.use("/banners", bannerRoutes);
+router.use("/lead-generate", leadGenerateRoutes);
 
 
 

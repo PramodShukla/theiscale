@@ -9,21 +9,28 @@ const {
   getAllPPT,
   updatePPT,
   deletePPT,
+  changePPTStatus,
+  getSinglePPT,
 } = require("../controllers/pptController");
 
-router.post("/add-ppt",authMiddleware,adminMiddleware, pptUpload, addPPT);
+router.post("/add-ppt", authMiddleware, adminMiddleware, pptUpload, addPPT);
 
-router.get("/get-ppts",authMiddleware,adminMiddleware, getAllPPT);
+router.get("/get-ppts", authMiddleware, adminMiddleware, getAllPPT);
 
-router.put("/update-ppt/:id",authMiddleware,adminMiddleware, pptUpload, updatePPT);
+router.put(
+  "/update-ppt/:id",
+  authMiddleware,
+  adminMiddleware,
+  pptUpload,
+  updatePPT,
+);
 
-router.delete("/delete-ppt/:id",authMiddleware,adminMiddleware, deletePPT);
+router.delete("/delete-ppt/:id", authMiddleware, adminMiddleware, deletePPT);
 
+router.patch("/status/:id", authMiddleware, adminMiddleware, changePPTStatus);
 
-
-
+router.get("/:id", authMiddleware, adminMiddleware, getSinglePPT);
 
 router.get("/public-get-ppts", getAllPPT);
-
 
 module.exports = router;

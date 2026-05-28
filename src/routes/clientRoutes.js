@@ -6,7 +6,9 @@ const {
   getAllClients,
   getClientImages,
   updateClient,
-  deleteClient
+  deleteClient,
+  changeClientStatus,
+  getSingleClient
 } = require("../controllers/clientController");
 
 const { clientUpload } = require("../middlewares/uploadMiddleware");
@@ -22,6 +24,10 @@ router.put("/update-client/:id", authMiddleware, adminMiddleware, clientUpload, 
 
 router.delete("/delete-client/:id", authMiddleware, adminMiddleware, deleteClient);
 
+router.get("/:id", authMiddleware, adminMiddleware, getSingleClient);
+
+router.patch("/:id", authMiddleware, adminMiddleware, changeClientStatus);
+
 
 
 
@@ -32,3 +38,4 @@ router.get("/public-get-client-images", getClientImages);
 
 
 module.exports = router;
+   

@@ -7,7 +7,8 @@ const {
   getSubjectsByCourse,
   updateSubject,
   deleteSubject,
-  getSubjectDropdownByCourse
+  getSubjectDropdownByCourse,
+  getAllSubjectsDropdown
 } = require("../controllers/subjectController");
 
 const { authMiddleware } = require("../middlewares/authMiddleware");
@@ -66,6 +67,15 @@ router.get(
   authMiddleware,
   adminMiddleware,
   getSubjectDropdownByCourse
+);
+
+
+
+router.get(
+  "/all/dropdown",
+  authMiddleware,
+  adminMiddleware,
+  getAllSubjectsDropdown
 );
 
 

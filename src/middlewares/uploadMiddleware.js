@@ -99,6 +99,12 @@ const storage = multer.diskStorage({
       folder = "src/uploads/offers";
     } else if (file.fieldname === "partner_image") {
       folder = "src/uploads/partners";
+    } else if (file.fieldname === "user_image") {
+      folder = "src/uploads/user-reviews";
+    } else if (file.fieldname === "banner_image") {
+      folder = "src/uploads/banners";
+    } else if (file.fieldname === "m_ss_image") {
+      folder = "src/uploads/success-story";
     }
 
     // folder create if not exists
@@ -456,6 +462,33 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // User review image - only images
+  else if (file.fieldname === "user_image") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for user review"), false);
+    }
+  }
+
+  // Banner image - only images
+  else if (file.fieldname === "banner_image") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for banner"), false);
+    }
+  }
+
+  // Success story image - only images
+  else if (file.fieldname === "m_ss_image") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for success story"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -595,6 +628,27 @@ const partnerUpload = upload.fields([
   },
 ]);
 
+const userReviewUpload = upload.fields([
+  {
+    name: "user_image",
+    maxCount: 1,
+  },
+]);
+
+const bannerUpload = upload.fields([
+  {
+    name: "banner_image",
+    maxCount: 1,
+  },
+]);
+
+const successStoryUpload = upload.fields([
+  {
+    name: "m_ss_image",
+    maxCount: 1,
+  },
+]);
+
 module.exports = {
   upload,
   courseUpload,
@@ -624,5 +678,8 @@ module.exports = {
   teamUpload,
   candidateUpload,
   offerUpload,
-  partnerUpload
+  partnerUpload,
+  userReviewUpload,
+  bannerUpload,
+  successStoryUpload,
 };

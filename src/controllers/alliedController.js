@@ -1,7 +1,6 @@
 const Allied = require("../models/allied");
 const fs = require("fs");
 
-// 🔥 COMMON FILE DELETE
 const deleteUploadedFiles = (files) => {
   if (!files) return;
 
@@ -14,9 +13,6 @@ const deleteUploadedFiles = (files) => {
   });
 };
 
-// =======================
-// ADD
-// =======================
 const addAllied = async (req, res) => {
   try {
     const { m_allied_title } = req.body;
@@ -39,90 +35,133 @@ const addAllied = async (req, res) => {
       message: "Added successfully",
       data,
     });
-
   } catch (err) {
     deleteUploadedFiles(req.files);
     res.status(500).json({ status: false, message: err.message });
   }
 };
 
-// =======================
-// UPDATE
-// =======================
 const updateAllied = async (req, res) => {
   try {
     const item = await Allied.findById(req.params.id);
 
     if (!item) {
       deleteUploadedFiles(req.files);
+
       return res.status(404).json({
         status: false,
         message: "Not found",
       });
     }
 
-    if (req.body.m_allied_title) {
+    if ("m_allied_title" in req.body) {
+      if (!req.body.m_allied_title.trim()) {
+        deleteUploadedFiles(req.files);
+
+        return res.status(400).json({
+          status: false,
+          message: "Title cannot be empty",
+        });
+      }
+
       item.m_allied_title = req.body.m_allied_title;
     }
 
-    // image update
-    if (req.files?.m_allied_image) {
-      if (item.m_allied_image && fs.existsSync(item.m_allied_image)) {
-        fs.unlinkSync(item.m_allied_image);
-      }
-
-      item.m_allied_image = req.files.m_allied_image[0].path;
+    if ("m_allied_inr" in req.body) {
+      item.m_allied_inr = req.body.m_allied_inr;
     }
 
-    await item.save();
+    if ("m_allied_order" in req.body) {
+      item.m_allied_order = req.body.m_allied_order || 0;
+    }
+
+    if ("m_allied_status" in req.body) {
+      item.m_allied_status = req.body.m_allied_status;
+    }
+
+    if (req.files?.m_allied_image) {
+      const oldImage = item.m_allied_image;
+
+      item.m_allied_image = req.files.m_allied_image[0].path;
+
+      await item.save();
+
+      if (oldImage && fs.existsSync(oldImage)) {
+        fs.unlinkSync(oldImage);
+      }
+    } else {
+      await item.save();
+    }
 
     res.json({
       status: true,
       message: "Updated successfully",
       data: item,
     });
-
   } catch (err) {
     deleteUploadedFiles(req.files);
-    res.status(500).json({ status: false, message: err.message });
+
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
   }
 };
 
-// =======================
-// GET ALL (Pagination)
-// =======================
 const getAllAllied = async (req, res) => {
   try {
-    let { page = 1, limit = 10 } = req.query;
+    let { page = 1, limit = 10, search = "", status } = req.query;
 
     page = parseInt(page);
     limit = parseInt(limit);
 
-    const skip = (page - 1) * limit;
+    let filter = {};
 
-    const data = await Allied.find()
-      .sort({ _id: -1 })
-      .skip(skip)
+    if (search) {
+      filter.$or = [
+        {
+          m_allied_title: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    if (status) {
+      filter.m_allied_status = status;
+    }
+
+    const total = await Allied.countDocuments(filter);
+
+    const data = await Allied.find(filter)
+      .sort({
+        m_allied_order: 1,
+        _id: -1,
+      })
+      .skip((page - 1) * limit)
       .limit(limit);
-
-    const total = await Allied.countDocuments();
 
     res.json({
       status: true,
-      total,
-      page,
-      limit,
+
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+
       data,
     });
-
   } catch (err) {
-    res.status(500).json({ status: false, message: err.message });
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
   }
 };
 
-// =======================
-// DELETE
-// =======================
 const deleteAllied = async (req, res) => {
   try {
     const item = await Allied.findById(req.params.id);
@@ -144,9 +183,60 @@ const deleteAllied = async (req, res) => {
       status: true,
       message: "Deleted successfully",
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+const getSingleAllied = async (req, res) => {
+  try {
+    const item = await Allied.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({
+        status: false,
+        message: "Not found",
+      });
+    }
+
+    res.json({
+      status: true,
+      data: item,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
+  }
+};
+
+const changeAlliedStatus = async (req, res) => {
+  try {
+    const item = await Allied.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({
+        status: false,
+        message: "Not found",
+      });
+    }
+
+    item.m_allied_status =
+      item.m_allied_status === "active" ? "inactive" : "active";
+
+    await item.save();
+
+    res.json({
+      status: true,
+      message: "Status changed successfully",
+      data: item,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
   }
 };
 
@@ -155,4 +245,6 @@ module.exports = {
   updateAllied,
   getAllAllied,
   deleteAllied,
+  getSingleAllied,
+  changeAlliedStatus
 };

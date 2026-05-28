@@ -1,30 +1,36 @@
 const Job = require("../models/company_requirement");
 const JobApplication = require("../models/company_requirement_application");
-
+const fs = require("fs");
 
 const addJob = async (req, res) => {
   try {
     const jobData = {
       job_title: req.body.job_title,
+
       company_name: req.body.company_name,
 
       company_logo: req.files?.company_logo?.[0]?.path || req.body.company_logo,
 
+      last_date_to_apply: req.body.last_date_to_apply || null,
+
+      recruiter_mobile_no: req.body.recruiter_mobile_no || null,
+
+      recruiter_whatsapp_no: req.body.recruiter_whatsapp_no || null,
+
+      recruiter_date: req.body.recruiter_date || null,
+
+      recruiter_expire_date: req.body.recruiter_expire_date || null,
+
       job_locations: req.body.location || [],
 
       salary: {
-        min: req.body.salary?.min,
-        max: req.body.salary?.max,
+        min: req.body.salary_from || 0,
+        max: req.body.salary_to || 0,
       },
 
-      salary_type:
-        req.body.salary?.type === "monthly" ? "per_month" : "per_annum",
+      salary_type: req.body.salary_type || "PM",
 
-      experience: {
-        min: req.body.experience?.min,
-        max: req.body.experience?.max,
-        label: req.body.experience?.unit,
-      },
+      experience: req.body.experience || null,
 
       job_description: req.body.job_description,
 
@@ -36,8 +42,9 @@ const addJob = async (req, res) => {
         twitter: req.body.social_links?.twitter,
         instagram: req.body.social_links?.instagram,
       },
+      order: req.body.order || 0,
 
-      status: 1,
+      status: req.body.status || "open",
     };
 
     const job = await Job.create(jobData);
@@ -48,10 +55,20 @@ const addJob = async (req, res) => {
       data: job,
     });
   } catch (err) {
-    res.status(500).json({ status: false, message: err.message });
+    if (req.files?.company_logo?.[0]?.path) {
+      fs.unlink(req.files.company_logo[0].path, (unlinkErr) => {
+        if (unlinkErr) {
+          console.log("File delete error:", unlinkErr.message);
+        }
+      });
+    }
+
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
   }
 };
-
 
 const getAllJobs = async (req, res) => {
   try {
@@ -67,7 +84,7 @@ const getAllJobs = async (req, res) => {
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
 
-    let filter = { status: 1 };
+    let filter = { status: "open" };
 
     // LOCATION FILTER
     if (location) {
@@ -93,7 +110,7 @@ const getAllJobs = async (req, res) => {
 
     const data = await Job.find(filter)
       .select(
-        "company_logo job_title company_name salary job_locations experience",
+        "company_logo job_title company_name salary salary_type job_locations experience order",
       )
       .sort({ _id: -1 })
       .skip((page - 1) * limit)
@@ -113,7 +130,6 @@ const getAllJobs = async (req, res) => {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 const getJobById = async (req, res) => {
   try {
@@ -135,10 +151,10 @@ const getJobById = async (req, res) => {
   }
 };
 
-
 const updateJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
+    const oldLogo = job.company_logo;
 
     if (!job) {
       return res.status(404).json({
@@ -147,27 +163,20 @@ const updateJob = async (req, res) => {
       });
     }
 
-    // 🔥 FIX START
-
-    if (req.body.salary) {
-      const salary = JSON.parse(req.body.salary);
-
-      job.salary = {
-        min: salary.min,
-        max: salary.max,
-      };
-
-      job.salary_type = salary.type === "monthly" ? "per_month" : "per_annum";
+    if ("salary_from" in req.body) {
+      job.salary.min = req.body.salary_from || 0;
     }
 
-    if (req.body.experience) {
-      const exp = JSON.parse(req.body.experience);
+    if ("salary_to" in req.body) {
+      job.salary.max = req.body.salary_to || 0;
+    }
 
-      job.experience = {
-        min: exp.min,
-        max: exp.max,
-        label: exp.unit,
-      };
+    if ("salary_type" in req.body) {
+      job.salary_type = req.body.salary_type || "PM";
+    }
+
+    if ("experience" in req.body) {
+      job.experience = req.body.experience || null;
     }
 
     // normal fields
@@ -177,6 +186,26 @@ const updateJob = async (req, res) => {
       job.job_description = req.body.job_description;
     if (req.body.apply_link) job.application_link = req.body.apply_link;
 
+    if (req.body.recruiter_mobile_no) {
+      job.recruiter_mobile_no = req.body.recruiter_mobile_no;
+    }
+
+    if (req.body.recruiter_whatsapp_no) {
+      job.recruiter_whatsapp_no = req.body.recruiter_whatsapp_no;
+    }
+
+    if (req.body.recruiter_date) {
+      job.recruiter_date = req.body.recruiter_date;
+    }
+
+    if (req.body.recruiter_expire_date) {
+      job.recruiter_expire_date = req.body.recruiter_expire_date;
+    }
+
+    if (req.body.last_date_to_apply) {
+      job.last_date_to_apply = req.body.last_date_to_apply;
+    }
+
     // locations
     if (req.body.location) {
       job.job_locations = Array.isArray(req.body.location)
@@ -184,14 +213,29 @@ const updateJob = async (req, res) => {
         : [req.body.location];
     }
 
-    // 🔥 logo update (important)
+    //  logo update (important)
     if (req.files?.company_logo) {
       job.company_logo = req.files.company_logo[0].path;
+    }
+
+    if ("order" in req.body) {
+      job.order = req.body.order || 0;
+    }
+    if ("status" in req.body) {
+      job.status = req.body.status || "open";
     }
 
     job.updated_at = new Date();
 
     const updated = await job.save();
+
+    if (req.files?.company_logo && oldLogo && fs.existsSync(oldLogo)) {
+      fs.unlink(oldLogo, (err) => {
+        if (err) {
+          console.log("Old image delete error:", err.message);
+        }
+      });
+    }
 
     res.json({
       status: true,
@@ -199,10 +243,20 @@ const updateJob = async (req, res) => {
       data: updated,
     });
   } catch (err) {
-    res.status(500).json({ status: false, message: err.message });
+    if (req.files?.company_logo?.[0]?.path) {
+      fs.unlink(req.files.company_logo[0].path, (unlinkErr) => {
+        if (unlinkErr) {
+          console.log("File delete error:", unlinkErr.message);
+        }
+      });
+    }
+
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
   }
 };
-
 
 const deleteJob = async (req, res) => {
   try {
@@ -225,7 +279,6 @@ const deleteJob = async (req, res) => {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 const applyJob = async (req, res) => {
   try {
@@ -277,20 +330,11 @@ const applyJob = async (req, res) => {
   }
 };
 
-
-
-
-const getAllUniqueJobTitles = async (
-  req,
-  res,
-) => {
+const getAllUniqueJobTitles = async (req, res) => {
   try {
-    const data = await Job.distinct(
-      "job_title",
-      {
-        status: 1,
-      },
-    );
+    const data = await Job.distinct("job_title", {
+      status: "open",
+    });
 
     return res.status(200).json({
       status: true,
@@ -308,6 +352,38 @@ const getAllUniqueJobTitles = async (
   }
 };
 
+const changeJobStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const job = await Job.findById(id);
+
+    if (!job) {
+      return res.status(404).json({
+        status: false,
+        message: "Job not found",
+      });
+    }
+
+    job.status = job.status === "open" ? "closed" : "open";
+
+    job.updated_at = new Date();
+
+    await job.save();
+
+    return res.status(200).json({
+      status: true,
+      message: `Job status changed to ${job.status}`,
+      data: job.status,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addJob,
   getAllJobs,
@@ -315,5 +391,6 @@ module.exports = {
   updateJob,
   deleteJob,
   applyJob,
-  getAllUniqueJobTitles
+  getAllUniqueJobTitles,
+  changeJobStatus
 };

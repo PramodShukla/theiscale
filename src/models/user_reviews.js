@@ -1,46 +1,43 @@
 const mongoose = require("mongoose");
 
-const testimonialSchema = new mongoose.Schema({
-  id: {
-    type: Number,
-    required: true,
-    auto: true // AUTO_INCREMENT
-  },
+const userReviewSchema = new mongoose.Schema(
+  {
+    user_name: {
+      type: String,
+      required: true,
+      trim: true,
+      default: null,
+    },
 
-  m_name: {
-    type: String,
-    default: null,
-    maxlength: 256
-  },
+    user_designation: {
+      type: String,
+      default: null,
+      trim: true,
+    },
 
-  m_designation: {
-    type: String,
-    default: null,
-    maxlength: 256
-  },
+    user_image: {
+      type: String,
+      default: null,
+    },
 
-  m_image: {
-    type: String,
-    default: null,
-    maxlength: 256
-  },
+    user_review: {
+      type: String,
+      default: null,
+      trim: true,
+    },
 
-  m_review: {
-    type: String,
-    default: null
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
   },
-
-  m_status: {
-    type: String,
-    required: true,
-    maxlength: 10
-  },
-
-  m_added_on: {
-    type: Date,
-    required: true,
-    default: Date.now
+  {
+    timestamps: true,
   }
-});
+);
 
-module.exports = mongoose.model("user_reviews", testimonialSchema);
+module.exports = mongoose.model("user_reviews", userReviewSchema);
+
+
+// using 

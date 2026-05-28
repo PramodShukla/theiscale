@@ -28,6 +28,8 @@ router.get("/get-all-jobs", authMiddleware, adminMiddleware, jobController.getAl
 // Get Single Job (admin)
 router.get("/get-job/:id", authMiddleware, adminMiddleware, jobController.getJobById);
 
+router.patch("/status/:id", authMiddleware, adminMiddleware, jobController.changeJobStatus);
+
 
 // ===============================
 // USER ROUTES
@@ -44,4 +46,4 @@ router.post("/user-apply-job/:jobId", authMiddleware, userMiddleware, jobControl
 
 router.get("/job-titles-dropdown",authMiddleware, adminMiddleware, jobController.getAllUniqueJobTitles);
 
-module.exports = router;
+module.exports = router;   

@@ -123,12 +123,8 @@ const updateSubject = async (req, res) => {
       });
     }
 
-    const {
-      m_subject_title,
-      m_subject_desc,
-      m_subject_status,
-      m_subject_seq,
-    } = req.body;
+    const { m_subject_title, m_subject_desc, m_subject_status, m_subject_seq } =
+      req.body;
 
     if (m_subject_title) subject.m_subject_title = m_subject_title;
     if (m_subject_desc) subject.m_subject_desc = m_subject_desc;
@@ -212,7 +208,7 @@ const getSubjectDropdownByCourse = async (req, res) => {
     // ✅ fetch subjects of that course
     const subjects = await Subject.find({
       m_subject_course: m_course_id,
-     // m_subject_status: 1, // only active
+      // m_subject_status: 1, // only active
     }).select("_id m_subject_title");
 
     res.status(200).json({
@@ -220,9 +216,69 @@ const getSubjectDropdownByCourse = async (req, res) => {
       message: "Subjects fetched successfully",
       data: subjects,
     });
-
   } catch (err) {
     res.status(500).json({
+      status: false,
+      message: err.message,
+    });
+  }
+};
+
+// ===============================
+// GET ALL SUBJECTS FOR DROPDOWN
+// ===============================
+
+const getAllSubjectsDropdown = async (req, res) => {
+  try {
+    let { page = 1, limit = 10 } = req.query;
+
+    page = Number(page);
+    limit = Number(limit);
+
+    // ===============================
+    // TOTAL RECORDS
+    // ===============================
+
+    const totalRecords = await Subject.countDocuments();
+
+    // ===============================
+    // GET DATA
+    // ===============================
+
+    const subjects = await Subject.find()
+
+      .select(
+        `
+        _id
+        m_subject_title
+      `,
+      )
+
+      .sort({ m_subject_title: 1 })
+
+      .skip((page - 1) * limit)
+
+      .limit(limit);
+
+    // ===============================
+    // RESPONSE
+    // ===============================
+
+    return res.status(200).json({
+      status: true,
+      message: "Subjects fetched successfully",
+
+      pagination: {
+        currentPage: page,
+        perPage: limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+      },
+
+      data: subjects,
+    });
+  } catch (err) {
+    return res.status(500).json({
       status: false,
       message: err.message,
     });
@@ -235,5 +291,6 @@ module.exports = {
   getSubjectsByCourse,
   updateSubject,
   deleteSubject,
-  getSubjectDropdownByCourse
+  getSubjectDropdownByCourse,
+  getAllSubjectsDropdown
 };

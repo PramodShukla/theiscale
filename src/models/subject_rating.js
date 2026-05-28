@@ -1,36 +1,67 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const ReviewSchema = new mongoose.Schema({
-  id: {
-    type: Number,
-    required: true,
-    unique: true
+const subjectRatingSchema = new mongoose.Schema(
+  {
+   
+
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "candidates",
+      default: null,
+    },
+
+
+    subject_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "subject",
+      default: null,
+    },
+
+
+    rating: {
+      type: Number,
+      default: null,
+
+      min: 1,
+      max: 5,
+
+      validate: {
+        validator: function (value) {
+          return value % 0.5 === 0;
+        },
+
+        message:
+          "Rating must be between 1 to 5 in steps of 0.5",
+      },
+    },
+
+  
+
+    review: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+
+
+
+    status: {
+      type: String,
+
+      enum: ["active", "inactive"],
+
+      default: "active",
+    },
   },
-  user_id: {
-    type: Number,
-    required: true
-  },
-  subject_id: {
-    type: Number,
-    required: true
-  },
-  rating: {
-    type: String,
-    required: true
-  },
-  review: {
-    type: String,
-    required: true
-  },
-  status: {
-    type: String,
-    required: true
-  },
-  added_on: {
-    type: Date,
-    required: true,
-    default: Date.now
+
+  {
+    timestamps: true,
+
+    versionKey: false,
   }
-});
+);
 
-module.exports = mongoose.model('subject_rating', ReviewSchema);
+module.exports = mongoose.model(
+  "subject_rating",
+  subjectRatingSchema
+);

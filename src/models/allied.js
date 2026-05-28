@@ -23,11 +23,11 @@ const alliedSchema = new mongoose.Schema({
     default: 0
   },
 
-  m_allied_status: {
-    type: Number,
-    enum: [0, 1], // 0 inactive, 1 active
-    default: 1
-  },
+ m_allied_status: {
+  type: String,
+  enum: ["active", "inactive"],
+  default: "active"
+},
 
   m_allied_added_on: {
     type: Date,
