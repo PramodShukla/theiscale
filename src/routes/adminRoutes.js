@@ -48,6 +48,7 @@ const subjectRatingRoutes = require("./subjectRatingRoutes");
 const userReviewsRoutes = require("./userReviewsRoutes");
 const bannerRoutes = require("./bannerRoutes");
 const leadGenerateRoutes = require("./leadGenerateRoutes");
+const couponRoutes = require("./couponRoutes");
 
 
 
@@ -100,6 +101,7 @@ router.use("/subject-ratings", subjectRatingRoutes);
 router.use("/user-reviews", userReviewsRoutes);
 router.use("/banners", bannerRoutes);
 router.use("/lead-generate", leadGenerateRoutes);
+router.use("/coupons", couponRoutes);
 
 
 
