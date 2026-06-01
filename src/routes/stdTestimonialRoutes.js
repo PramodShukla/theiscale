@@ -5,7 +5,8 @@ const {
   addTestimonial,
   getAllTestimonials,
   updateTestimonial,
-  deleteTestimonial
+  deleteTestimonial,
+  changeTestimonialStatus
 } = require("../controllers/stdTestimonialController");
 
 const { testimonialUpload } = require("../middlewares/uploadMiddleware");
@@ -13,21 +14,46 @@ const { authMiddleware } = require("../middlewares/authMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
 
 // ADD
-router.post("/add-stdtestimonial",authMiddleware, adminMiddleware, testimonialUpload, addTestimonial);
+router.post(
+  "/add-stdtestimonial",
+  authMiddleware,
+  adminMiddleware,
+  testimonialUpload,
+  addTestimonial,
+);
 
 // GET ALL
-router.get("/all-stdtestimonials",authMiddleware, adminMiddleware, getAllTestimonials);
+router.get(
+  "/all-stdtestimonials",
+  authMiddleware,
+  adminMiddleware,
+  getAllTestimonials,
+);
 
 // UPDATE
-router.put("/update-stdtestimonial/:id",authMiddleware, adminMiddleware, testimonialUpload, updateTestimonial);
+router.put(
+  "/update-stdtestimonial/:id",
+  authMiddleware,
+  adminMiddleware,
+  testimonialUpload,
+  updateTestimonial,
+);
 
 // DELETE
-router.delete("/delete-stdtestimonial/:id",authMiddleware, adminMiddleware, deleteTestimonial);
-
+router.delete(
+  "/delete-stdtestimonial/:id",
+  authMiddleware,
+  adminMiddleware,
+  deleteTestimonial,
+);
+router.patch(
+  "/status/:id",
+  authMiddleware,
+  adminMiddleware,
+  changeTestimonialStatus,
+);
 
 // get all for user home page
 router.get("/user-get-stdtestimonials", getAllTestimonials);
-
-
 
 module.exports = router;

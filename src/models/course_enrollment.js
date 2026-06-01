@@ -2,9 +2,7 @@ const mongoose = require("mongoose");
 
 const courseEnrollmentSchema = new mongoose.Schema(
   {
-    // =====================================
-    // USER + COURSE
-    // =====================================
+
 
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -18,9 +16,7 @@ const courseEnrollmentSchema = new mongoose.Schema(
       required: true,
     },
 
-    // =====================================
-    // COURSE TYPE
-    // =====================================
+
 
     course_type: {
       type: String,
@@ -28,9 +24,7 @@ const courseEnrollmentSchema = new mongoose.Schema(
       required: true,
     },
 
-    // =====================================
-    // PAYMENT
-    // =====================================
+   
 
     payment_status: {
       type: String,
@@ -78,9 +72,7 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: null,
     },
 
-    // =====================================
-    // ACCESS
-    // =====================================
+ 
 
     access_type: {
       type: String,
@@ -93,9 +85,7 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: null,
     },
 
-    // =====================================
-    // ENROLLMENT
-    // =====================================
+  
 
     enrolled_on: {
       type: Date,
@@ -115,18 +105,13 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: "active",
     },
 
-    // =====================================
-    // BATCH
-    // =====================================
 
     batch_name: {
       type: String,
       default: null,
     },
 
-    // =====================================
-    // PLATFORM STATUS
-    // =====================================
+
 
     app_status: {
       type: String,
@@ -146,9 +131,7 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: "active",
     },
 
-    // =====================================
-    // CONTENT STATUS
-    // =====================================
+   
 
     test_series_status: {
       type: String,
@@ -162,9 +145,7 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: "inactive",
     },
 
-    // =====================================
-    // CERTIFICATE
-    // =====================================
+
 
     certificate_status: {
       type: String,
@@ -192,9 +173,7 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: null,
     },
 
-    // =====================================
-    // ADMIN NOTE
-    // =====================================
+    
 
     admin_note: {
       type: String,
@@ -206,9 +185,7 @@ const courseEnrollmentSchema = new mongoose.Schema(
   },
 );
 
-// =====================================
-// PREVENT DUPLICATE ENROLLMENTS
-// =====================================
+
 
 courseEnrollmentSchema.index({ user_id: 1, course_id: 1 }, { unique: true });
 

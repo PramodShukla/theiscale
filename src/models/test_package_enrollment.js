@@ -3,27 +3,21 @@ const mongoose = require("mongoose");
 const testPackageEnrollmentSchema =
   new mongoose.Schema(
     {
-      // =========================
-      // USER
-      // =========================
+     
       user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "candidates",
         required: true,
       },
 
-      // =========================
-      // TEST PACKAGE
-      // =========================
+      
       test_package_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "test_package",
         required: true,
       },
 
-      // =========================
-      // PAYMENT DETAILS
-      // =========================
+     
       package_type: {
         type: String,
         enum: ["free", "paid"],
@@ -50,9 +44,7 @@ const testPackageEnrollmentSchema =
         default: null,
       },
 
-      // =========================
-      // PRICE DETAILS
-      // =========================
+      
       original_amount: {
         type: Number,
         default: 0,
@@ -78,9 +70,6 @@ const testPackageEnrollmentSchema =
         default: null,
       },
 
-      // =========================
-      // ACCESS
-      // =========================
       access_status: {
         type: String,
         enum: ["active", "inactive"],
@@ -98,9 +87,7 @@ const testPackageEnrollmentSchema =
         default: null,
       },
 
-      // =========================
-      // OTHER
-      // =========================
+    
       remark: {
         type: String,
         default: null,

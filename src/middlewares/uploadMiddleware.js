@@ -105,6 +105,10 @@ const storage = multer.diskStorage({
       folder = "src/uploads/banners";
     } else if (file.fieldname === "m_ss_image") {
       folder = "src/uploads/success-story";
+    } else if (file.fieldname === "kh_pic") {
+      folder = "src/uploads/admins";
+    } else if (file.fieldname === "video_file") {
+      folder = "src/uploads/brand-videos";
     }
 
     // folder create if not exists
@@ -489,6 +493,33 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // brand video upload - only videos
+  else if (file.fieldname === "video_file") {
+    const allowedVideoTypes = [
+      "video/mp4",
+      "video/mpeg",
+      "video/mp3",
+      "video/webm",
+      "video/mov",
+      "video/quicktime",
+    ];
+
+    if (allowedVideoTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only video files allowed"), false);
+    }
+  }
+
+  // Admin profile image - only images
+  else if (file.fieldname === "kh_pic") {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed for admin profile"), false);
+    }
+  }
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -500,6 +531,14 @@ const upload = multer({
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB max
+  },
+});
+
+const brandVideoMulter = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100 MB
   },
 });
 
@@ -649,6 +688,20 @@ const successStoryUpload = upload.fields([
   },
 ]);
 
+const adminUpload = upload.fields([
+  {
+    name: "kh_pic",
+    maxCount: 1,
+  },
+]);
+
+const brandVideoUpload = brandVideoMulter.fields([
+  {
+    name: "video_file",
+    maxCount: 1,
+  },
+]);
+
 module.exports = {
   upload,
   courseUpload,
@@ -682,4 +735,6 @@ module.exports = {
   userReviewUpload,
   bannerUpload,
   successStoryUpload,
+  adminUpload,
+  brandVideoUpload,
 };

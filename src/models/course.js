@@ -8,10 +8,7 @@ const courseSchema = new mongoose.Schema(
       required: true,
     },
 
-    // m_course_category: {
-    //   type: String,
-    //   // required: true,
-    // },
+   
 
     m_course_category: {
       type: mongoose.Schema.Types.ObjectId,

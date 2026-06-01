@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema(
     kh_admin_phone: {
       type: Number,
       required: true,
+      trim:true
     },
 
     kh_role: {
@@ -48,8 +49,9 @@ const userSchema = new mongoose.Schema(
     },
 
     kh_status: {
-      type: Number,
-      default: 1,
+      type: String,
+      default: "active",
+      enum:["active", "inactive"]
     },
   },
   {

@@ -49,6 +49,9 @@ const userReviewsRoutes = require("./userReviewsRoutes");
 const bannerRoutes = require("./bannerRoutes");
 const leadGenerateRoutes = require("./leadGenerateRoutes");
 const couponRoutes = require("./couponRoutes");
+const myProfileRoutes = require("./myProfileRoutes");
+const adminDashboardRoutes = require("./adminDashboardRoutes");
+const brandVideoRoutes = require("./brandVideoRoutes");
 
 
 
@@ -102,7 +105,9 @@ router.use("/user-reviews", userReviewsRoutes);
 router.use("/banners", bannerRoutes);
 router.use("/lead-generate", leadGenerateRoutes);
 router.use("/coupons", couponRoutes);
-
+router.use("/profile", myProfileRoutes);
+router.use("/dashboard", adminDashboardRoutes);
+router.use("/brand-video", brandVideoRoutes);
 
 
 

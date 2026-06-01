@@ -34,4 +34,4 @@ const QuizSchema = new mongoose.Schema({
   m_quiz_type: { type: Number, default: 2 } // 1=paid, 2=free
 });
 
-module.exports = mongoose.model("quizs", QuizSchema);
+module.exports = mongoose.model("quizs", QuizSchema);    

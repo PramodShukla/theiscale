@@ -5,14 +5,12 @@ const addTestimonial = async (req, res) => {
   try {
     const { m_st_url, m_st_status } = req.body;
 
-    const video = req.files?.m_st_video
-      ? req.files.m_st_video[0].path
-      : null;
+    const video = req.files?.m_st_video ? req.files.m_st_video[0].path : null;
 
     const newData = new Testimonial({
       m_st_video: video,
       m_st_url,
-      m_st_status: m_st_status ? Number(m_st_status) : 1
+      m_st_status: m_st_status ? Number(m_st_status) : 1,
     });
 
     const saved = await newData.save();
@@ -20,9 +18,8 @@ const addTestimonial = async (req, res) => {
     res.status(201).json({
       status: true,
       message: "Testimonial added",
-      data: saved
+      data: saved,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -48,11 +45,10 @@ const getAllTestimonials = async (req, res) => {
         total,
         page,
         limit,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / limit),
       },
-      data
+      data,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -63,38 +59,47 @@ const updateTestimonial = async (req, res) => {
     const { id } = req.params;
 
     const data = await Testimonial.findById(id);
+
     if (!data) {
       return res.status(404).json({
         status: false,
-        message: "Not found"
+        message: "Not found",
       });
     }
 
-    const { m_st_url, m_st_status } = req.body;
+    // URL update
+    if (req.body.m_st_url !== undefined && req.body.m_st_url !== "") {
+      data.m_st_url = req.body.m_st_url;
+    }
 
-    if (m_st_url) data.m_st_url = m_st_url;
-    if (m_st_status !== undefined)
-      data.m_st_status = Number(m_st_status);
+    // Status update
+    if (req.body.m_st_status !== undefined && req.body.m_st_status !== "") {
+      data.m_st_status = req.body.m_st_status;
+    }
 
+    // Video update
     if (req.files?.m_st_video) {
       if (data.m_st_video && fs.existsSync(data.m_st_video)) {
         fs.unlinkSync(data.m_st_video);
       }
+
       data.m_st_video = req.files.m_st_video[0].path;
     }
 
     data.m_st_updated_on = new Date();
 
-    const updated = await data.save();
+    await data.save();
 
     res.json({
       status: true,
       message: "Updated successfully",
-      data: updated
+      data,
     });
-
   } catch (err) {
-    res.status(500).json({ status: false, message: err.message });
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
   }
 };
 
@@ -106,7 +111,7 @@ const deleteTestimonial = async (req, res) => {
     if (!data) {
       return res.status(404).json({
         status: false,
-        message: "Not found"
+        message: "Not found",
       });
     }
 
@@ -118,11 +123,41 @@ const deleteTestimonial = async (req, res) => {
 
     res.json({
       status: true,
-      message: "Deleted successfully"
+      message: "Deleted successfully",
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+const changeTestimonialStatus = async (req, res) => {
+  try {
+    const testimonial = await Testimonial.findById(req.params.id);
+
+    if (!testimonial) {
+      return res.status(404).json({
+        status: false,
+        message: "Not found",
+      });
+    }
+
+    testimonial.m_st_status =
+      testimonial.m_st_status === "active" ? "inactive" : "active";
+
+    testimonial.m_st_updated_on = new Date();
+
+    await testimonial.save();
+
+    res.json({
+      status: true,
+      message: "Status changed successfully",
+      data: testimonial,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
   }
 };
 
@@ -130,5 +165,6 @@ module.exports = {
   addTestimonial,
   getAllTestimonials,
   updateTestimonial,
-  deleteTestimonial
+  deleteTestimonial,
+  changeTestimonialStatus
 };

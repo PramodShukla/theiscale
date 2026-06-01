@@ -1,15 +1,35 @@
 const mongoose = require("mongoose");
 
-const videoSchema = new mongoose.Schema({
-  m_video_title: { type: String, required: true },
-  m_video_thumb: { type: String, required: true },
-  m_video_link: { type: String, required: true },
-  m_video_duration: { type: String, required: true },
-  m_video_description: { type: String, required: true },
+const brandVideoSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  m_video_added_on: { type: Date, required: true },
+    video_file: {
+      type: String,
+      default: null,
+    },
 
-  m_video_status: { type: Number, required: true }
-});
+    url: {
+      type: String,
+      default: null,
+    },
 
-module.exports = mongoose.model("video", videoSchema);
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+module.exports = mongoose.model(
+  "brand_video",
+  brandVideoSchema
+);
