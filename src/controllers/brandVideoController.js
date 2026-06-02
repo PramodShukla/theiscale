@@ -44,7 +44,6 @@ const addBrandVideo = async (req, res) => {
   }
 };
 
-
 const updateBrandVideo = async (req, res) => {
   let uploadedVideo = null;
 
@@ -111,7 +110,6 @@ const updateBrandVideo = async (req, res) => {
   }
 };
 
-
 // GET ALL BRAND VIDEOS
 // ==========================================
 const getAllBrandVideos = async (req, res) => {
@@ -155,7 +153,6 @@ const getAllBrandVideos = async (req, res) => {
     });
   }
 };
-
 
 const getSingleBrandVideo = async (req, res) => {
   try {

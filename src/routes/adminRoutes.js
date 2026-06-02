@@ -52,6 +52,8 @@ const couponRoutes = require("./couponRoutes");
 const myProfileRoutes = require("./myProfileRoutes");
 const adminDashboardRoutes = require("./adminDashboardRoutes");
 const brandVideoRoutes = require("./brandVideoRoutes");
+const contactQueriesRoutes = require("./contactQueriesRoutes");
+const hiringFormRoutes = require("./hiringFormRoutes");
 
 
 
@@ -108,7 +110,8 @@ router.use("/coupons", couponRoutes);
 router.use("/profile", myProfileRoutes);
 router.use("/dashboard", adminDashboardRoutes);
 router.use("/brand-video", brandVideoRoutes);
-
+router.use("/contact-us", contactQueriesRoutes);
+router.use("/hiring-form", hiringFormRoutes);
 
 
 

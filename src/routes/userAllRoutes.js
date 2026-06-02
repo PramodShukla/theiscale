@@ -34,6 +34,8 @@ const testCategoryRoutes = require("./testCategoryRoutes");
 const enrolledTestPackageRoutes = require("./enrolledTestPackageRoutes");
 const notesRoutes = require("./notesRoutes");
 const userWishlistRoutes = require("./userWishlistRoutes");
+const contactQueriesRoutes = require("./contactQueriesRoutes");
+const hiringFormRoutes = require("./hiringFormRoutes");
 
 
 
@@ -71,6 +73,8 @@ router.use("/test-category", testCategoryRoutes);
 router.use("/enrolled-test-packages", enrolledTestPackageRoutes);
 router.use("/notes", notesRoutes);
 router.use("/user-wishlist", userWishlistRoutes);
+router.use("/contact-us", contactQueriesRoutes);
+router.use("/hiring-form", hiringFormRoutes);
 
 
 

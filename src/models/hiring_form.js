@@ -1,64 +1,61 @@
 const mongoose = require("mongoose");
 
-const orgSchema = new mongoose.Schema({
-  // m_org_id: {
-  //   type: Number,
-  //   required: true,
-  //   auto: true
-  // },
+const hiringFormSchema = new mongoose.Schema(
+  {
+    organization_type: {
+      type: String,
+      enum: [
+        "Proprietorship Firm",
+        "Partnership Firm",
+        "Private Limited Company",
+        "One Person Company",
+        "Limited Liability Company",
+      ],
+      default: null,
+    },
 
-  m_org_type: {
-    type: String,
-    required: true,
-    maxlength: 20
+    organization_name: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+
+    hr_email_1: {
+      type: String,
+      default: null,
+      trim: true,
+      lowercase: true,
+    },
+
+    hr_email_2: {
+      type: String,
+      default: null,
+      trim: true,
+      lowercase: true,
+    },
+
+    hr_contact_no: {
+      type: String,
+      default: null,
+    },
+
+    whatsapp_no: {
+      type: String,
+      default: null,
+    },
+
+    description: {
+      type: String,
+      default: null,
+    },
   },
-
-  m_org_name: {
-    type: String,
-    required: true,
-    maxlength: 300
-  },
-
-  m_org_hr_email1: {
-    type: String,
-    required: true,
-    maxlength: 100
-  },
-
-  m_org_hr_email2: {
-    type: String,
-    required: true,
-    maxlength: 100
-  },
-
-  m_org_hr_contact: {
-    type: Number,
-    required: true,
-    maxlength: 20
-  },
-
-  m_org_whatsapp: {
-    type: Number,
-    required: true,
-    maxlength: 20
-  },
-
-  m_org_desc: {
-    type: String,
-    required: true
-  },
-
-  m_org_status: {
-    type: String,
-    required: true,
-    maxlength: 10
-  },
-
-  m_org_added_on: {
-    type: Date,
-    required: true,
-    default: Date.now
+  {
+    timestamps: true,
+    versionKey: false,
   }
-});
+);
 
-module.exports = mongoose.model("hiring_form", orgSchema);
+module.exports = mongoose.model(
+  "hiring_form",
+  hiringFormSchema
+);
