@@ -109,7 +109,9 @@ const storage = multer.diskStorage({
       folder = "src/uploads/admins";
     } else if (file.fieldname === "video_file") {
       folder = "src/uploads/brand-videos";
-    }
+    } else if (file.fieldname === "setting_file") {
+  folder = "src/uploads/settings";
+}
 
     // folder create if not exists
     if (!fs.existsSync(folder)) {
@@ -520,6 +522,19 @@ const fileFilter = (req, file, cb) => {
     }
   }
 
+  // Admin app settings upload - only images
+  else if (file.fieldname === "setting_file") {
+  if (
+    allowedImageTypes.includes(file.mimetype)
+  ) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image allowed"), false);
+  }
+}
+
+  
+
   // Other fields
   else {
     cb(new Error("Unknown file field"), false);
@@ -702,6 +717,15 @@ const brandVideoUpload = brandVideoMulter.fields([
   },
 ]);
 
+
+const settingUpload = upload.fields([
+  {
+    name: "setting_file",
+    maxCount: 1,
+  },
+]);
+
+
 module.exports = {
   upload,
   courseUpload,
@@ -737,4 +761,5 @@ module.exports = {
   successStoryUpload,
   adminUpload,
   brandVideoUpload,
+  settingUpload
 };

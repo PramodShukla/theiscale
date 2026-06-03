@@ -6,13 +6,17 @@ const appConfigSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      // unique: true,
+      unique: true,
       // index: true,
     },
 
     m_app_value: {
       type: String,
-      required: true,
+      trim: true,
+    },
+
+     setting_file: {
+      type: String,
       trim: true,
     },
   },
