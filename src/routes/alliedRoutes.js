@@ -23,6 +23,8 @@ router.put("/update-allied/:id", authMiddleware, adminMiddleware, alliedUpload, 
 // get all
 router.get("/all-allied",authMiddleware,adminMiddleware, getAllAllied);
 
+router.get("/public-all-allied", getAllAllied);
+
 router.get("/:id",authMiddleware,adminMiddleware, getSingleAllied);
 
 router.patch("/:id",authMiddleware,adminMiddleware, changeAlliedStatus);
@@ -32,6 +34,6 @@ router.delete("/delete-allied/:id", authMiddleware, adminMiddleware, deleteAllie
 
 
 
-router.get("/public-all-allied", getAllAllied);
+// router.get("/public-all-allied", getAllAllied);
 
 module.exports = router;  

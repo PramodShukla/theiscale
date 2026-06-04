@@ -29,8 +29,10 @@ router.delete("/delete-ppt/:id", authMiddleware, adminMiddleware, deletePPT);
 
 router.patch("/status/:id", authMiddleware, adminMiddleware, changePPTStatus);
 
+router.get("/public-get-ppts", getAllPPT);
+
 router.get("/:id", authMiddleware, adminMiddleware, getSinglePPT);
 
-router.get("/public-get-ppts", getAllPPT);
+// router.get("/public-get-ppts", getAllPPT);
 
 module.exports = router;

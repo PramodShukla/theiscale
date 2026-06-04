@@ -33,18 +33,27 @@ const candidateSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "state",
     default: null,
+    set: (value) => {
+      return value === "NA" || value === "" ? null : value;
+    },
   },
 
   c_current_city: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "city",
     default: null,
+    set: (value) => {
+      return value === "NA" || value === "" ? null : value;
+    },
   },
 
   c_user_refer_by: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "app_admin",
     default: null,
+    set: (value) => {
+      return value === "NA" || value === "" ? null : value;
+    },
   },
 
   c_contact: { type: Number, default: null },

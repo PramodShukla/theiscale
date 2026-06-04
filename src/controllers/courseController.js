@@ -8,7 +8,6 @@ const Subject = require("../models/subject");
 const Lecture = require("../models/lecture");
 const Enrollment = require("../models/course_enrollment");
 
-
 // ===============================
 // ADD COURSE
 // ===============================
@@ -49,9 +48,7 @@ const addCourse = async (req, res) => {
       m_course_order,
     } = req.body;
 
-    // =========================
     // REQUIRED FIELD VALIDATION
-    // =========================
     const requiredFields = {
       m_course_lang,
       m_course_title,
@@ -60,7 +57,9 @@ const addCourse = async (req, res) => {
     };
 
     const missingFields = Object.entries(requiredFields)
-      .filter(([_, value]) => value === undefined || value === null || value === "")
+      .filter(
+        ([_, value]) => value === undefined || value === null || value === "",
+      )
       .map(([key]) => key);
 
     if (missingFields.length > 0) {
@@ -71,26 +70,45 @@ const addCourse = async (req, res) => {
       });
     }
 
-    // =========================
     // OBJECT ID VALIDATION
-    // =========================
-    if (m_course_category && !mongoose.Types.ObjectId.isValid(m_course_category)) {
-      return res.status(400).json({ status: false, message: "Invalid category id" });
+    if (
+      m_course_category &&
+      !mongoose.Types.ObjectId.isValid(m_course_category)
+    ) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid category id" });
     }
 
-    if (m_course_trainee && !mongoose.Types.ObjectId.isValid(m_course_trainee)) {
-      return res.status(400).json({ status: false, message: "Invalid instructor id" });
+    if (
+      m_course_trainee &&
+      !mongoose.Types.ObjectId.isValid(m_course_trainee)
+    ) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid instructor id" });
     }
 
-    // =========================
     // ENUM VALIDATIONS
-    // =========================
-    if (m_course_type !== undefined && ![1, 2].includes(Number(m_course_type))) {
-      return res.status(400).json({ status: false, message: "Invalid course type (1=Free, 2=Paid)" });
+    if (
+      m_course_type !== undefined &&
+      ![1, 2].includes(Number(m_course_type))
+    ) {
+      return res
+        .status(400)
+        .json({
+          status: false,
+          message: "Invalid course type (1=Free, 2=Paid)",
+        });
     }
 
-    if (m_course_access_type && !["lifetime", "limited"].includes(m_course_access_type)) {
-      return res.status(400).json({ status: false, message: "Invalid access type" });
+    if (
+      m_course_access_type &&
+      !["lifetime", "limited"].includes(m_course_access_type)
+    ) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid access type" });
     }
 
     if (m_course_access_type === "limited") {
@@ -102,21 +120,28 @@ const addCourse = async (req, res) => {
       }
     }
 
-    if (m_course_certificate !== undefined && ![1, 2].includes(Number(m_course_certificate))) {
-      return res.status(400).json({ status: false, message: "Invalid certificate value" });
+    if (
+      m_course_certificate !== undefined &&
+      ![1, 2].includes(Number(m_course_certificate))
+    ) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid certificate value" });
     }
 
     if (![0, 1].includes(Number(m_course_status))) {
-      return res.status(400).json({ status: false, message: "Invalid course status" });
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid course status" });
     }
 
     if (![0, 1].includes(Number(m_course_status_web))) {
-      return res.status(400).json({ status: false, message: "Invalid course status web" });
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid course status web" });
     }
 
-    // =========================
     // PRICE VALIDATION
-    // =========================
     if (Number(m_course_type) === 2) {
       if (!m_course_price || Number(m_course_price) <= 0) {
         return res.status(400).json({
@@ -137,11 +162,11 @@ const addCourse = async (req, res) => {
       });
     }
 
-    // =========================
     // DUPLICATE COURSE CODE
-    // =========================
     if (m_course_code) {
-      const exists = await Course.findOne({ m_course_code: m_course_code.trim() });
+      const exists = await Course.findOne({
+        m_course_code: m_course_code.trim(),
+      });
       if (exists) {
         deleteUploadedFiles(req.files);
         return res.status(409).json({
@@ -151,20 +176,15 @@ const addCourse = async (req, res) => {
       }
     }
 
-    // =========================
     // FILE HANDLING (SAFE)
-    // =========================
-    const getFile = (name) =>
-      req.files?.[name]?.[0]?.path || null;
+    const getFile = (name) => req.files?.[name]?.[0]?.path || null;
 
     const m_course_banner = getFile("m_course_banner");
     const m_course_pdf = getFile("m_course_pdf");
     const m_course_feestructure = getFile("m_course_feestructure");
     const m_course_brochure = getFile("m_course_brochure");
 
-    // =========================
     // SLUG GENERATION
-    // =========================
     let slug = slugify(m_course_title, { lower: true, strict: true });
 
     const slugExists = await Course.findOne({ m_course_slug: slug });
@@ -172,20 +192,16 @@ const addCourse = async (req, res) => {
       slug = `${slug}-${Date.now()}`;
     }
 
-    // =========================
     // YOUTUBE VIDEO ID
-    // =========================
     let videoId = null;
     if (m_course_video_link) {
       const match = m_course_video_link.match(
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/,
       );
       if (match) videoId = match[1];
     }
 
-    // =========================
     // CREATE OBJECT
-    // =========================
     const newCourse = new Course({
       m_course_lang: Number(m_course_lang),
       m_course_category: m_course_category || null,
@@ -205,8 +221,7 @@ const addCourse = async (req, res) => {
 
       m_course_description: m_course_description || null,
 
-      m_course_type:
-        m_course_type !== undefined ? Number(m_course_type) : null,
+      m_course_type: m_course_type !== undefined ? Number(m_course_type) : null,
       m_course_price: Number(m_course_price) || 0,
       m_course_offer_price: Number(m_course_offer_price) || 0,
 
@@ -281,9 +296,7 @@ const addCourse = async (req, res) => {
   }
 };
 
-// ===============================
 // HELPER - DELETE UPLOADED FILES
-// ===============================
 const deleteUploadedFiles = (files) => {
   if (!files) return;
   Object.values(files).forEach((fileArray) => {
@@ -296,6 +309,90 @@ const deleteUploadedFiles = (files) => {
     });
   });
 };
+
+// const getAllCourses = async (req, res) => {
+//   try {
+//     let {
+//       page = 1,
+//       limit = 10,
+//       search = "",
+//       category,
+//       course_type,
+//       status,
+//     } = req.query;
+
+//     page = parseInt(page) || 1;
+//     limit = parseInt(limit) || 10;
+
+//     let filter = {};
+
+//     // SEARCH
+//     if (search) {
+//       filter.$or = [
+//         { m_course_title: { $regex: search, $options: "i" } },
+//         { m_course_code: { $regex: search, $options: "i" } },
+//       ];
+//     }
+
+//     // CATEGORY FILTER
+//     if (category && mongoose.Types.ObjectId.isValid(category)) {
+//       filter.m_course_category = category;
+//     }
+
+//     // COURSE TYPE FILTER
+//     if (course_type) {
+//       filter.m_course_type = Number(course_type);
+//     }
+
+//     // STATUS FILTER
+//     if (status !== undefined) {
+//       filter.m_course_status = Number(status);
+//     }
+
+//     // TOTAL COUNT
+//     const total = await Course.countDocuments(filter);
+
+//     // FETCH COURSES WITH POPULATE
+//     const courses = await Course.find(filter)
+//       .populate("m_course_category", "m_category_name") // Sirf name fetch karega
+//       .sort({ m_course_order: 1, _id: -1 })
+//       .skip((page - 1) * limit)
+//       .limit(limit);
+
+//     // FINAL RESPONSE MAPPING
+//     const finalData = courses.map((course) => ({
+//       _id: course._id,
+//       title: course.m_course_title,
+//       code: course.m_course_code,
+//       // Yahan change kiya hai: populated object se seedha name nikalna hai
+//       category: course.m_course_category ? course.m_course_category.m_category_name : "N/A",
+//       banner: course.m_course_banner,
+//       video: course.m_course_video_link,
+//       course_type: course.m_course_type === 1 ? "Free" : "Paid",
+//       price: course.m_course_type === 1 ? "N/A" : course.m_course_price,
+//       offer_price: course.m_course_type === 1 ? "N/A" : course.m_course_offer_price,
+//       status: course.m_course_status === 1 ? "Active" : "Inactive",
+//       slug: course.m_course_slug,
+//     }));
+
+//     res.send({
+//       status: true,
+//       message: "Courses fetched successfully",
+//       pagination: {
+//         total,
+//         page,
+//         limit,
+//         totalPages: Math.ceil(total / limit),
+//       },
+//       data: finalData,
+//     });
+//   } catch (e) {
+//     res.status(500).send({
+//       status: false,
+//       message: e.message,
+//     });
+//   }
+// };
 
 const getAllCourses = async (req, res) => {
   try {
@@ -313,9 +410,7 @@ const getAllCourses = async (req, res) => {
 
     let filter = {};
 
-    // =========================
     // SEARCH
-    // =========================
     if (search) {
       filter.$or = [
         { m_course_title: { $regex: search, $options: "i" } },
@@ -323,74 +418,104 @@ const getAllCourses = async (req, res) => {
       ];
     }
 
-    // =========================
-    // CATEGORY FILTER (ObjectId)
-    // =========================
+    // CATEGORY FILTER
     if (category && mongoose.Types.ObjectId.isValid(category)) {
       filter.m_course_category = category;
     }
 
-    // =========================
     // COURSE TYPE FILTER
-    // =========================
     if (course_type) {
-      filter.m_course_type = Number(course_type); // 1 = Free, 2 = Paid
+      filter.m_course_type = Number(course_type);
     }
 
-    // =========================
     // STATUS FILTER
-    // =========================
     if (status !== undefined) {
       filter.m_course_status = Number(status);
     }
 
-    // =========================
     // TOTAL COUNT
-    // =========================
     const total = await Course.countDocuments(filter);
 
-    // =========================
-    // FETCH COURSES
-    // =========================
+    // FETCH ALL COURSES
     const courses = await Course.find(filter)
       .populate("m_course_category", "m_category_name")
       .sort({ m_course_order: 1, _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
-    // =========================
-    // CATEGORY FETCH
-    // =========================
-    const categoryIds = courses
-      .map((c) => c.m_course_category)
-      .filter((id) => id); // null remove
+    // ===============================
+    // NEW CODE FOR EXTRA FIELDS
+    // ===============================
 
-    const categories = await Category.find({
-      _id: { $in: categoryIds },
+    // Sab course ki id ek baar nikal lo
+    const courseIds = courses.map((c) => c._id);
+
+    // Ek single query mein sab course ke saare subject le lo
+    const allSubjects = await Subject.find({
+      m_subject_course: { $in: courseIds },
     });
 
-    const categoryMap = {};
-    categories.forEach((cat) => {
-      categoryMap[cat._id.toString()] = cat.m_category_name;
+    // Ek single query mein sab course ke sirf active lectures le lo
+    const allLectures = await Lecture.find({
+      ml_course: { $in: courseIds },
+      ml_status: 1,
     });
 
-    // =========================
+    // Count ko map mein group kar lo
+    const subjectCountMap = {};
+    const lectureCountMap = {};
+
+    allSubjects.forEach((subject) => {
+      const cid = subject.m_subject_course.toString();
+      subjectCountMap[cid] = (subjectCountMap[cid] || 0) + 1;
+    });
+
+    allLectures.forEach((lecture) => {
+      const cid = lecture.ml_course.toString();
+      lectureCountMap[cid] = (lectureCountMap[cid] || 0) + 1;
+    });
+
+    // ===============================
     // FINAL RESPONSE
-    // =========================
-    const finalData = courses.map((course) => ({
-      _id: course._id,
-      title: course.m_course_title,
-      code: course.m_course_code,
-      category: categoryMap[course.m_course_category?.toString()] || "N/A",
-      banner: course.m_course_banner,
-      video: course.m_course_video_link,
-      course_type: course.m_course_type === 1 ? "Free" : "Paid",
-      price: course.m_course_type === 1 ? "N/A" : course.m_course_price,
-      offer_price:
-        course.m_course_type === 1 ? "N/A" : course.m_course_offer_price,
-      status: course.m_course_status === 1 ? "Active" : "Inactive",
-      slug: course.m_course_slug,
-    }));
+    // ===============================
+
+    const finalData = courses.map((course) => {
+      const cid = course._id.toString();
+
+      return {
+        _id: course._id,
+        title: course.m_course_title,
+        code: course.m_course_code,
+        category: course.m_course_category
+          ? course.m_course_category.m_category_name
+          : "N/A",
+        banner: course.m_course_banner,
+        video: course.m_course_video_link,
+        course_type: course.m_course_type === 1 ? "Free" : "Paid",
+        price:
+          course.m_course_type === 1
+            ? "N/A"
+            : course.m_course_price,
+        offer_price:
+          course.m_course_type === 1
+            ? "N/A"
+            : course.m_course_offer_price,
+        status:
+          course.m_course_status === 1
+            ? "Active"
+            : "Inactive",
+        slug: course.m_course_slug,
+
+        // Extra Fields
+        views: course.m_course_view,
+        total_subjects: subjectCountMap[cid] || 0,
+        total_lectures: lectureCountMap[cid] || 0,
+        duration:
+          course.m_course_duration_web ||
+          course.m_course_duration_app ||
+          "N/A",
+      };
+    });
 
     res.send({
       status: true,
@@ -404,6 +529,8 @@ const getAllCourses = async (req, res) => {
       data: finalData,
     });
   } catch (e) {
+    console.error(e);
+
     res.status(500).send({
       status: false,
       message: e.message,
@@ -429,17 +556,12 @@ const getCategoryDropdown = async (req, res) => {
   }
 };
 
-// ===============================
 // UPDATE COURSE
-// ===============================
-
 const updateCourse = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // =========================
     // VALIDATION
-    // =========================
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         status: false,
@@ -455,9 +577,7 @@ const updateCourse = async (req, res) => {
       });
     }
 
-    // =========================
-    // HELPER FUNCTION (🔥 IMPORTANT)
-    // =========================
+    // HELPER FUNCTION
     const isValid = (val) => {
       return val !== undefined && val !== null && val.toString().trim() !== "";
     };
@@ -465,9 +585,7 @@ const updateCourse = async (req, res) => {
     const body = req.body;
     let updateData = {};
 
-    // =========================
     // BASIC FIELDS
-    // =========================
     if (isValid(body.m_course_lang))
       updateData.m_course_lang = Number(body.m_course_lang);
 
@@ -501,9 +619,7 @@ const updateCourse = async (req, res) => {
     if (isValid(body.m_course_intro))
       updateData.m_course_intro = body.m_course_intro;
 
-    // =========================
     // ACCESS TYPE ( NEW)
-    // =========================
     if (isValid(body.m_course_access_type)) {
       if (!["lifetime", "limited"].includes(body.m_course_access_type)) {
         return res.status(400).json({
@@ -515,9 +631,7 @@ const updateCourse = async (req, res) => {
       updateData.m_course_access_type = body.m_course_access_type;
     }
 
-    // =========================
     // ACCESS DAYS ( IMPORTANT)
-    // =========================
     if (body.m_course_access_type === "limited") {
       if (!isValid(body.m_course_access_days)) {
         return res.status(400).json({
@@ -534,9 +648,7 @@ const updateCourse = async (req, res) => {
       updateData.m_course_access_days = null;
     }
 
-    // =========================
     // COURSE CODE (UNIQUE)
-    // =========================
     if (isValid(body.m_course_code)) {
       const existing = await Course.findOne({
         m_course_code: body.m_course_code.trim(),
@@ -556,9 +668,7 @@ const updateCourse = async (req, res) => {
     if (isValid(body.m_course_description))
       updateData.m_course_description = body.m_course_description;
 
-    // =========================
     // VIDEO
-    // =========================
     if (isValid(body.m_course_video_link)) {
       updateData.m_course_video_link = body.m_course_video_link;
 
@@ -571,9 +681,7 @@ const updateCourse = async (req, res) => {
       updateData.m_course_video_id = videoId;
     }
 
-    // =========================
     // TYPE & PRICE
-    // =========================
     if (isValid(body.m_course_type)) {
       if (![1, 2].includes(Number(body.m_course_type))) {
         return res.status(400).json({
@@ -599,9 +707,7 @@ const updateCourse = async (req, res) => {
     if (isValid(body.m_course_offer_price))
       updateData.m_course_offer_price = Number(body.m_course_offer_price);
 
-    // =========================
     // SETTINGS
-    // =========================
     if (isValid(body.m_course_popular))
       updateData.m_course_popular = Number(body.m_course_popular);
 
@@ -617,18 +723,14 @@ const updateCourse = async (req, res) => {
     if (isValid(body.m_course_status_web))
       updateData.m_course_status_web = Number(body.m_course_status_web);
 
-    // =========================
     // DURATION
-    // =========================
     if (isValid(body.m_course_duration_app))
       updateData.m_course_duration_app = body.m_course_duration_app.toString();
 
     if (isValid(body.m_course_duration_web))
       updateData.m_course_duration_web = Number(body.m_course_duration_web);
 
-    // =========================
-    // INSTRUCTOR (🔥 SPECIAL CASE)
-    // =========================
+    // INSTRUCTOR
     if (body.m_course_trainee === null) {
       updateData.m_course_trainee = null;
     } else if (isValid(body.m_course_trainee)) {
@@ -644,15 +746,11 @@ const updateCourse = async (req, res) => {
       );
     }
 
-    // =========================
     // CERTIFICATE
-    // =========================
     if (isValid(body.m_course_certificate))
       updateData.m_course_certificate = Number(body.m_course_certificate);
 
-    // =========================
     // GRAPHY
-    // =========================
     if (isValid(body.m_course_app_g_link))
       updateData.m_course_app_g_link = body.m_course_app_g_link;
 
@@ -662,15 +760,11 @@ const updateCourse = async (req, res) => {
     if (isValid(body.m_course_graphy_instruction))
       updateData.m_course_graphy_instruction = body.m_course_graphy_instruction;
 
-    // =========================
     // ORDER
-    // =========================
     if (isValid(body.m_course_order))
       updateData.m_course_order = Number(body.m_course_order);
 
-    // =========================
     // FILE UPDATE
-    // =========================
     if (req.files) {
       if (req.files["m_course_banner"]) {
         updateData.m_course_banner = req.files["m_course_banner"][0].path;
@@ -690,14 +784,10 @@ const updateCourse = async (req, res) => {
       }
     }
 
-    // =========================
     // MODIFIED DATE
-    // =========================
     updateData.m_course_modified = new Date();
 
-    // =========================
     // UPDATE
-    // =========================
     const updatedCourse = await Course.findByIdAndUpdate(
       id,
       { $set: updateData },
@@ -720,16 +810,12 @@ const updateCourse = async (req, res) => {
   }
 };
 
-// ===============================
 // DELETE COURSE
-// ===============================
 const deleteCourse = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // =========================
     // VALIDATION
-    // =========================
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         status: false,
@@ -746,9 +832,7 @@ const deleteCourse = async (req, res) => {
       });
     }
 
-    // =========================
     // DELETE FILES (IMPORTANT)
-    // =========================
     const filesToDelete = [
       course.m_course_banner,
       course.m_course_pdf,
@@ -762,9 +846,7 @@ const deleteCourse = async (req, res) => {
       }
     });
 
-    // =========================
     // DELETE FROM DB
-    // =========================
     await Course.findByIdAndDelete(id);
 
     return res.status(200).json({
@@ -782,9 +864,7 @@ const deleteCourse = async (req, res) => {
   }
 };
 
-// ===============================
 // GET POPULAR COURSES
-// ===============================
 const getPopularCourses = async (req, res) => {
   try {
     let { page = 1, limit = 10 } = req.query;
@@ -834,9 +914,7 @@ const getPopularCourses = async (req, res) => {
   }
 };
 
-// ===============================
-// GET RECOMMENDED COURSES
-// ===============================
+// GET RECOMMENDED COURSE
 const getRecommendedCourses = async (req, res) => {
   try {
     let { page = 1, limit = 10 } = req.query;
@@ -886,16 +964,12 @@ const getRecommendedCourses = async (req, res) => {
   }
 };
 
-// ===============================
 // GET SINGLE COURSE BY ID
-// ===============================
 const getCourseById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // =========================
     // VALIDATION
-    // =========================
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         status: false,
@@ -903,9 +977,7 @@ const getCourseById = async (req, res) => {
       });
     }
 
-    // =========================
     // FETCH COURSE
-    // =========================
     const course = await Course.findById(id);
 
     if (!course) {
@@ -915,9 +987,7 @@ const getCourseById = async (req, res) => {
       });
     }
 
-    // =========================
     // CATEGORY NAME FETCH
-    // =========================
     let categoryName = "N/A";
 
     if (course.m_course_category) {
@@ -927,9 +997,7 @@ const getCourseById = async (req, res) => {
       }
     }
 
-    // =========================
     // FINAL RESPONSE
-    // =========================
     const finalData = {
       _id: course._id,
       title: course.m_course_title,
@@ -980,37 +1048,22 @@ const getCourseById = async (req, res) => {
   }
 };
 
-
-
-
-// ===============================
 // GET COURSE DROPDOWN
 // WITH CATEGORY FILTER + PAGINATION
-// ===============================
 const getCourseDropdown = async (req, res) => {
   try {
-    let {
-      page = 1,
-      limit = 10,
-      category_id,
-      search = "",
-    } = req.query;
+    let { page = 1, limit = 10, category_id, search = "" } = req.query;
 
     page = Number(page) || 1;
     limit = Number(limit) || 10;
 
-    // =========================
     // FILTER
-    // =========================
     const filter = {
       m_course_status: 1,
     };
 
     // category filter
-    if (
-      category_id &&
-      mongoose.Types.ObjectId.isValid(category_id)
-    ) {
+    if (category_id && mongoose.Types.ObjectId.isValid(category_id)) {
       filter.m_course_category = category_id;
     }
 
@@ -1022,23 +1075,17 @@ const getCourseDropdown = async (req, res) => {
       };
     }
 
-    // =========================
     // TOTAL
-    // =========================
     const total = await Course.countDocuments(filter);
 
-    // =========================
     // GET COURSES
-    // =========================
     const courses = await Course.find(filter)
       .select("_id m_course_title")
       .sort({ m_course_title: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
-    // =========================
     // RESPONSE
-    // =========================
     return res.status(200).json({
       status: true,
       message: "Course dropdown fetched successfully",
@@ -1055,8 +1102,6 @@ const getCourseDropdown = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   addCourse,
   getAllCourses,
@@ -1066,6 +1111,5 @@ module.exports = {
   getPopularCourses,
   getRecommendedCourses,
   getCourseById,
-  getCourseDropdown
- 
+  getCourseDropdown,
 };
