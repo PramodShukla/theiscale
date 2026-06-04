@@ -1,4 +1,5 @@
 require("dotenv").config(); // env variables
+const path = require("path");
 
 
 const express = require("express");
@@ -13,6 +14,13 @@ connectDB();
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb",extended: true }));
 app.use(cors());
+
+
+
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "src/uploads"))
+);
 
 
 // Admin routes
