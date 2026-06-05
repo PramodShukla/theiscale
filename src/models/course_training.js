@@ -56,12 +56,14 @@ const navigationSchema = new mongoose.Schema(
       default: null,
       required: true,
       maxlength: 255,
+      trim:true
     },
 
     description: {
       type: String,
       default: null,
       maxlength: 255,
+      trim:true
     },
 
     active: {

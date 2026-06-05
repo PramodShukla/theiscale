@@ -49,7 +49,7 @@ const addClient = async (req, res) => {
 // ================= GET ALL (pagination)
 const getAllClients = async (req, res) => {
   try {
-    let { page = 1, limit = 10, search = "", status } = req.query;
+    let { page = 1, limit = 100, search = "", status } = req.query;
 
     page = parseInt(page);
     limit = parseInt(limit);
@@ -133,7 +133,7 @@ const getSingleClient = async (req, res) => {
 // ================= GET ONLY IMAGES
 const getClientImages = async (req, res) => {
   try {
-    let { page = 1, limit = 10 } = req.query;
+    let { page = 1, limit = 100 } = req.query;
 
     page = parseInt(page);
     limit = parseInt(limit);

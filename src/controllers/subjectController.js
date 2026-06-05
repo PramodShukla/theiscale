@@ -1,11 +1,10 @@
 const Subject = require("../models/subject");
 const Course = require("../models/course");
+const Lecture = require("../models/lecture");
 const fs = require("fs");
 const mongoose = require("mongoose");
 
-// ===============================
 // ADD SUBJECT
-// ===============================
 const addSubject = async (req, res) => {
   try {
     const {
@@ -63,9 +62,7 @@ const addSubject = async (req, res) => {
   }
 };
 
-// ===============================
 // GET ALL SUBJECTS
-// ===============================
 const getAllSubjects = async (req, res) => {
   try {
     const data = await Subject.find()
@@ -81,9 +78,31 @@ const getAllSubjects = async (req, res) => {
   }
 };
 
-// ===============================
 // GET BY COURSE ID
-// ===============================
+// const getSubjectsByCourse = async (req, res) => {
+//   try {
+//     const { courseId } = req.params;
+
+//     if (!mongoose.Types.ObjectId.isValid(courseId)) {
+//       return res.status(400).json({
+//         status: false,
+//         message: "Invalid course ID",
+//       });
+//     }
+
+//     const data = await Subject.find({
+//       m_subject_course: courseId,
+//     }).sort({ m_subject_seq: 1 });
+
+//     res.json({
+//       status: true,
+//       data,
+//     });
+//   } catch (err) {
+//     res.status(500).json({ status: false, message: err.message });
+//   }
+// };
+
 const getSubjectsByCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -95,22 +114,64 @@ const getSubjectsByCourse = async (req, res) => {
       });
     }
 
-    const data = await Subject.find({
+    // Subjects fetch
+    const subjects = await Subject.find({
       m_subject_course: courseId,
     }).sort({ m_subject_seq: 1 });
 
+    const subjectIds = subjects.map((subject) => subject._id);
+
+    // Lectures fetch
+    const lectures = await Lecture.find({
+      ml_subject: { $in: subjectIds },
+      ml_status: 1,
+    })
+      .select("_id ml_title ml_subject")
+      .sort({ ml_seq: 1 });
+
+    // Group lectures by subject
+    const lectureMap = {};
+
+    lectures.forEach((lecture) => {
+      const subjectId = lecture.ml_subject.toString();
+
+      if (!lectureMap[subjectId]) {
+        lectureMap[subjectId] = [];
+      }
+
+      lectureMap[subjectId].push({
+        _id: lecture._id,
+        title: lecture.ml_title,
+      });
+    });
+
+    // Final response
+    const finalData = subjects.map((subject) => ({
+      _id: subject._id,
+      m_subject_course: subject.m_subject_course,
+      m_subject_title: subject.m_subject_title,
+      m_subject_desc: subject.m_subject_desc,
+      code: subject.code,
+      is_writing: subject.is_writing,
+      created_at: subject.created_at,
+      updated_at: subject.updated_at,
+
+      lectures: lectureMap[subject._id.toString()] || [],
+    }));
+
     res.json({
       status: true,
-      data,
+      data: finalData,
     });
   } catch (err) {
-    res.status(500).json({ status: false, message: err.message });
+    res.status(500).json({
+      status: false,
+      message: err.message,
+    });
   }
 };
 
-// ===============================
 // UPDATE SUBJECT
-// ===============================
 const updateSubject = async (req, res) => {
   try {
     const { id } = req.params;
@@ -153,9 +214,7 @@ const updateSubject = async (req, res) => {
   }
 };
 
-// ===============================
 // DELETE SUBJECT
-// ===============================
 const deleteSubject = async (req, res) => {
   try {
     const { id } = req.params;
@@ -183,14 +242,12 @@ const deleteSubject = async (req, res) => {
   }
 };
 
-// ===============================
 // GET SUBJECT DROPDOWN BY COURSE
-// ===============================
 const getSubjectDropdownByCourse = async (req, res) => {
   try {
     const { m_course_id } = req.query;
 
-    // 🔴 validation
+    // validation
     if (!m_course_id) {
       return res.status(400).json({
         status: false,
@@ -205,7 +262,7 @@ const getSubjectDropdownByCourse = async (req, res) => {
       });
     }
 
-    // ✅ fetch subjects of that course
+    //  fetch subjects of that course
     const subjects = await Subject.find({
       m_subject_course: m_course_id,
       // m_subject_status: 1, // only active
@@ -224,10 +281,7 @@ const getSubjectDropdownByCourse = async (req, res) => {
   }
 };
 
-// ===============================
 // GET ALL SUBJECTS FOR DROPDOWN
-// ===============================
-
 const getAllSubjectsDropdown = async (req, res) => {
   try {
     let { page = 1, limit = 10 } = req.query;
@@ -235,16 +289,10 @@ const getAllSubjectsDropdown = async (req, res) => {
     page = Number(page);
     limit = Number(limit);
 
-    // ===============================
     // TOTAL RECORDS
-    // ===============================
-
     const totalRecords = await Subject.countDocuments();
 
-    // ===============================
     // GET DATA
-    // ===============================
-
     const subjects = await Subject.find()
 
       .select(
@@ -260,10 +308,7 @@ const getAllSubjectsDropdown = async (req, res) => {
 
       .limit(limit);
 
-    // ===============================
     // RESPONSE
-    // ===============================
-
     return res.status(200).json({
       status: true,
       message: "Subjects fetched successfully",
@@ -292,5 +337,5 @@ module.exports = {
   updateSubject,
   deleteSubject,
   getSubjectDropdownByCourse,
-  getAllSubjectsDropdown
+  getAllSubjectsDropdown,
 };

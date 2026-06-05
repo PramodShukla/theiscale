@@ -1,7 +1,6 @@
 const Candidate = require("../models/candidates");
 const bcrypt = require("bcrypt");
 
-
 //  GET PROFILE (prefill data)
 exports.getProfile = async (req, res) => {
   try {
@@ -20,7 +19,6 @@ exports.getProfile = async (req, res) => {
       status: true,
       data: user,
     });
-
   } catch (e) {
     res.status(500).send({
       status: false,
@@ -28,8 +26,6 @@ exports.getProfile = async (req, res) => {
     });
   }
 };
-
-
 
 // UPDATE PROFILE (partial update)
 exports.updateProfile = async (req, res) => {
@@ -42,7 +38,7 @@ exports.updateProfile = async (req, res) => {
     const updatedUser = await Candidate.findByIdAndUpdate(
       userId,
       { $set: updateData },
-      { new: true }
+      { new: true },
     ).select("-c_password");
 
     if (!updatedUser) {
@@ -57,7 +53,6 @@ exports.updateProfile = async (req, res) => {
       message: "Profile updated successfully",
       data: updatedUser,
     });
-
   } catch (e) {
     res.status(500).send({
       status: false,
@@ -65,7 +60,6 @@ exports.updateProfile = async (req, res) => {
     });
   }
 };
-
 
 // change password
 exports.changePassword = async (req, res) => {
@@ -112,16 +106,20 @@ exports.changePassword = async (req, res) => {
     // new password hash
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    user.c_password = hashedPassword;
-    user.c_password_update = 1;
+    // user.c_password = hashedPassword;
+    // user.c_password_update = 1;
 
-    await user.save();
+    // await user.save();
+
+    await Candidate.findByIdAndUpdate(userId, {
+      c_password: hashedPassword,
+      c_password_update: 1,
+    });
 
     res.send({
       status: true,
       message: "Password updated successfully",
     });
-
   } catch (e) {
     res.status(500).send({
       status: false,

@@ -157,7 +157,94 @@ const getMonthWiseRegistrations = async (req, res) => {
   }
 };
 
+const getTopCourses = async (req, res) => {
+  try {
+    const topCourses = await CourseEnrollment.aggregate([
+      {
+        $match: {
+          payment_status: "success",
+        },
+      },
+
+      {
+        $group: {
+          _id: "$course_id",
+          total_registrations: { $sum: 1 },
+        },
+      },
+
+      {
+        $sort: {
+          total_registrations: -1,
+        },
+      },
+
+      {
+        $limit: 10,
+      },
+
+      {
+        $lookup: {
+          from: "courses",
+          localField: "_id",
+          foreignField: "_id",
+          as: "course",
+        },
+      },
+
+      {
+        $unwind: "$course",
+      },
+
+      {
+        $lookup: {
+          from: "categories",
+          localField: "course.m_course_category",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$category",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $project: {
+          _id: 0,
+
+          course_id: "$course._id",
+
+          course_name: "$course.m_course_title",
+
+          category: {
+            _id: "$category._id",
+            name: "$category.m_category_name",
+          },
+
+          total_registrations: 1,
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      total: topCourses.length,
+      data: topCourses,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getMonthWiseRegistrations,
+  getTopCourses,
 };

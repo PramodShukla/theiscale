@@ -24,6 +24,14 @@ router.put("/update-client/:id", authMiddleware, adminMiddleware, clientUpload, 
 
 router.delete("/delete-client/:id", authMiddleware, adminMiddleware, deleteClient);
 
+
+router.get("/public-get-all-client", getAllClients);
+
+router.get("/public-get-client-images", getClientImages);
+
+
+
+
 router.get("/:id", authMiddleware, adminMiddleware, getSingleClient);
 
 router.patch("/:id", authMiddleware, adminMiddleware, changeClientStatus);
@@ -31,9 +39,9 @@ router.patch("/:id", authMiddleware, adminMiddleware, changeClientStatus);
 
 
 
-router.get("/public-get-all-client", getAllClients);
+// router.get("/public-get-all-client", getAllClients);
 
-router.get("/public-get-client-images", getClientImages);
+// router.get("/public-get-client-images", getClientImages);
 
 
 

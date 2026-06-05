@@ -15,9 +15,7 @@ const { authMiddleware } = require("../middlewares/authMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
 const { subjectUpload } = require("../middlewares/uploadMiddleware");
 
-// ===============================
-// ROUTES
-// ===============================
+
 
 // ADD
 router.post(

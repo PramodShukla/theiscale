@@ -62,8 +62,8 @@ exports.register = async (req, res) => {
       c_current_address2: "NA",
 
       c_current_country: 0,
-      c_current_state: "NA",
-      c_current_city: "NA",
+      c_current_state: null,
+      c_current_city: null,
       c_current_district: "NA",
       c_current_area: 0,
       c_current_pincode: "000000",
@@ -121,7 +121,7 @@ exports.register = async (req, res) => {
       c_pan_file: "NA",
       c_upi_id: "NA",
       c_assign_batch: 0,
-      c_user_refer_by: 0,
+      c_user_refer_by: null,
       c_user_referal_code: "NA",
       c_user_refered_users: 0,
     });

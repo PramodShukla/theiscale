@@ -19,8 +19,9 @@ const candidateSchema = new mongoose.Schema({
 
   c_password: { type: String, required: true },
   c_password_update: {
-    type: String,
+    type: Number,
     enum: [0, 1], // 0=no, 1=yes
+    default: 0,
   },
 
   //   c_role: {
