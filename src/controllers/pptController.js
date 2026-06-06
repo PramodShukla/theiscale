@@ -47,7 +47,7 @@ const addPPT = async (req, res) => {
 
 const getAllPPT = async (req, res) => {
   try {
-    let { search = "", status, page = 1, limit = 10 } = req.query;
+    let { search = "", status, page = 1, limit = 100 } = req.query;
 
     page = parseInt(page);
     limit = parseInt(limit);

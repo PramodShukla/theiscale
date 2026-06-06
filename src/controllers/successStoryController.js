@@ -156,7 +156,7 @@ const updateSuccessStory = async (req, res) => {
 
 const getAllSuccessStories = async (req, res) => {
   try {
-    let { page = 1, limit = 10, search } = req.query;
+    let { page = 1, limit = 100, search } = req.query;
 
     page = parseInt(page);
     limit = parseInt(limit);

@@ -35,9 +35,11 @@ router.delete(
   deleteSuccessStory,
 );
 
+router.get("/public-all-ss", getAllSuccessStories);
+
 router.get("/:id", authMiddleware, adminMiddleware, getSingleSuccessStory);
 
-router.get("/public-all-ss", getAllSuccessStories);
+// router.get("/public-all-ss", getAllSuccessStories);
 
 router.patch(
   "/status/:id",

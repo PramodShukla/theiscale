@@ -110,7 +110,7 @@ const updateAllied = async (req, res) => {
 
 const getAllAllied = async (req, res) => {
   try {
-    let { page = 1, limit = 10, search = "", status } = req.query;
+    let { page = 1, limit = 100, search = "", status } = req.query;
 
     page = parseInt(page);
     limit = parseInt(limit);
