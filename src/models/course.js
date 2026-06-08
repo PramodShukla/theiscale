@@ -126,9 +126,9 @@ const courseSchema = new mongoose.Schema(
     },
 
     m_course_status: {
-      type: Number,
+      type: String,
       // required: true,
-      enum: [0, 1], // 0-Inactive, 1-Active
+      enum: ["active","inactive"], 
     },
 
     m_course_status_web: {
@@ -170,7 +170,7 @@ const courseSchema = new mongoose.Schema(
     },
 
     m_course_duration_app: {
-      type: String,
+      type: Number,
       // required: true,
     },
 

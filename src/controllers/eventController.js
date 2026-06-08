@@ -2,7 +2,6 @@ const Event = require("../models/event");
 const slugify = require("slugify");
 const fs = require("fs");
 
-
 const deleteUploadedFiles = (files) => {
   if (!files) return;
 
@@ -14,7 +13,6 @@ const deleteUploadedFiles = (files) => {
     });
   });
 };
-
 
 const addEvent = async (req, res) => {
   try {
@@ -75,9 +73,7 @@ const addEvent = async (req, res) => {
       message: "Event created",
       data: event,
     });
-
   } catch (err) {
-
     //  ERROR → FILE DELETE
     deleteUploadedFiles(req.files);
 
@@ -88,25 +84,17 @@ const addEvent = async (req, res) => {
   }
 };
 
-
 const getAllEvents = async (req, res) => {
   try {
-    let {
-      page = 1,
-      limit = 10,
-      search = "",
-      category,
-      status,
-    } = req.query;
+    let { page = 1, limit = 100, search = "", category, status } = req.query;
 
     page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
+    limit = parseInt(limit) || 100;
 
     let filter = {};
 
-    // =========================
-    // 🔍 SEARCH (title, host)
-    // =========================
+    //SEARCH (title, host)
+
     if (search) {
       filter.$or = [
         { m_event_title: { $regex: search, $options: "i" } },
@@ -114,37 +102,27 @@ const getAllEvents = async (req, res) => {
       ];
     }
 
-    // =========================
     //  CATEGORY FILTER
-    // =========================
     if (category) {
       filter.m_event_category = category;
     }
 
-    // =========================
     //  STATUS FILTER
-    // =========================
     if (status) {
       filter.m_event_status = status;
     }
 
-    // =========================
     //  TOTAL COUNT
-    // =========================
     const total = await Event.countDocuments(filter);
 
-    // =========================
     //  FETCH DATA
-    // =========================
     const data = await Event.find(filter)
       .populate("m_event_category", "m_ec_title")
       .sort({ _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
-    // =========================
     //  RESPONSE
-    // =========================
     res.json({
       status: true,
       message: "Events fetched successfully",
@@ -156,7 +134,6 @@ const getAllEvents = async (req, res) => {
       },
       data,
     });
-
   } catch (err) {
     res.status(500).json({
       status: false,
@@ -164,7 +141,6 @@ const getAllEvents = async (req, res) => {
     });
   }
 };
-
 
 const updateEvent = async (req, res) => {
   try {
@@ -204,16 +180,13 @@ const updateEvent = async (req, res) => {
       message: "Updated successfully",
       data: event,
     });
-
   } catch (err) {
-
     //  ERROR → NEW FILE DELETE
     deleteUploadedFiles(req.files);
 
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 const deleteEvent = async (req, res) => {
   try {
@@ -239,38 +212,25 @@ const deleteEvent = async (req, res) => {
       status: true,
       message: "Deleted successfully",
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
 
-
-
 const getAllEventsDropdown = async (req, res) => {
   try {
-    let {
-      page = 1,
-      limit = 10,
-      search = "",
-    } = req.query;
+    let { page = 1, limit = 10, search = "" } = req.query;
 
     page = parseInt(page) || 1;
 
     limit = parseInt(limit) || 10;
 
-    // ======================================
     // FILTER
-    // ======================================
-
     const filter = {
       m_event_status: "active",
     };
 
-    // ======================================
     // SEARCH
-    // ======================================
-
     if (search) {
       filter.m_event_title = {
         $regex: search,
@@ -278,22 +238,17 @@ const getAllEventsDropdown = async (req, res) => {
       };
     }
 
-    // ======================================
     // TOTAL
-    // ======================================
+    const totalRecords = await Event.countDocuments(filter);
 
-    const totalRecords =
-      await Event.countDocuments(filter);
-
-    // ======================================
     // DATA
-    // ======================================
-
     const data = await Event.find(filter)
-      .select(`
+      .select(
+        `
         _id
         m_event_title
-      `)
+      `,
+      )
 
       .sort({
         m_event_title: 1,
@@ -305,23 +260,17 @@ const getAllEventsDropdown = async (req, res) => {
 
       .lean();
 
-    // ======================================
     // RESPONSE
-    // ======================================
-
     return res.status(200).json({
       status: true,
 
       current_page: page,
 
-      total_pages: Math.ceil(
-        totalRecords / limit,
-      ),
+      total_pages: Math.ceil(totalRecords / limit),
 
       total_records: totalRecords,
 
-      has_more:
-        page * limit < totalRecords,
+      has_more: page * limit < totalRecords,
 
       data,
     });
@@ -340,4 +289,3 @@ module.exports = {
   deleteEvent,
   getAllEventsDropdown,
 };
-  

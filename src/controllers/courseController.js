@@ -94,12 +94,10 @@ const addCourse = async (req, res) => {
       m_course_type !== undefined &&
       ![1, 2].includes(Number(m_course_type))
     ) {
-      return res
-        .status(400)
-        .json({
-          status: false,
-          message: "Invalid course type (1=Free, 2=Paid)",
-        });
+      return res.status(400).json({
+        status: false,
+        message: "Invalid course type (1=Free, 2=Paid)",
+      });
     }
 
     if (
@@ -492,18 +490,10 @@ const getAllCourses = async (req, res) => {
         banner: course.m_course_banner,
         video: course.m_course_video_link,
         course_type: course.m_course_type === 1 ? "Free" : "Paid",
-        price:
-          course.m_course_type === 1
-            ? "N/A"
-            : course.m_course_price,
+        price: course.m_course_type === 1 ? "N/A" : course.m_course_price,
         offer_price:
-          course.m_course_type === 1
-            ? "N/A"
-            : course.m_course_offer_price,
-        status:
-          course.m_course_status === 1
-            ? "Active"
-            : "Inactive",
+          course.m_course_type === 1 ? "N/A" : course.m_course_offer_price,
+        status: course.m_course_status === 1 ? "Active" : "Inactive",
         slug: course.m_course_slug,
 
         // Extra Fields
@@ -511,9 +501,7 @@ const getAllCourses = async (req, res) => {
         total_subjects: subjectCountMap[cid] || 0,
         total_lectures: lectureCountMap[cid] || 0,
         duration:
-          course.m_course_duration_web ||
-          course.m_course_duration_app ||
-          "N/A",
+          course.m_course_duration_web || course.m_course_duration_app || "N/A",
       };
     });
 
@@ -1102,6 +1090,37 @@ const getCourseDropdown = async (req, res) => {
   }
 };
 
+const changeCourseStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const course = await Course.findById(id);
+
+    if (!course) {
+      return res.status(404).send({
+        status: false,
+        message: "Course not found",
+      });
+    }
+
+    course.m_course_status =
+      course.m_course_status === "active" ? "inactive" : "active";
+
+    await course.save();
+
+    res.status(200).send({
+      status: true,
+      message: `Course status changed to ${course.m_course_status}`,
+      data: course.m_course_status,
+    });
+  } catch (error) {
+    res.status(500).send({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addCourse,
   getAllCourses,
@@ -1112,4 +1131,5 @@ module.exports = {
   getRecommendedCourses,
   getCourseById,
   getCourseDropdown,
+  changeCourseStatus,
 };
