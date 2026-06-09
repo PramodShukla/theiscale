@@ -129,6 +129,7 @@ const courseSchema = new mongoose.Schema(
       type: String,
       // required: true,
       enum: ["active","inactive"], 
+      default: "active",
     },
 
     m_course_status_web: {

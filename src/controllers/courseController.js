@@ -855,14 +855,14 @@ const deleteCourse = async (req, res) => {
 // GET POPULAR COURSES
 const getPopularCourses = async (req, res) => {
   try {
-    let { page = 1, limit = 10 } = req.query;
+    let { page = 1, limit = 100 } = req.query;
 
     page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
+    limit = parseInt(limit) || 100;
 
     const filter = {
       m_course_popular: 1,
-      m_course_status: 1,
+      // m_course_status: "active",
     };
 
     const total = await Course.countDocuments(filter);
@@ -905,14 +905,14 @@ const getPopularCourses = async (req, res) => {
 // GET RECOMMENDED COURSE
 const getRecommendedCourses = async (req, res) => {
   try {
-    let { page = 1, limit = 10 } = req.query;
+    let { page = 1, limit = 100 } = req.query;
 
     page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
+    limit = parseInt(limit) || 100;
 
     const filter = {
       m_course_recomended: 1,
-      m_course_status: 1,
+      // m_course_status: "active",
     };
 
     const total = await Course.countDocuments(filter);
