@@ -36,6 +36,7 @@ const notesRoutes = require("./notesRoutes");
 const userWishlistRoutes = require("./userWishlistRoutes");
 const contactQueriesRoutes = require("./contactQueriesRoutes");
 const hiringFormRoutes = require("./hiringFormRoutes");
+const userReviewsRoutes = require("./userReviewsRoutes");
 
 
 
@@ -75,7 +76,7 @@ router.use("/notes", notesRoutes);
 router.use("/user-wishlist", userWishlistRoutes);
 router.use("/contact-us", contactQueriesRoutes);
 router.use("/hiring-form", hiringFormRoutes);
-
+router.use("/user-reviews", userReviewsRoutes);
 
 
 module.exports = router; 

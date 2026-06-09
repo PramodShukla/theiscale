@@ -17,6 +17,9 @@ const { adminMiddleware } = require("../middlewares/adminMiddleware");
 
 router.post("/add",authMiddleware,adminMiddleware, userReviewUpload, addUserReview);
 
+
+router.get("/all-reviews", getAllUserReviews);
+
 router.get("/all",authMiddleware,adminMiddleware, getAllUserReviews);
 
 router.get("/:id",authMiddleware,adminMiddleware, getSingleUserReview);

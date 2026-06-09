@@ -92,7 +92,7 @@ const getAllUserReviews = async (req, res) => {
   try {
     let {
       page = 1,
-      limit = 10,
+      limit = 50,
       keyword = "",
     } = req.query;
 

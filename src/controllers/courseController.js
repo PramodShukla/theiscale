@@ -45,6 +45,10 @@ const addCourse = async (req, res) => {
       m_course_web_g_link,
       m_course_graphy_instruction,
 
+      m_course_view,
+      m_course_reviews,
+      m_course_rating,
+
       m_course_order,
     } = req.body;
 
@@ -127,10 +131,17 @@ const addCourse = async (req, res) => {
         .json({ status: false, message: "Invalid certificate value" });
     }
 
-    if (![0, 1].includes(Number(m_course_status))) {
-      return res
-        .status(400)
-        .json({ status: false, message: "Invalid course status" });
+    // if (![0, 1].includes(Number(m_course_status))) {
+    //   return res
+    //     .status(400)
+    //     .json({ status: false, message: "Invalid course status" });
+    // }
+
+    if (!["active", "inactive"].includes(m_course_status?.toLowerCase())) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid course status",
+      });
     }
 
     if (![0, 1].includes(Number(m_course_status_web))) {
@@ -172,6 +183,16 @@ const addCourse = async (req, res) => {
           message: "Course code already exists",
         });
       }
+    }
+
+    if (
+      m_course_rating !== undefined &&
+      (Number(m_course_rating) < 0 || Number(m_course_rating) > 10)
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: "Course rating must be between 0 and 10",
+      });
     }
 
     // FILE HANDLING (SAFE)
@@ -233,14 +254,14 @@ const addCourse = async (req, res) => {
       m_course_recomended: Number(m_course_recomended) || 0,
       m_course_keyword: m_course_keyword || null,
 
-      m_course_status: Number(m_course_status),
+      m_course_status: m_course_status.toLowerCase(),
       m_course_status_web: Number(m_course_status_web),
 
-      m_course_view: 0,
+      // m_course_view: 0,
       m_course_like: 0,
       m_course_dislike: 0,
-      m_course_rating: 0,
-      m_course_reviews: 0,
+      // m_course_rating: 0,
+      // m_course_reviews: 0,
       m_course_share: 0,
 
       m_course_duration_app: m_course_duration_app?.toString() || null,
@@ -262,6 +283,14 @@ const addCourse = async (req, res) => {
       m_course_graphy_instruction: m_course_graphy_instruction || null,
 
       m_course_order: m_course_order ? Number(m_course_order) : null,
+
+      m_course_view: m_course_view !== undefined ? Number(m_course_view) : 0,
+
+      m_course_reviews:
+        m_course_reviews !== undefined ? Number(m_course_reviews) : 0,
+
+      m_course_rating:
+        m_course_rating !== undefined ? Number(m_course_rating) : 0,
 
       m_course_modified: new Date(),
     });
@@ -396,7 +425,7 @@ const getAllCourses = async (req, res) => {
   try {
     let {
       page = 1,
-      limit = 10,
+      limit = 50,
       search = "",
       category,
       course_type,
@@ -404,7 +433,7 @@ const getAllCourses = async (req, res) => {
     } = req.query;
 
     page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
+    limit = parseInt(limit) || 50;
 
     let filter = {};
 
@@ -428,7 +457,7 @@ const getAllCourses = async (req, res) => {
 
     // STATUS FILTER
     if (status !== undefined) {
-      filter.m_course_status = Number(status);
+      filter.m_course_status = status.toLowerCase();
     }
 
     // TOTAL COUNT
@@ -498,6 +527,8 @@ const getAllCourses = async (req, res) => {
 
         // Extra Fields
         views: course.m_course_view,
+        reviews: course.m_course_reviews,
+        rating: course.m_course_rating,
         total_subjects: subjectCountMap[cid] || 0,
         total_lectures: lectureCountMap[cid] || 0,
         duration:
@@ -705,9 +736,18 @@ const updateCourse = async (req, res) => {
     if (isValid(body.m_course_keyword))
       updateData.m_course_keyword = body.m_course_keyword;
 
-    if (isValid(body.m_course_status))
-      updateData.m_course_status = Number(body.m_course_status);
+    if (isValid(body.m_course_status)) {
+      if (
+        !["active", "inactive"].includes(body.m_course_status.toLowerCase())
+      ) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid course status",
+        });
+      }
 
+      updateData.m_course_status = body.m_course_status.toLowerCase();
+    }
     if (isValid(body.m_course_status_web))
       updateData.m_course_status_web = Number(body.m_course_status_web);
 
@@ -751,6 +791,27 @@ const updateCourse = async (req, res) => {
     // ORDER
     if (isValid(body.m_course_order))
       updateData.m_course_order = Number(body.m_course_order);
+
+    if (isValid(body.m_course_view)) {
+      updateData.m_course_view = Number(body.m_course_view);
+    }
+
+    if (isValid(body.m_course_reviews)) {
+      updateData.m_course_reviews = Number(body.m_course_reviews);
+    }
+
+    if (isValid(body.m_course_rating)) {
+      const rating = Number(body.m_course_rating);
+
+      if (rating < 0 || rating > 10) {
+        return res.status(400).json({
+          status: false,
+          message: "Course rating must be between 0 and 10",
+        });
+      }
+
+      updateData.m_course_rating = rating;
+    }
 
     // FILE UPDATE
     if (req.files) {
@@ -1015,6 +1076,10 @@ const getCourseById = async (req, res) => {
 
       popular: course.m_course_popular,
       recommended: course.m_course_recomended,
+
+      views: course.m_course_view,
+      reviews: course.m_course_reviews,
+      rating: course.m_course_rating,
 
       created_at: course.createdAt,
       updated_at: course.m_course_modified,

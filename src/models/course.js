@@ -157,7 +157,7 @@ const courseSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: 0,
-      max: 5,
+      max: 10,
     },
 
     m_course_reviews: {
