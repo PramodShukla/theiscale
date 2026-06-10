@@ -2,8 +2,6 @@ const mongoose = require("mongoose");
 
 const courseEnrollmentSchema = new mongoose.Schema(
   {
-
-
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "candidates",
@@ -16,15 +14,11 @@ const courseEnrollmentSchema = new mongoose.Schema(
       required: true,
     },
 
-
-
     course_type: {
       type: String,
       enum: ["free", "paid"],
       required: true,
     },
-
-   
 
     payment_status: {
       type: String,
@@ -72,8 +66,6 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: null,
     },
 
- 
-
     access_type: {
       type: String,
       enum: ["lifetime", "limited"],
@@ -84,8 +76,6 @@ const courseEnrollmentSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-
-  
 
     enrolled_on: {
       type: Date,
@@ -105,13 +95,16 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: "active",
     },
 
+    batch_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "batch",
+      default: null,
+    },
 
     batch_name: {
       type: String,
       default: null,
     },
-
-
 
     app_status: {
       type: String,
@@ -131,8 +124,6 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: "active",
     },
 
-   
-
     test_series_status: {
       type: String,
       enum: ["active", "inactive"],
@@ -145,11 +136,9 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: "inactive",
     },
 
-
-
     certificate_status: {
       type: String,
-      enum: ["not_requested","pending", "approved", "declined"],
+      enum: ["not_requested", "pending", "approved", "declined"],
       default: "not_requested",
     },
 
@@ -173,8 +162,6 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: null,
     },
 
-    
-
     admin_note: {
       type: String,
       default: null,
@@ -184,8 +171,6 @@ const courseEnrollmentSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-
-
 
 courseEnrollmentSchema.index({ user_id: 1, course_id: 1 }, { unique: true });
 

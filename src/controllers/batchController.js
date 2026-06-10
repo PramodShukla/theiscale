@@ -2,10 +2,13 @@ const fs = require("fs");
 const path = require("path");
 
 const MasterBatch = require("../models/batch");
+const CourseEnrollment = require("../models/course_enrollment");
 
-// =================================
+const Instructor = require("../models/instructor");
+const Course = require("../models/course");
+const mongoose = require("mongoose");
+
 // DELETE FILE HELPER
-// =================================
 const deleteFile = (filePath) => {
   try {
     if (fs.existsSync(filePath)) {
@@ -16,9 +19,7 @@ const deleteFile = (filePath) => {
   }
 };
 
-// =================================
 // CHECK EMPTY VALUE
-// =================================
 const isValidValue = (value) => {
   return (
     value !== undefined &&
@@ -29,9 +30,7 @@ const isValidValue = (value) => {
   );
 };
 
-// =================================
 // PARSE DAYS
-// =================================
 const parseDays = (days) => {
   let parsedDays = [];
 
@@ -67,13 +66,10 @@ const parseDays = (days) => {
   return parsedDays;
 };
 
-// =================================
 // ADD BATCH
-// =================================
 const addBatch = async (req, res) => {
   try {
-    const uploadedImage =
-      req.files?.m_batch_image?.[0]?.filename || "";
+    const uploadedImage = req.files?.m_batch_image?.[0]?.filename || "";
 
     const {
       batch_name,
@@ -92,9 +88,7 @@ const addBatch = async (req, res) => {
       m_batch_status,
     } = req.body;
 
-    // =================================
     // VALIDATION
-    // =================================
     if (!isValidValue(batch_name)) {
       if (uploadedImage) {
         deleteFile(path.join("src/uploads/batches", uploadedImage));
@@ -106,9 +100,7 @@ const addBatch = async (req, res) => {
       });
     }
 
-    // =================================
     // CREATE OBJECT
-    // =================================
     const batchData = {};
 
     // required
@@ -174,10 +166,68 @@ const addBatch = async (req, res) => {
       batchData.m_batch_image = uploadedImage;
     }
 
+    // ===============================
+    // INSTRUCTOR VALIDATION
+    // ===============================
+
+    if (isValidValue(batch_instructor_id)) {
+      if (!mongoose.Types.ObjectId.isValid(batch_instructor_id)) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid instructor id",
+        });
+      }
+
+      const instructorExists = await Instructor.findById(batch_instructor_id);
+
+      if (!instructorExists) {
+        return res.status(404).json({
+          status: false,
+          message: "Instructor not found",
+        });
+      }
+    }
+
+    // ===============================
+    // COURSE VALIDATION
+    // ===============================
+
+    if (isValidValue(batch_course)) {
+      if (!mongoose.Types.ObjectId.isValid(batch_course)) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid course id",
+        });
+      }
+
+      const courseExists = await Course.findById(batch_course);
+
+      if (!courseExists) {
+        return res.status(404).json({
+          status: false,
+          message: "Course not found",
+        });
+      }
+    }
+
     // =================================
     // CREATE
     // =================================
     const batch = await MasterBatch.create(batchData);
+
+    if (batch.batch_course) {
+      await CourseEnrollment.updateMany(
+        {
+          course_id: batch.batch_course,
+        },
+        {
+          $set: {
+            batch_id: batch._id,
+            batch_name: batch.batch_name,
+          },
+        },
+      );
+    }
 
     return res.status(201).json({
       status: true,
@@ -188,10 +238,7 @@ const addBatch = async (req, res) => {
     // delete uploaded image if error
     if (req.files?.m_batch_image?.[0]?.filename) {
       deleteFile(
-        path.join(
-          "src/uploads/batches",
-          req.files.m_batch_image[0].filename
-        )
+        path.join("src/uploads/batches", req.files.m_batch_image[0].filename),
       );
     }
 
@@ -202,20 +249,71 @@ const addBatch = async (req, res) => {
   }
 };
 
-// =================================
 // UPDATE BATCH
-// =================================
 const updateBatch = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const uploadedImage =
-      req.files?.m_batch_image?.[0]?.filename || "";
+    const uploadedImage = req.files?.m_batch_image?.[0]?.filename || "";
 
-    // =================================
+
     // FIND BATCH
-    // =================================
     const existingBatch = await MasterBatch.findById(id);
+
+   
+// INSTRUCTOR VALIDATION
+
+if (isValidValue(req.body.batch_instructor_id)) {
+
+  if (
+    !mongoose.Types.ObjectId.isValid(
+      req.body.batch_instructor_id
+    )
+  ) {
+    return res.status(400).json({
+      status: false,
+      message: "Invalid instructor id",
+    });
+  }
+
+  const instructorExists = await Instructor.findById(
+    req.body.batch_instructor_id
+  );
+
+  if (!instructorExists) {
+    return res.status(404).json({
+      status: false,
+      message: "Instructor not found",
+    });
+  }
+}
+
+
+// COURSE VALIDATION
+if (isValidValue(req.body.batch_course)) {
+
+  if (
+    !mongoose.Types.ObjectId.isValid(
+      req.body.batch_course
+    )
+  ) {
+    return res.status(400).json({
+      status: false,
+      message: "Invalid course id",
+    });
+  }
+
+  const courseExists = await Course.findById(
+    req.body.batch_course
+  );
+
+  if (!courseExists) {
+    return res.status(404).json({
+      status: false,
+      message: "Course not found",
+    });
+  }
+}
 
     if (!existingBatch) {
       if (uploadedImage) {
@@ -228,9 +326,8 @@ const updateBatch = async (req, res) => {
       });
     }
 
-    // =================================
+
     // UPDATE OBJECT
-    // =================================
     const updateData = {};
 
     // update only filled fields
@@ -240,19 +337,16 @@ const updateBatch = async (req, res) => {
     }
 
     if (isValidValue(req.body.batch_instructor_id)) {
-      updateData.batch_instructor_id =
-        req.body.batch_instructor_id;
+      updateData.batch_instructor_id = req.body.batch_instructor_id;
     }
 
     if (isValidValue(req.body.batch_instructor)) {
-      updateData.batch_instructor =
-        req.body.batch_instructor;
+      updateData.batch_instructor = req.body.batch_instructor;
     }
 
     // single course only
     if (isValidValue(req.body.batch_course)) {
-      updateData.batch_course =
-        req.body.batch_course;
+      updateData.batch_course = req.body.batch_course;
     }
 
     if (isValidValue(req.body.batch_date)) {
@@ -272,13 +366,11 @@ const updateBatch = async (req, res) => {
     }
 
     if (isValidValue(req.body.m_batch_notice_desc)) {
-      updateData.m_batch_notice_desc =
-        req.body.m_batch_notice_desc;
+      updateData.m_batch_notice_desc = req.body.m_batch_notice_desc;
     }
 
     if (isValidValue(req.body.m_batch_notice_link)) {
-      updateData.m_batch_notice_link =
-        req.body.m_batch_notice_link;
+      updateData.m_batch_notice_link = req.body.m_batch_notice_link;
     }
 
     if (isValidValue(req.body.order)) {
@@ -290,15 +382,12 @@ const updateBatch = async (req, res) => {
     }
 
     if (isValidValue(req.body.m_batch_status)) {
-      updateData.m_batch_status =
-        Number(req.body.m_batch_status);
+      updateData.m_batch_status = Number(req.body.m_batch_status);
     }
 
     // days
     if (isValidValue(req.body.m_batch_days)) {
-      updateData.m_batch_days = parseDays(
-        req.body.m_batch_days
-      );
+      updateData.m_batch_days = parseDays(req.body.m_batch_days);
     }
 
     // new image
@@ -306,31 +395,51 @@ const updateBatch = async (req, res) => {
       updateData.m_batch_image = uploadedImage;
     }
 
-    // =================================
+    
     // UPDATE
-    // =================================
-    const updatedBatch =
-      await MasterBatch.findByIdAndUpdate(
-        id,
-        updateData,
-        {
-          new: true,
-        }
-      );
+    const updatedBatch = await MasterBatch.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
 
-    // =================================
-    // DELETE OLD IMAGE
-    // =================================
-    if (
-      uploadedImage &&
-      existingBatch.m_batch_image
-    ) {
-      deleteFile(
-        path.join(
-          "src/uploads/batches",
-          existingBatch.m_batch_image
-        )
+    const oldCourseId = existingBatch.batch_course?.toString();
+
+    const newCourseId = updatedBatch.batch_course?.toString();
+
+    if (oldCourseId && newCourseId && oldCourseId !== newCourseId) {
+      // Purane course ke enrollment se batch hatao
+
+      await CourseEnrollment.updateMany(
+        {
+          course_id: oldCourseId,
+          batch_id: updatedBatch._id,
+        },
+        {
+          $set: {
+            batch_id: null,
+            batch_name: null,
+          },
+        },
       );
+    }
+
+    if (updatedBatch.batch_course) {
+      await CourseEnrollment.updateMany(
+        {
+          course_id: updatedBatch.batch_course,
+        },
+        {
+          $set: {
+            batch_id: updatedBatch._id,
+            batch_name: updatedBatch.batch_name,
+          },
+        },
+      );
+    }
+
+    
+    // DELETE OLD IMAGE
+    if (uploadedImage && existingBatch.m_batch_image) {
+      deleteFile(path.join("src/uploads/batches", existingBatch.m_batch_image));
     }
 
     return res.status(200).json({
@@ -342,10 +451,7 @@ const updateBatch = async (req, res) => {
     // delete newly uploaded image if error
     if (req.files?.m_batch_image?.[0]?.filename) {
       deleteFile(
-        path.join(
-          "src/uploads/batches",
-          req.files.m_batch_image[0].filename
-        )
+        path.join("src/uploads/batches", req.files.m_batch_image[0].filename),
       );
     }
 
@@ -356,18 +462,10 @@ const updateBatch = async (req, res) => {
   }
 };
 
-// =================================
 // GET ALL BATCHES
-// =================================
 const getAllBatches = async (req, res) => {
   try {
-    let {
-      page = 1,
-      limit = 10,
-      search,
-      fromDate,
-      toDate,
-    } = req.query;
+    let { page = 1, limit = 10, search, fromDate, toDate } = req.query;
 
     page = Number(page);
     limit = Number(limit);
@@ -403,41 +501,29 @@ const getAllBatches = async (req, res) => {
     // =================================
     // DATE FILTER
     // =================================
-    if (
-      isValidValue(fromDate) ||
-      isValidValue(toDate)
-    ) {
+    if (isValidValue(fromDate) || isValidValue(toDate)) {
       filter.batch_date = {};
 
       if (isValidValue(fromDate)) {
-        filter.batch_date.$gte =
-          new Date(fromDate);
+        filter.batch_date.$gte = new Date(fromDate);
       }
 
       if (isValidValue(toDate)) {
-        filter.batch_date.$lte =
-          new Date(toDate);
+        filter.batch_date.$lte = new Date(toDate);
       }
     }
 
     // =================================
     // TOTAL
     // =================================
-    const total =
-      await MasterBatch.countDocuments(filter);
+    const total = await MasterBatch.countDocuments(filter);
 
     // =================================
     // GET DATA
     // =================================
     const batches = await MasterBatch.find(filter)
-      .populate(
-        "batch_course",
-        "m_course_name"
-      )
-      .populate(
-        "batch_instructor_id",
-        "m_instructor_name"
-      )
+      .populate("batch_course", "m_course_name")
+      .populate("batch_instructor_id", "m_instructor_name")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -457,9 +543,7 @@ const getAllBatches = async (req, res) => {
   }
 };
 
-// =================================
 // GET SINGLE BATCH
-// =================================
 const getSingleBatch = async (req, res) => {
   try {
     const { id } = req.params;
@@ -487,9 +571,7 @@ const getSingleBatch = async (req, res) => {
   }
 };
 
-// =================================
 // DELETE BATCH
-// =================================
 const deleteBatch = async (req, res) => {
   try {
     const { id } = req.params;
@@ -505,12 +587,7 @@ const deleteBatch = async (req, res) => {
 
     // delete image
     if (batch.m_batch_image) {
-      deleteFile(
-        path.join(
-          "src/uploads/batches",
-          batch.m_batch_image
-        )
-      );
+      deleteFile(path.join("src/uploads/batches", batch.m_batch_image));
     }
 
     // delete batch
@@ -528,17 +605,9 @@ const deleteBatch = async (req, res) => {
   }
 };
 
-
-
-
 const getBatchesDropdown = async (req, res) => {
   try {
-    let {
-      page = 1,
-      limit = 10,
-      search,
-      status,
-    } = req.query;
+    let { page = 1, limit = 10, search, status } = req.query;
 
     page = Number(page);
     limit = Number(limit);
@@ -556,9 +625,8 @@ const getBatchesDropdown = async (req, res) => {
       filter.m_batch_status = { $in: [0, 1] };
     }
 
-    
     // SEARCH
-    
+
     if (isValidValue(search)) {
       filter.batch_name = {
         $regex: search,
@@ -566,10 +634,8 @@ const getBatchesDropdown = async (req, res) => {
       };
     }
 
-    const total =
-      await MasterBatch.countDocuments(filter);
+    const total = await MasterBatch.countDocuments(filter);
 
- 
     const batches = await MasterBatch.find(filter)
       .select("_id batch_name")
       .sort({ batch_name: 1 })
@@ -597,5 +663,5 @@ module.exports = {
   getAllBatches,
   getSingleBatch,
   deleteBatch,
-  getBatchesDropdown
+  getBatchesDropdown,
 };

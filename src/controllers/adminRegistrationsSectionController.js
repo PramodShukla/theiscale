@@ -7,11 +7,7 @@ const NotesEnrollment = require("../models/notes_enrollment");
 const Notes = require("../models/notes");
 const EventEnrollment = require("../models/event_enrollment");
 const Event = require("../models/event");
-const JobApplication = require(
-  "../models/company_requirement_application",
-);
-
-
+const JobApplication = require("../models/company_requirement_application");
 
 const getCourseRegistrations = async (req, res) => {
   try {
@@ -95,6 +91,18 @@ const getCourseRegistrations = async (req, res) => {
             m_course_duration_app
             m_course_duration_web
           `,
+      })
+
+      .populate({
+        path: "batch_id",
+        select: `
+    batch_name
+    batch_instructor
+    start_time
+    end_time
+    strength
+    subject
+  `,
       })
 
       .sort({
@@ -210,6 +218,23 @@ const getCourseRegistrations = async (req, res) => {
 
           course_progress: progress,
 
+          // =====================================
+          // BATCH
+          // =====================================
+
+          batch_id: enrollment.batch_id?._id || null,
+
+          batch_name: enrollment.batch_id?.batch_name || null,
+
+          batch_instructor: enrollment.batch_id?.batch_instructor || null,
+
+          batch_start_time: enrollment.batch_id?.start_time || null,
+
+          batch_end_time: enrollment.batch_id?.end_time || null,
+
+          batch_strength: enrollment.batch_id?.strength || 0,
+
+          batch_subject: enrollment.batch_id?.subject || null,
           // =====================================
           // CERTIFICATE
           // =====================================
@@ -392,8 +417,6 @@ const getCoursePurchaseDetails = async (req, res) => {
   }
 };
 
-
-
 const getAllTestPackageEnrollments = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -490,8 +513,6 @@ const getAllTestPackageEnrollments = async (req, res) => {
   }
 };
 
-
-
 const getSingleTestPackageEnrollment = async (req, res) => {
   try {
     const enrollmentId = req.params.id;
@@ -548,8 +569,6 @@ const getSingleTestPackageEnrollment = async (req, res) => {
   }
 };
 
-
-
 const deleteTestPackageEnrollment = async (req, res) => {
   try {
     const enrollmentId = req.params.id;
@@ -579,8 +598,6 @@ const deleteTestPackageEnrollment = async (req, res) => {
     });
   }
 };
-
-
 
 const changeTestPackageAccessStatus = async (req, res) => {
   try {
@@ -913,9 +930,6 @@ const deleteNotesEnrollment = async (req, res) => {
   }
 };
 
-
-
-
 const getAllEventRegistrations = async (req, res) => {
   try {
     // ======================================================
@@ -1046,14 +1060,11 @@ const getAllEventRegistrations = async (req, res) => {
         const userName =
           `${item.user_id?.c_first_name || ""} ${item.user_id?.c_last_name || ""}`.toLowerCase();
 
-        const email =
-          item.user_id?.c_email?.toLowerCase() || "";
+        const email = item.user_id?.c_email?.toLowerCase() || "";
 
-        const phone =
-          String(item.user_id?.c_contact || "");
+        const phone = String(item.user_id?.c_contact || "");
 
-        const eventTitle =
-          item.event_id?.m_event_title?.toLowerCase() || "";
+        const eventTitle = item.event_id?.m_event_title?.toLowerCase() || "";
 
         return (
           userName.includes(text) ||
@@ -1097,31 +1108,23 @@ const getAllEventRegistrations = async (req, res) => {
 
           banner: item.event_id?.m_event_banner || null,
 
-          start_date:
-            item.event_id?.m_event_date_start || null,
+          start_date: item.event_id?.m_event_date_start || null,
 
-          end_date:
-            item.event_id?.m_event_date_end || null,
+          end_date: item.event_id?.m_event_date_end || null,
 
-          start_time:
-            item.event_id?.m_event_time_start || null,
+          start_time: item.event_id?.m_event_time_start || null,
 
-          end_time:
-            item.event_id?.m_event_time_end || null,
+          end_time: item.event_id?.m_event_time_end || null,
 
           host: item.event_id?.m_event_host || null,
 
-          language:
-            item.event_id?.m_event_lang || null,
+          language: item.event_id?.m_event_lang || null,
 
-          skill_level:
-            item.event_id?.m_event_skill_level || null,
+          skill_level: item.event_id?.m_event_skill_level || null,
 
-          certificate:
-            item.event_id?.m_event_certificate || null,
+          certificate: item.event_id?.m_event_certificate || null,
 
-          event_status:
-            item.event_id?.m_event_status || null,
+          event_status: item.event_id?.m_event_status || null,
         },
 
         // =====================================
@@ -1140,8 +1143,7 @@ const getAllEventRegistrations = async (req, res) => {
     // TOTAL
     // ======================================================
 
-    const totalRecords =
-      await EventEnrollment.countDocuments(filter);
+    const totalRecords = await EventEnrollment.countDocuments(filter);
 
     // ======================================================
     // RESPONSE
@@ -1150,8 +1152,7 @@ const getAllEventRegistrations = async (req, res) => {
     return res.status(200).json({
       status: true,
 
-      message:
-        "Event registrations fetched successfully",
+      message: "Event registrations fetched successfully",
 
       current_page: page,
 
@@ -1170,18 +1171,11 @@ const getAllEventRegistrations = async (req, res) => {
   }
 };
 
-
-
-const getSingleEventRegistration = async (
-  req,
-  res,
-) => {
+const getSingleEventRegistration = async (req, res) => {
   try {
     const registrationId = req.params.id;
 
-    const data = await EventEnrollment.findById(
-      registrationId,
-    )
+    const data = await EventEnrollment.findById(registrationId)
 
       .populate({
         path: "user_id",
@@ -1208,8 +1202,7 @@ const getSingleEventRegistration = async (
       return res.status(404).json({
         status: false,
 
-        message:
-          "Event registration not found",
+        message: "Event registration not found",
       });
     }
 
@@ -1226,26 +1219,19 @@ const getSingleEventRegistration = async (
         user: {
           user_id: data.user_id?._id || null,
 
-          first_name:
-            data.user_id?.c_first_name || null,
+          first_name: data.user_id?.c_first_name || null,
 
-          last_name:
-            data.user_id?.c_last_name || null,
+          last_name: data.user_id?.c_last_name || null,
 
-          full_name:
-            `${data.user_id?.c_first_name || ""} ${data.user_id?.c_last_name || ""}`,
+          full_name: `${data.user_id?.c_first_name || ""} ${data.user_id?.c_last_name || ""}`,
 
-          email:
-            data.user_id?.c_email || null,
+          email: data.user_id?.c_email || null,
 
-          mobile:
-            data.user_id?.c_contact || null,
+          mobile: data.user_id?.c_contact || null,
 
-          alternate_mobile:
-            data.user_id?.c_alt_contact || null,
+          alternate_mobile: data.user_id?.c_alt_contact || null,
 
-          city:
-            data.user_id?.c_current_city || null,
+          city: data.user_id?.c_current_city || null,
 
           address: `
             ${data.user_id?.c_current_address1 || ""}
@@ -1281,26 +1267,17 @@ const getSingleEventRegistration = async (
   }
 };
 
-
-
-const deleteEventRegistration = async (
-  req,
-  res,
-) => {
+const deleteEventRegistration = async (req, res) => {
   try {
     const registrationId = req.params.id;
 
-    const registration =
-      await EventEnrollment.findById(
-        registrationId,
-      );
+    const registration = await EventEnrollment.findById(registrationId);
 
     if (!registration) {
       return res.status(404).json({
         status: false,
 
-        message:
-          "Event registration not found",
+        message: "Event registration not found",
       });
     }
 
@@ -1309,28 +1286,22 @@ const deleteEventRegistration = async (
     // EVENT ENROLL COUNT DECREASE
     // ======================================================
 
-    await Event.findByIdAndUpdate(
-      registration.event_id,
-      {
-        $inc: {
-          m_event_no_of_enroll: -1,
-        },
+    await Event.findByIdAndUpdate(registration.event_id, {
+      $inc: {
+        m_event_no_of_enroll: -1,
       },
-    );
+    });
 
     // ======================================================
     // DELETE
     // ======================================================
 
-    await EventEnrollment.findByIdAndDelete(
-      registrationId,
-    );
+    await EventEnrollment.findByIdAndDelete(registrationId);
 
     return res.status(200).json({
       status: true,
 
-      message:
-        "Event registration deleted successfully",
+      message: "Event registration deleted successfully",
     });
   } catch (error) {
     return res.status(500).json({
@@ -1341,11 +1312,7 @@ const deleteEventRegistration = async (
   }
 };
 
-
-const getAllJobApplications = async (
-  req,
-  res,
-) => {
+const getAllJobApplications = async (req, res) => {
   try {
     let {
       page = 1,
@@ -1385,23 +1352,15 @@ const getAllJobApplications = async (
       filter.applied_at = {};
 
       if (from_date) {
-        filter.applied_at.$gte =
-          new Date(from_date);
+        filter.applied_at.$gte = new Date(from_date);
       }
 
       if (to_date) {
-        const endDate =
-          new Date(to_date);
+        const endDate = new Date(to_date);
 
-        endDate.setHours(
-          23,
-          59,
-          59,
-          999,
-        );
+        endDate.setHours(23, 59, 59, 999);
 
-        filter.applied_at.$lte =
-          endDate;
+        filter.applied_at.$lte = endDate;
       }
     }
 
@@ -1409,44 +1368,41 @@ const getAllJobApplications = async (
     // GET DATA
     // ======================================================
 
-    let data =
-      await JobApplication.find(
-        filter,
-      )
+    let data = await JobApplication.find(filter)
 
-        .populate({
-          path: "user_id",
+      .populate({
+        path: "user_id",
 
-          select: `
+        select: `
             c_first_name
             c_last_name
             c_email
             c_contact
             c_current_city
           `,
-        })
+      })
 
-        .populate({
-          path: "job_id",
+      .populate({
+        path: "job_id",
 
-          select: `
+        select: `
             job_title
             company_name
             job_locations
             salary
             experience
           `,
-        })
+      })
 
-        .sort({
-          applied_at: -1,
-        })
+      .sort({
+        applied_at: -1,
+      })
 
-        .skip(skip)
+      .skip(skip)
 
-        .limit(limit)
+      .limit(limit)
 
-        .lean();
+      .lean();
 
     // ======================================================
     // COMPANY FILTER
@@ -1456,9 +1412,7 @@ const getAllJobApplications = async (
       data = data.filter((item) =>
         item.job_id?.company_name
           ?.toLowerCase()
-          .includes(
-            company_name.toLowerCase(),
-          ),
+          .includes(company_name.toLowerCase()),
       );
     }
 
@@ -1467,29 +1421,19 @@ const getAllJobApplications = async (
     // ======================================================
 
     if (search) {
-      const text =
-        search.toLowerCase();
+      const text = search.toLowerCase();
 
       data = data.filter((item) => {
         const userName =
           `${item.user_id?.c_first_name || ""} ${item.user_id?.c_last_name || ""}`.toLowerCase();
 
-        const email =
-          item.user_id?.c_email?.toLowerCase() ||
-          "";
+        const email = item.user_id?.c_email?.toLowerCase() || "";
 
-        const mobile = String(
-          item.user_id?.c_contact ||
-            "",
-        );
+        const mobile = String(item.user_id?.c_contact || "");
 
-        const jobTitle =
-          item.job_id?.job_title?.toLowerCase() ||
-          "";
+        const jobTitle = item.job_id?.job_title?.toLowerCase() || "";
 
-        const company =
-          item.job_id?.company_name?.toLowerCase() ||
-          "";
+        const company = item.job_id?.company_name?.toLowerCase() || "";
 
         return (
           userName.includes(text) ||
@@ -1505,8 +1449,7 @@ const getAllJobApplications = async (
     // TOTAL
     // ======================================================
 
-    const totalRecords =
-      data.length;
+    const totalRecords = data.length;
 
     // ======================================================
     // RESPONSE
@@ -1517,12 +1460,9 @@ const getAllJobApplications = async (
 
       current_page: page,
 
-      total_pages: Math.ceil(
-        totalRecords / limit,
-      ),
+      total_pages: Math.ceil(totalRecords / limit),
 
-      total_records:
-        totalRecords,
+      total_records: totalRecords,
 
       data,
     });
@@ -1535,23 +1475,16 @@ const getAllJobApplications = async (
   }
 };
 
+const getSingleJobApplication = async (req, res) => {
+  try {
+    const applicationId = req.params.id;
 
+    const data = await JobApplication.findById(applicationId)
 
-const getSingleJobApplication =
-  async (req, res) => {
-    try {
-      const applicationId =
-        req.params.id;
+      .populate({
+        path: "user_id",
 
-      const data =
-        await JobApplication.findById(
-          applicationId,
-        )
-
-          .populate({
-            path: "user_id",
-
-            select: `
+        select: `
             c_first_name
             c_last_name
             c_email
@@ -1561,77 +1494,63 @@ const getSingleJobApplication =
             c_current_address1
             c_current_address2
           `,
-          })
+      })
 
-          .populate({
-            path: "job_id",
-          });
-
-      if (!data) {
-        return res.status(404).json({
-          status: false,
-
-          message:
-            "Job application not found",
-        });
-      }
-
-      return res.status(200).json({
-        status: true,
-
-        data,
+      .populate({
+        path: "job_id",
       });
-    } catch (error) {
-      return res.status(500).json({
+
+    if (!data) {
+      return res.status(404).json({
         status: false,
 
-        message: error.message,
+        message: "Job application not found",
       });
     }
-  };
 
+    return res.status(200).json({
+      status: true,
 
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
 
-const deleteJobApplication =
-  async (req, res) => {
-    try {
-      const applicationId =
-        req.params.id;
+      message: error.message,
+    });
+  }
+};
 
-      const application =
-        await JobApplication.findById(
-          applicationId,
-        );
+const deleteJobApplication = async (req, res) => {
+  try {
+    const applicationId = req.params.id;
 
-      if (!application) {
-        return res.status(404).json({
-          status: false,
+    const application = await JobApplication.findById(applicationId);
 
-          message:
-            "Job application not found",
-        });
-      }
-
-      await JobApplication.findByIdAndDelete(
-        applicationId,
-      );
-
-      return res.status(200).json({
-        status: true,
-
-        message:
-          "Job application deleted successfully",
-      });
-    } catch (error) {
-      return res.status(500).json({
+    if (!application) {
+      return res.status(404).json({
         status: false,
 
-        message: error.message,
+        message: "Job application not found",
       });
     }
-  };
 
+    await JobApplication.findByIdAndDelete(applicationId);
 
+    return res.status(200).json({
+      status: true,
+
+      message: "Job application deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   getCourseRegistrations,
