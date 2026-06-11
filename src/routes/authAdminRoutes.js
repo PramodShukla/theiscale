@@ -8,7 +8,7 @@ const { adminMiddleware } = require("../middlewares/adminMiddleware");
 const { adminUpload } = require("../middlewares/uploadMiddleware");
 
 // Register Admin
-router.post("/register", authAdminController.registerAdmin);
+// router.post("/register", authAdminController.registerAdmin);
 
 // Login Admin
 router.post("/login", authAdminController.loginAdmin);

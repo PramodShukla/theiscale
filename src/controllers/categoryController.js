@@ -1,4 +1,5 @@
 const Category = require("../models/category");
+const Course = require("../models/course");
 
 // helper slug function
 const generateSlug = (name) => {
@@ -236,6 +237,69 @@ exports.deleteCategory = async (req, res) => {
     res.status(500).send({
       status: false,
       message: e.message,
+    });
+  }
+};
+
+
+//Mobile app apis=============================================================================================================
+
+exports.appGetCategoryWiseCourses = async (req, res) => {
+  try {
+
+    const categories = await Category.find({
+      m_category_for: 1
+    })
+    .sort({ m_category_order: 1 });
+
+    const result = [];
+
+    for (const category of categories) {
+
+      const courses = await Course.find({
+        m_course_category: category._id,
+        m_course_status: "active"
+      });
+
+      const formattedCourses = courses.map(course => ({
+        course_id: course._id,
+        course_name: course.m_course_title || "",
+        course_image: course.m_course_banner || "",
+        course_price: String(course.m_course_price || 0),
+        course_offerprice: String(course.m_course_offer_price || 0),
+        course_views: String(course.m_course_view || 0),
+        course_rating: String(course.m_course_rating || 0),
+        course_duration: String(course.m_course_duration_web || 0),
+        course_reviews: String(course.m_course_reviews || 0),
+
+        // currently same as rating
+        total_rating: String(course.m_course_rating || 0),
+
+        // abhi calculation nahi hai schema me
+        totalPercent: 0,
+
+        // subject collection connect hone par dynamic kar lena
+        total_subjects: "0"
+      }));
+
+      result.push({
+        category_id: category._id,
+        category_name: category.m_category_name,
+        Courses: formattedCourses
+      });
+    }
+
+    return res.status(200).json({
+      response: "success",
+      Category: result
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      response: "error",
+      message: error.message
     });
   }
 };

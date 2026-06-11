@@ -7,26 +7,77 @@ const { authMiddleware } = require("../middlewares/authMiddleware");
 const { courseUpload } = require("../middlewares/uploadMiddleware");
 const { userMiddleware } = require("../middlewares/userMiddleware");
 
+const {
+  addCourse,
+  getAllCourses,
+  getCategoryDropdown,
+  updateCourse,
+  deleteCourse,
+  getPopularCourses,
+  getRecommendedCourses,
+  getCourseById,
+  getCourseDropdown,
+  changeCourseStatus,
+  appGetCourseTeamList
+} = require("../controllers/courseController");
 
-const { addCourse,getAllCourses,getCategoryDropdown,updateCourse,deleteCourse,getPopularCourses,getRecommendedCourses,getCourseById,getCourseDropdown,changeCourseStatus } = require("../controllers/courseController"); 
-
-router.post("/add-course", authMiddleware, adminMiddleware, courseUpload, addCourse);
+router.post(
+  "/add-course",
+  authMiddleware,
+  adminMiddleware,
+  courseUpload,
+  addCourse,
+);
 router.get("/all-courses", authMiddleware, adminMiddleware, getAllCourses);
-router.get("/categories-dropdown", authMiddleware, adminMiddleware, getCategoryDropdown);
-router.put("/update-course/:id", authMiddleware, adminMiddleware, courseUpload, updateCourse);
-router.delete("/delete-course/:id", authMiddleware, adminMiddleware, deleteCourse);
-router.get("/popular-courses",authMiddleware,adminMiddleware, getPopularCourses);
-router.get("/recommended-courses",authMiddleware,adminMiddleware, getRecommendedCourses);
+router.get(
+  "/categories-dropdown",
+  authMiddleware,
+  adminMiddleware,
+  getCategoryDropdown,
+);
+router.put(
+  "/update-course/:id",
+  authMiddleware,
+  adminMiddleware,
+  courseUpload,
+  updateCourse,
+);
+router.delete(
+  "/delete-course/:id",
+  authMiddleware,
+  adminMiddleware,
+  deleteCourse,
+);
+router.get(
+  "/popular-courses",
+  authMiddleware,
+  adminMiddleware,
+  getPopularCourses,
+);
+router.get(
+  "/recommended-courses",
+  authMiddleware,
+  adminMiddleware,
+  getRecommendedCourses,
+);
 router.get("/course/:id", authMiddleware, adminMiddleware, getCourseById);
-router.get("/dropdown", authMiddleware, adminMiddleware, getCourseDropdown); 
-router.patch("/status/:id", authMiddleware, adminMiddleware, changeCourseStatus);
-
-
-
-
-
+router.get("/dropdown", authMiddleware, adminMiddleware, getCourseDropdown);
+router.patch(
+  "/status/:id",
+  authMiddleware,
+  adminMiddleware,
+  changeCourseStatus,
+);
 
 router.get("/public-all-courses", getAllCourses);
 router.get("/public-course/:id", getCourseById);
 
-module.exports = router;  
+
+
+
+
+// Mobile App Routes ==================================================================================
+
+router.post("/course_team_list",authMiddleware,userMiddleware, appGetCourseTeamList);
+
+module.exports = router;

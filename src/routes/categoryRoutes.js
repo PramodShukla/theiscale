@@ -7,6 +7,7 @@ const {
   getAllCategories,
   updateCategory,
   deleteCategory,
+  appGetCategoryWiseCourses
 } = require("../controllers/categoryController");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
@@ -48,5 +49,7 @@ router.delete(
   adminMiddleware,
   deleteCategory,
 );
+
+router.get("/get_category_courses", appGetCategoryWiseCourses);
 
 module.exports = router;

@@ -155,7 +155,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 🔐 bcrypt compare
+    //  bcrypt compare
     const isMatch = await bcrypt.compare(password, user.c_password);
 
     if (!isMatch) {
@@ -182,3 +182,66 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+
+// exports.applogin = async (req, res) => {
+//   try {
+//     const { user_mobile, user_pass } = req.body;
+
+//     // Validation
+//     if (!user_mobile || !user_pass) {
+//       return res.status(400).json({
+//         response: "error",
+//         message: "user_mobile and user_pass are required",
+//       });
+//     }
+
+//     // Mobile number se user find karo
+//     const user = await Candidate.findOne({
+//       c_contact: Number(user_mobile),
+//     });
+
+//     if (!user) {
+//       return res.status(404).json({
+//         response: "error",
+//         message: "User not found",
+//       });
+//     }
+
+//     // Password check
+//     const isMatch = await bcrypt.compare(
+//       user_pass,
+//       user.c_password
+//     );
+
+//     if (!isMatch) {
+//       return res.status(401).json({
+//         response: "error",
+//         message: "Invalid Password",
+//       });
+//     }
+
+//     // Success Response
+//     return res.status(200).json({
+//       response: "success",
+//       message: "Login Successfully",
+//       user: [
+//         {
+//           c_id: user._id,
+//           c_first_name: user.c_first_name,
+//           c_email: user.c_email,
+//           c_contact: String(user.c_contact),
+//           c_gender: user.c_gender,
+//           c_current_address1: user.c_current_address1,
+//         },
+//       ],
+//     });
+//   } catch (error) {
+//     console.log(error);
+
+//     return res.status(500).json({
+//       response: "error",
+//       message: error.message,
+//     });
+//   }
+// };

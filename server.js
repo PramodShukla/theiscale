@@ -33,6 +33,12 @@ const userAllRoutes = require("./src/routes/userAllRoutes");
 app.use("/api", userAllRoutes);
 
 
+
+const appAllRoutes = require("./src/routes/appAllRoutes");
+app.use("/app", appAllRoutes);
+
+
+
 //  default route
 app.get("/", (req, res) => {
   res.send("API is running...");

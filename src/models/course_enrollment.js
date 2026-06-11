@@ -51,8 +51,9 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: null,
     },
 
-    coupon_code: {
-      type: String,
+    coupon_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "coupon",
       default: null,
     },
 

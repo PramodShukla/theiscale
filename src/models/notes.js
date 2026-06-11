@@ -108,3 +108,6 @@ const notesSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("notes", notesSchema);
+
+
+//working

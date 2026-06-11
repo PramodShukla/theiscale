@@ -8,9 +8,8 @@ const Subject = require("../models/subject");
 const Lecture = require("../models/lecture");
 const Enrollment = require("../models/course_enrollment");
 
-// ===============================
+
 // ADD COURSE
-// ===============================
 const addCourse = async (req, res) => {
   try {
     const {
@@ -84,13 +83,33 @@ const addCourse = async (req, res) => {
         .json({ status: false, message: "Invalid category id" });
     }
 
-    if (
-      m_course_trainee &&
-      !mongoose.Types.ObjectId.isValid(m_course_trainee)
-    ) {
-      return res
-        .status(400)
-        .json({ status: false, message: "Invalid instructor id" });
+    // if (
+    //   m_course_trainee &&
+    //   !mongoose.Types.ObjectId.isValid(m_course_trainee)
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .json({ status: false, message: "Invalid instructor id" });
+    // }
+
+    if (m_course_trainee) {
+      if (!Array.isArray(m_course_trainee)) {
+        return res.status(400).json({
+          status: false,
+          message: "m_course_trainee must be an array",
+        });
+      }
+
+      const invalidIds = m_course_trainee.filter(
+        (id) => !mongoose.Types.ObjectId.isValid(id),
+      );
+
+      if (invalidIds.length > 0) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid trainee ids",
+        });
+      }
     }
 
     // ENUM VALIDATIONS
@@ -269,9 +288,13 @@ const addCourse = async (req, res) => {
         ? Number(m_course_duration_web)
         : null,
 
+      // m_course_trainee: m_course_trainee
+      //   ? new mongoose.Types.ObjectId(m_course_trainee)
+      //   : null,
+
       m_course_trainee: m_course_trainee
-        ? new mongoose.Types.ObjectId(m_course_trainee)
-        : null,
+        ? m_course_trainee.map((id) => new mongoose.Types.ObjectId(id))
+        : [],
 
       m_course_certificate:
         m_course_certificate !== undefined
@@ -522,7 +545,7 @@ const getAllCourses = async (req, res) => {
         price: course.m_course_type === 1 ? "N/A" : course.m_course_price,
         offer_price:
           course.m_course_type === 1 ? "N/A" : course.m_course_offer_price,
-        status: course.m_course_status === 1 ? "Active" : "Inactive",
+        status: course.m_course_status === "active" ? "Active" : "Inactive",
         slug: course.m_course_slug,
 
         // Extra Fields
@@ -759,18 +782,42 @@ const updateCourse = async (req, res) => {
       updateData.m_course_duration_web = Number(body.m_course_duration_web);
 
     // INSTRUCTOR
-    if (body.m_course_trainee === null) {
-      updateData.m_course_trainee = null;
-    } else if (isValid(body.m_course_trainee)) {
-      if (!mongoose.Types.ObjectId.isValid(body.m_course_trainee)) {
+    // if (body.m_course_trainee === null) {
+    //   updateData.m_course_trainee = null;
+    // } else if (isValid(body.m_course_trainee)) {
+    //   if (!mongoose.Types.ObjectId.isValid(body.m_course_trainee)) {
+    //     return res.status(400).json({
+    //       status: false,
+    //       message: "Invalid instructor id",
+    //     });
+    //   }
+
+    //   updateData.m_course_trainee = new mongoose.Types.ObjectId(
+    //     body.m_course_trainee,
+    //   );
+    // }
+
+    if (body.m_course_trainee !== undefined) {
+      if (!Array.isArray(body.m_course_trainee)) {
         return res.status(400).json({
           status: false,
-          message: "Invalid instructor id",
+          message: "m_course_trainee must be an array",
         });
       }
 
-      updateData.m_course_trainee = new mongoose.Types.ObjectId(
-        body.m_course_trainee,
+      const invalidIds = body.m_course_trainee.filter(
+        (id) => !mongoose.Types.ObjectId.isValid(id),
+      );
+
+      if (invalidIds.length > 0) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid trainee ids",
+        });
+      }
+
+      updateData.m_course_trainee = body.m_course_trainee.map(
+        (id) => new mongoose.Types.ObjectId(id),
       );
     }
 
@@ -916,7 +963,7 @@ const deleteCourse = async (req, res) => {
 // GET POPULAR COURSES
 const getPopularCourses = async (req, res) => {
   try {
-    let { page = 1, limit = 100 } = req.query;
+    let { page = 1, limit = 100, search = "" } = req.query;
 
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 100;
@@ -925,6 +972,14 @@ const getPopularCourses = async (req, res) => {
       m_course_popular: 1,
       // m_course_status: "active",
     };
+
+    // Search by course title
+    if (search) {
+      filter.m_course_title = {
+        $regex: search,
+        $options: "i",
+      };
+    }
 
     const total = await Course.countDocuments(filter);
 
@@ -966,7 +1021,7 @@ const getPopularCourses = async (req, res) => {
 // GET RECOMMENDED COURSE
 const getRecommendedCourses = async (req, res) => {
   try {
-    let { page = 1, limit = 100 } = req.query;
+    let { page = 1, limit = 100, search = "" } = req.query;
 
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 100;
@@ -975,6 +1030,14 @@ const getRecommendedCourses = async (req, res) => {
       m_course_recomended: 1,
       // m_course_status: "active",
     };
+
+    // Search by course title
+    if (search) {
+      filter.m_course_title = {
+        $regex: search,
+        $options: "i",
+      };
+    }
 
     const total = await Course.countDocuments(filter);
 
@@ -1027,7 +1090,23 @@ const getCourseById = async (req, res) => {
     }
 
     // FETCH COURSE
-    const course = await Course.findById(id);
+    // const course = await Course.findById(id);
+
+    const course = await Course.findById(id).populate({
+      path: "m_course_trainee",
+      select: `
+    member_name
+    member_position
+    member_image
+    member_expertise
+    member_experience
+    member_linkedin
+    member_bio
+    member_type
+    member_status
+    member_order
+  `,
+    });
 
     if (!course) {
       return res.status(404).json({
@@ -1068,7 +1147,7 @@ const getCourseById = async (req, res) => {
       price: course.m_course_price,
       offer_price: course.m_course_offer_price,
 
-      status: course.m_course_status === 1 ? "Active" : "Inactive",
+      status: course.m_course_status === "active" ? "Active" : "Inactive",
       status_web: course.m_course_status_web === 1 ? "Active" : "Inactive",
 
       duration_app: course.m_course_duration_app,
@@ -1076,6 +1155,30 @@ const getCourseById = async (req, res) => {
 
       popular: course.m_course_popular,
       recommended: course.m_course_recomended,
+
+      trainees: course.m_course_trainee.map((t) => ({
+        trainee_id: t._id,
+
+        name: t.member_name,
+
+        position: t.member_position,
+
+        image: t.member_image,
+
+        expertise: t.member_expertise,
+
+        experience: t.member_experience,
+
+        linkedin: t.member_linkedin,
+
+        bio: t.member_bio,
+
+        type: t.member_type,
+
+        status: t.member_status,
+
+        order: t.member_order,
+      })),
 
       views: course.m_course_view,
       reviews: course.m_course_reviews,
@@ -1186,6 +1289,59 @@ const changeCourseStatus = async (req, res) => {
   }
 };
 
+//===================================================================================================================
+
+const appGetCourseTeamList = async (req, res) => {
+  try {
+    const { course_id } = req.body;
+
+    if (!course_id) {
+      return res.status(400).json({
+        response: "error",
+        message: "course_id is required",
+      });
+    }
+
+    const course = await Course.findById(course_id).populate({
+      path: "m_course_trainee",
+      model: "our_teams",
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        response: "error",
+        message: "Course not found",
+      });
+    }
+
+    const data = course.m_course_trainee.map((member) => ({
+      id: member._id,
+      member_name: member.member_name || "",
+      member_position: member.member_position || "",
+      member_image: member.member_image || "",
+      member_expertise: member.member_expertise || "",
+      member_experience: String(member.member_experience || ""),
+      member_linkedin: member.member_linkedin || "",
+      member_bio: member.member_bio || "",
+      member_type: String(member.member_type || ""),
+      member_status: String(member.member_status || ""),
+      member_order: String(member.member_order || ""),
+    }));
+
+    return res.status(200).json({
+      response: "success",
+      data,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      response: "error",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addCourse,
   getAllCourses,
@@ -1197,4 +1353,6 @@ module.exports = {
   getCourseById,
   getCourseDropdown,
   changeCourseStatus,
+
+  appGetCourseTeamList,
 };

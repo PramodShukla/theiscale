@@ -8,8 +8,6 @@ const courseSchema = new mongoose.Schema(
       required: true,
     },
 
-   
-
     m_course_category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "category",
@@ -128,7 +126,7 @@ const courseSchema = new mongoose.Schema(
     m_course_status: {
       type: String,
       // required: true,
-      enum: ["active","inactive"], 
+      enum: ["active", "inactive"],
       default: "active",
     },
 
@@ -187,8 +185,13 @@ const courseSchema = new mongoose.Schema(
     // },
 
     m_course_trainee: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "instructor",
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "our_teams",
+        },
+      ],
+      default: [],
     },
 
     m_course_feestructure: {

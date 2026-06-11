@@ -789,11 +789,10 @@ const getMyNotesWishlist = async (req, res) => {
         path: "notes_id",
 
         select: `
-            m_notes_title
-            m_notes_thumbnail
-            m_notes_price
-            m_notes_offer_price
-            m_notes_language
+            notes_name
+            notes_image
+            notes_price
+            notes_offer_price
           `,
       })
 
@@ -890,9 +889,7 @@ const getAllNotesWishlistsAdmin = async (req, res) => {
         path: "notes_id",
 
         select: `
-            m_notes_title
-            m_notes_price
-            m_notes_offer_price
+            notes_name
           `,
       })
 
@@ -919,7 +916,7 @@ const getAllNotesWishlistsAdmin = async (req, res) => {
 
         const mobile = String(item.user_id?.c_contact || "");
 
-        const notesName = item.notes_id?.m_notes_title?.toLowerCase() || "";
+        const notesName = item.notes_id?.notes_name?.toLowerCase() || "";
 
         return (
           studentName.includes(text) ||
@@ -946,7 +943,7 @@ const getAllNotesWishlistsAdmin = async (req, res) => {
 
         notes_id: item.notes_id?._id,
 
-        notes_name: item.notes_id?.m_notes_title,
+        notes_name: item.notes_id?.notes_name,
 
         added_date: item.added_on,
       };
@@ -1062,8 +1059,6 @@ const deleteNotesWishlist = async (req, res) => {
     });
   }
 };
-
-
 
 module.exports = {
   addCourseToWishlist,
