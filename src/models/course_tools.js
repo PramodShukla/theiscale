@@ -35,10 +35,20 @@ const toolSchema = new mongoose.Schema(
       type: Number,
       default: 1, // 1 = active, 0 = inactive
     },
+
+    c_tool_created_by: {
+      type: Number,
+      default: 0,
+    },
+
+    c_tool_update_by: {
+      type: Number,
+      default: 0,
+    },
   },
   {
-    timestamps: true, // ✅ BEST FIX
-  }
+    timestamps: true,
+  },
 );
 
 module.exports = mongoose.model("course_tools", toolSchema);

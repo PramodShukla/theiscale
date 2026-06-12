@@ -26,6 +26,10 @@ const mLectureSchema = new mongoose.Schema({
   ml_yt_type: { type: String, default: "1",  },
   ml_file: { type: String, default: null, required: false }, //ocl_type=1 then link else file title	
   ml_video_id: { type: String,  },
+  ml_vdocipher_id: {
+  type: String,
+  default: null
+},
   ml_date: { type: Date, default: null },
   ml_time: { type: String, default: null },
   ml_added_by: { type: Number, default: null },

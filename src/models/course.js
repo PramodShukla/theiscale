@@ -229,6 +229,11 @@ const courseSchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+
+    m_course_share_link: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: false,

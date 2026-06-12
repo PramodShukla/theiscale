@@ -3,9 +3,7 @@ const Course = require("../models/course");
 const fs = require("fs");
 const mongoose = require("mongoose");
 
-// ===============================
 // ADD TOOL
-// ===============================
 const addTool = async (req, res) => {
   try {
     const {
@@ -31,9 +29,7 @@ const addTool = async (req, res) => {
       });
     }
 
-    const image = req.files?.c_tool_img
-      ? req.files.c_tool_img[0].path
-      : null;
+    const image = req.files?.c_tool_img ? req.files.c_tool_img[0].path : null;
 
     const newTool = new Tool({
       c_tool_course,
@@ -56,9 +52,7 @@ const addTool = async (req, res) => {
   }
 };
 
-// ===============================
 // GET TOOLS BY COURSE
-// ===============================
 const getToolsByCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -83,9 +77,7 @@ const getToolsByCourse = async (req, res) => {
   }
 };
 
-// ===============================
 // UPDATE TOOL
-// ===============================
 const updateTool = async (req, res) => {
   try {
     const { id } = req.params;
@@ -98,16 +90,11 @@ const updateTool = async (req, res) => {
       });
     }
 
-    const {
-      c_tool_title,
-      c_tool_description,
-      c_tool_status,
-    } = req.body;
+    const { c_tool_title, c_tool_description, c_tool_status } = req.body;
 
     if (c_tool_title) tool.c_tool_title = c_tool_title;
     if (c_tool_description) tool.c_tool_description = c_tool_description;
-    if (c_tool_status !== undefined)
-      tool.c_tool_status = Number(c_tool_status);
+    if (c_tool_status !== undefined) tool.c_tool_status = Number(c_tool_status);
 
     if (req.files?.c_tool_img) {
       if (tool.c_tool_img && fs.existsSync(tool.c_tool_img)) {
@@ -129,9 +116,7 @@ const updateTool = async (req, res) => {
   }
 };
 
-// ===============================
 // DELETE TOOL
-// ===============================
 const deleteTool = async (req, res) => {
   try {
     const { id } = req.params;
@@ -159,9 +144,72 @@ const deleteTool = async (req, res) => {
   }
 };
 
+
+// Mobile phone apis===============================================================================================================
+
+
+const appGetCourseTools = async (req, res) => {
+  try {
+    const { course_id } = req.body;
+
+    if (!course_id) {
+      return res.status(400).json({
+        response: "error",
+        message: "course_id is required",
+      });
+    }
+
+    const tools = await Tool.find({
+      c_tool_course: course_id,
+      c_tool_status: 1,
+    }).sort({ createdAt: 1 });
+
+    const data = tools.map((tool) => ({
+      c_tool_id: tool._id,
+
+      c_tool_course: tool.c_tool_course || "",
+
+      c_tool_course_slug: tool.c_tool_course_slug || "",
+
+      c_tool_title: tool.c_tool_title || "",
+
+      c_tool_img: tool.c_tool_img || "",
+
+      c_tool_description: tool.c_tool_description || "",
+
+      c_tool_created_by: tool.c_tool_created_by || "0",
+
+      c_tool_update_by: tool.c_tool_update_by || "0",
+
+      c_tool_status: String(tool.c_tool_status || 0),
+
+      c_tool_created: tool.createdAt
+        ? tool.createdAt.toISOString().replace("T", " ").substring(0, 19)
+        : "",
+
+      c_tool_updated: tool.updatedAt
+        ? tool.updatedAt.toISOString().replace("T", " ").substring(0, 19)
+        : "",
+    }));
+
+    return res.status(200).json({
+      response: "success",
+      data,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      response: "error",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addTool,
   getToolsByCourse,
   updateTool,
   deleteTool,
+  appGetCourseTools
 };

@@ -6,11 +6,13 @@ const {
   getToolsByCourse,
   updateTool,
   deleteTool,
+  appGetCourseTools,
 } = require("../controllers/toolsController");
 
 const { toolUpload } = require("../middlewares/uploadMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
+const { userMiddleware } = require("../middlewares/userMiddleware");
 
 // ADD
 router.post("/add-tool", authMiddleware, adminMiddleware, toolUpload, addTool);
@@ -35,9 +37,8 @@ router.put(
 // DELETE
 router.delete("/delete-tool/:id", authMiddleware, adminMiddleware, deleteTool);
 
-
-
-
 router.get("/public-get-tools/:courseId", getToolsByCourse);
+
+router.post("/tool_list", authMiddleware,userMiddleware, appGetCourseTools);
 
 module.exports = router;

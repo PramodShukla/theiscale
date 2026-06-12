@@ -9,6 +9,8 @@ const Lecture = require("../models/lecture");
 const Enrollment = require("../models/course_enrollment");
 
 
+
+
 // ADD COURSE
 const addCourse = async (req, res) => {
   try {
@@ -493,9 +495,7 @@ const getAllCourses = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    // ===============================
-    // NEW CODE FOR EXTRA FIELDS
-    // ===============================
+   
 
     // Sab course ki id ek baar nikal lo
     const courseIds = courses.map((c) => c._id);
@@ -525,9 +525,8 @@ const getAllCourses = async (req, res) => {
       lectureCountMap[cid] = (lectureCountMap[cid] || 0) + 1;
     });
 
-    // ===============================
+ 
     // FINAL RESPONSE
-    // ===============================
 
     const finalData = courses.map((course) => {
       const cid = course._id.toString();
@@ -1342,6 +1341,143 @@ const appGetCourseTeamList = async (req, res) => {
   }
 };
 
+
+const appGetCourseDetailsById = async (req, res) => {
+  try {
+
+    const { course_id } = req.body;
+
+    if (!course_id) {
+      return res.status(400).json({
+        response: "error",
+        message: "course_id is required"
+      });
+    }
+
+    const course = await Course.findById(course_id)
+      .populate("m_course_category");
+
+    if (!course) {
+      return res.status(404).json({
+        response: "error",
+        message: "Course not found"
+      });
+    }
+
+    // TOTAL SUBJECTS
+    const totalSubjects = await Subject.countDocuments({
+      m_subject_course: course._id
+    });
+
+   
+    // TOTAL LECTURES
+    const totalLectures = await Lecture.countDocuments({
+      ml_course: course._id
+    });
+
+    
+    // COMPLETED LECTURES
+    let completedLectures = 0;
+
+    if (req.user?.id) {
+      completedLectures =
+        await LectureProgress.countDocuments({
+          user_id: req.user.id,
+          course_id: course._id,
+          is_completed: true
+        });
+    }
+
+
+    // PERCENTAGE
+    let totalPercent = 0;
+
+    if (totalLectures > 0) {
+      totalPercent = Math.round(
+        (completedLectures / totalLectures) * 100
+      );
+    }
+
+    return res.status(200).json({
+      response: "success",
+      course_details: [
+        {
+          course_id: course._id,
+
+          course_name:
+            course.m_course_title || "",
+
+          m_course_slung:
+            course.m_course_slug || "",
+
+          course_pdf:
+            course.m_course_pdf || "",
+
+          category_id:
+            course.m_course_category?._id || "",
+
+          category_name:
+            course.m_course_category?.m_category_name || "",
+
+          course_image:
+            course.m_course_banner || "",
+
+          course_intro:
+            course.m_course_intro || "",
+
+          course_desc:
+            course.m_course_description || "",
+
+          course_price:
+            String(course.m_course_price || 0),
+
+          course_offerprice:
+            String(course.m_course_offer_price || 0),
+
+          video_link:
+            course.m_course_video_link || "",
+
+          course_views:
+            String(course.m_course_view || 0),
+
+          course_rating:
+            String(course.m_course_rating || 0),
+
+          course_reviews:
+            String(course.m_course_reviews || 0),
+
+          course_duration:
+            String(course.m_course_duration_web || 0),
+
+          // ObjectId Array
+          course_trainee:
+            course.m_course_trainee || [],
+
+         course_updated_on: course.m_course_modified,
+
+          total_subjects:
+            String(totalSubjects),
+
+          course_share_link:
+            course.m_course_share_link || "",
+
+          totalPercent
+        }
+      ]
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      response: "error",
+      message: error.message
+    });
+
+  }
+};
+
 module.exports = {
   addCourse,
   getAllCourses,
@@ -1355,4 +1491,5 @@ module.exports = {
   changeCourseStatus,
 
   appGetCourseTeamList,
+  appGetCourseDetailsById
 };

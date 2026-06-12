@@ -18,7 +18,8 @@ const {
   getCourseById,
   getCourseDropdown,
   changeCourseStatus,
-  appGetCourseTeamList
+  appGetCourseTeamList,
+  appGetCourseDetailsById,
 } = require("../controllers/courseController");
 
 router.post(
@@ -72,12 +73,15 @@ router.patch(
 router.get("/public-all-courses", getAllCourses);
 router.get("/public-course/:id", getCourseById);
 
-
-
-
-
 // Mobile App Routes ==================================================================================
 
-router.post("/course_team_list",authMiddleware,userMiddleware, appGetCourseTeamList);
+router.post(
+  "/course_team_list",
+  authMiddleware,
+  userMiddleware,
+  appGetCourseTeamList,
+);
+
+router.post("/course_details", authMiddleware,userMiddleware, appGetCourseDetailsById);
 
 module.exports = router;
