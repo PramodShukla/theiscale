@@ -52,8 +52,8 @@ const userSchema = new mongoose.Schema(
 
     kh_status: {
       type: String,
-      default: "active",
-      enum: ["active", "inactive"],
+      default: 1,
+      enum: [0,1],
     },
   },
   {

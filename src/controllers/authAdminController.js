@@ -155,7 +155,8 @@ exports.getAllAdmins = async (req, res) => {
 
       added_on: admin.kh_added_on,
 
-      status: admin.kh_status === 1 ? "active" : "inactive",
+      // status: admin.kh_status === 1 ? "active" : "inactive",
+      status: admin.kh_status,
     }));
 
     res.status(200).json({
@@ -204,7 +205,8 @@ exports.getSingleAdmin = async (req, res) => {
 
         profile_pic: admin.kh_pic,
 
-        status: admin.kh_status === 1 ? "active" : "inactive",
+        // status: admin.kh_status === 1 ? "active" : "inactive",
+        status: admin.kh_status ,
 
         added_on: admin.kh_added_on,
       },

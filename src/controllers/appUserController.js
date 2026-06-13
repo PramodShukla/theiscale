@@ -494,12 +494,14 @@ const searchUsersForDropdown = async (req, res) => {
     // ======================================
 
     const users = await Candidate.find(filter)
-      .select(`
+      .select(
+        `
         c_first_name
         c_last_name
         c_display_name
         c_email
-      `)
+      `,
+      )
       .skip((page - 1) * limit)
       .limit(limit)
       .sort({ createdAt: -1 });
