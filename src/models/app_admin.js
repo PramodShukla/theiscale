@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema(
     },
 
     kh_status: {
-      type: String,
+      type: Number,
       default: 1,
       enum: [0,1],
     },
