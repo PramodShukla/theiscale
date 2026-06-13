@@ -11,6 +11,7 @@ const JobApplication = require("../models/company_requirement_application");
 const Coupon = require("../models/coupon");
 const Candidate = require("../models/candidates");
 const Job = require("../models/company_requirement");
+const mongoose = require("mongoose");
 
 const getCourseRegistrations = async (req, res) => {
   try {
@@ -1478,7 +1479,6 @@ const getAllJobApplications = async (req, res) => {
       }
     }
 
-
     // DB SEARCH
     if (search) {
       const regex = new RegExp(search, "i");
@@ -1640,6 +1640,159 @@ const deleteJobApplication = async (req, res) => {
   }
 };
 
+const toggleAppStatus = async (req, res) => {
+  try {
+    const { enrollment_id } = req.params;
+
+    const enrollment = await Enrollment.findById(enrollment_id);
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    enrollment.app_status =
+      enrollment.app_status === 1 ? 0 : 1;
+
+    await enrollment.save();
+
+    return res.status(200).json({
+      status: true,
+      message: "App status updated successfully",
+      app_status: enrollment.app_status,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+const toggleAndroidStatus = async (req, res) => {
+  try {
+    const { enrollment_id } = req.params;
+
+    const enrollment = await Enrollment.findById(enrollment_id);
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    enrollment.android_status =
+      enrollment.android_status === 1 ? 0 : 1;
+
+    await enrollment.save();
+
+    return res.status(200).json({
+      status: true,
+      message: "Android status updated successfully",
+      android_status: enrollment.android_status,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+const toggleIosStatus = async (req, res) => {
+  try {
+    const { enrollment_id } = req.params;
+
+    const enrollment = await Enrollment.findById(enrollment_id);
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    enrollment.ios_status =
+      enrollment.ios_status === 1 ? 0 : 1;
+
+    await enrollment.save();
+
+    return res.status(200).json({
+      status: true,
+      message: "IOS status updated successfully",
+      ios_status: enrollment.ios_status,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+const toggleTestSeriesStatus = async (req, res) => {
+  try {
+    const { enrollment_id } = req.params;
+
+    const enrollment = await Enrollment.findById(enrollment_id);
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    enrollment.test_series_status = enrollment.test_series_status === 1 ? 0 : 1;
+
+    await enrollment.save();
+
+    return res.status(200).json({
+      status: true,
+      message: "Test series status updated successfully",
+      test_series_status: enrollment.test_series_status,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+const toggleLiveClassStatus = async (req, res) => {
+  try {
+    const { enrollment_id } = req.params;
+
+    const enrollment = await Enrollment.findById(enrollment_id);
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    enrollment.live_class_status = enrollment.live_class_status === 1 ? 0 : 1;
+
+    await enrollment.save();
+
+    return res.status(200).json({
+      status: true,
+      message: "Live class status updated successfully",
+      live_class_status: enrollment.live_class_status,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getCourseRegistrations,
   getCoursePurchaseDetails,
@@ -1655,4 +1808,9 @@ module.exports = {
   getAllJobApplications,
   getSingleJobApplication,
   deleteJobApplication,
+  toggleAppStatus,
+  toggleAndroidStatus,
+  toggleIosStatus,
+  toggleTestSeriesStatus,
+  toggleLiveClassStatus,
 };

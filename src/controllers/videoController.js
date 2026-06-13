@@ -35,9 +35,7 @@ const playVideo = async (req, res) => {
       });
     }
 
-    // =========================
     // GET LECTURE
-    // =========================
 
     const lecture = await Lecture.findById(topic_id).populate(
       "ml_subject",
@@ -56,9 +54,7 @@ const playVideo = async (req, res) => {
     // console.log("VIDEO ID =>", lecture.ml_vdocipher_id);
     // console.log("FILE =>", lecture.ml_file);
 
-    // =========================
     // SUBJECT CHECK
-    // =========================
 
     const subject = lecture.ml_subject;
 
@@ -69,9 +65,7 @@ const playVideo = async (req, res) => {
       });
     }
 
-    // =========================
     // COURSE CHECK
-    // =========================
 
     const courseId = subject.m_subject_course;
 
@@ -82,9 +76,7 @@ const playVideo = async (req, res) => {
       });
     }
 
-    // =========================
     // ENROLLMENT CHECK
-    // =========================
 
     const enrollment = await Enrollment.findOne({
       user_id: req.user.id,
@@ -101,9 +93,7 @@ const playVideo = async (req, res) => {
       });
     }
 
-    // =========================
     // PAYMENT CHECK
-    // =========================
 
     if (
       enrollment.course_type === "paid" &&
@@ -115,9 +105,7 @@ const playVideo = async (req, res) => {
       });
     }
 
-    // =========================
     // EXPIRY CHECK
-    // =========================
 
     if (
       enrollment.access_type === "limited" &&
@@ -130,9 +118,7 @@ const playVideo = async (req, res) => {
       });
     }
 
-    // =========================
     // VDOCIPHER VIDEO
-    // =========================
 
     if (Number(lecture.ml_yt_type) === 2) {
       const videoId = lecture.ml_vdocipher_id;
@@ -156,9 +142,7 @@ const playVideo = async (req, res) => {
       });
     }
 
-    // =========================
     // NORMAL VIDEO FILE
-    // =========================
 
     if (lecture.ml_file) {
       return res.status(200).json({

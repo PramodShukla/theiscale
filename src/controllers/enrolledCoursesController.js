@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 
 const Enrollment = require("../models/course_enrollment");
@@ -7,13 +6,9 @@ const Subject = require("../models/subject");
 const Lecture = require("../models/lecture");
 const LectureProgress = require("../models/lecture_progress");
 
-
-// =====================================================
 // GET ENROLLED FREE COURSES
-// =====================================================
 const getEnrolledFreeCourses = async (req, res) => {
   try {
-
     const userId = req.user.id;
 
     const enrollments = await Enrollment.find({
@@ -41,9 +36,7 @@ const getEnrolledFreeCourses = async (req, res) => {
       .sort({ enrolled_on: -1 });
 
     // remove deleted/null courses
-    const filteredCourses = enrollments.filter(
-      (item) => item.course_id
-    );
+    const filteredCourses = enrollments.filter((item) => item.course_id);
 
     return res.status(200).json({
       status: true,
@@ -51,27 +44,19 @@ const getEnrolledFreeCourses = async (req, res) => {
       total: filteredCourses.length,
       data: filteredCourses,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       status: false,
       message: error.message,
     });
-
   }
 };
 
-
-
-// =====================================================
 // GET ENROLLED PREMIUM COURSES
-// =====================================================
 const getEnrolledPremiumCourses = async (req, res) => {
   try {
-
     const userId = req.user.id;
 
     const enrollments = await Enrollment.find({
@@ -99,9 +84,7 @@ const getEnrolledPremiumCourses = async (req, res) => {
       .sort({ enrolled_on: -1 });
 
     // remove deleted/null courses
-    const filteredCourses = enrollments.filter(
-      (item) => item.course_id
-    );
+    const filteredCourses = enrollments.filter((item) => item.course_id);
 
     return res.status(200).json({
       status: true,
@@ -109,33 +92,23 @@ const getEnrolledPremiumCourses = async (req, res) => {
       total: filteredCourses.length,
       data: filteredCourses,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       status: false,
       message: error.message,
     });
-
   }
 };
 
-
-// =====================================================
 // GET FULL ENROLLED COURSE DETAILS
-// =====================================================
-
 const getEnrolledCourseFullDetails = async (req, res) => {
   try {
-
     const userId = req.user.id;
     const { course_id } = req.params;
 
-    // =========================================
     // VALIDATION
-    // =========================================
 
     if (!course_id) {
       return res.status(400).json({
@@ -151,10 +124,7 @@ const getEnrolledCourseFullDetails = async (req, res) => {
       });
     }
 
-    // =========================================
     // CHECK ENROLLMENT
-    // =========================================
-
     const enrollment = await Enrollment.findOne({
       user_id: userId,
       course_id: course_id,
@@ -168,10 +138,7 @@ const getEnrolledCourseFullDetails = async (req, res) => {
       });
     }
 
-    // =========================================
     // PAID COURSE PAYMENT CHECK
-    // =========================================
-
     if (
       enrollment.course_type === "paid" &&
       enrollment.payment_status !== "success"
@@ -182,10 +149,7 @@ const getEnrolledCourseFullDetails = async (req, res) => {
       });
     }
 
-    // =========================================
     // EXPIRY CHECK
-    // =========================================
-
     if (
       enrollment.access_type === "limited" &&
       enrollment.expiry_date &&
@@ -197,10 +161,7 @@ const getEnrolledCourseFullDetails = async (req, res) => {
       });
     }
 
-    // =========================================
     // COURSE DETAILS
-    // =========================================
-
     const course = await Course.findById(course_id)
       .populate("m_course_category")
       .populate("m_course_trainee")
@@ -213,64 +174,41 @@ const getEnrolledCourseFullDetails = async (req, res) => {
       });
     }
 
-    // =========================================
     // SUBJECTS
-    // =========================================
-
     const subjects = await Subject.find({
       m_subject_course: course_id,
     })
       .sort({ created_at: 1 })
       .lean();
 
-    const subjectIds = subjects.map(
-      (subject) => subject._id
-    );
+    const subjectIds = subjects.map((subject) => subject._id);
 
-    // =========================================
     // LECTURES
-    // =========================================
-
     const lectures = await Lecture.find({
       ml_subject: { $in: subjectIds },
     })
       .sort({ ml_seq: 1, _id: 1 })
       .lean();
 
-    // =========================================
     // COMPLETED LECTURES
-    // =========================================
+    const completedLectures = await LectureProgress.find({
+      user_id: userId,
+      lecture_id: {
+        $in: lectures.map((lecture) => lecture._id),
+      },
+      is_completed: true,
+    }).select("lecture_id");
 
-    const completedLectures =
-      await LectureProgress.find({
-        user_id: userId,
-        lecture_id: {
-          $in: lectures.map((lecture) => lecture._id),
-        },
-        is_completed: true,
-      }).select("lecture_id");
-
-    // =========================================
     // COMPLETED SET
-    // =========================================
-
     const completedSet = new Set(
-      completedLectures.map((item) =>
-        item.lecture_id.toString()
-      )
+      completedLectures.map((item) => item.lecture_id.toString()),
     );
 
-    // =========================================
     // SUBJECT WISE DATA
-    // =========================================
-
     const subjectWiseData = subjects.map((subject) => {
-
       const subjectLectures = lectures
         .filter(
-          (lecture) =>
-            lecture.ml_subject.toString() ===
-            subject._id.toString()
+          (lecture) => lecture.ml_subject.toString() === subject._id.toString(),
         )
         .map((lecture) => ({
           lecture_id: lecture._id,
@@ -295,9 +233,7 @@ const getEnrolledCourseFullDetails = async (req, res) => {
 
           lecture_added_on: lecture.ml_added_on,
 
-          is_completed: completedSet.has(
-            lecture._id.toString()
-          ),
+          is_completed: completedSet.has(lecture._id.toString()),
         }));
 
       return {
@@ -313,30 +249,20 @@ const getEnrolledCourseFullDetails = async (req, res) => {
       };
     });
 
-    // =========================================
     // COUNTS
-    // =========================================
-
     const totalLectures = lectures.length;
 
-    const completedCount =
-      completedLectures.length;
+    const completedCount = completedLectures.length;
 
     const progress =
       totalLectures === 0
         ? 0
-        : Math.round(
-            (completedCount / totalLectures) * 100
-          );
+        : Math.round((completedCount / totalLectures) * 100);
 
-    // =========================================
     // RESPONSE
-    // =========================================
-
     return res.status(200).json({
       status: true,
-      message:
-        "Enrolled course full details fetched successfully",
+      message: "Enrolled course full details fetched successfully",
 
       progress,
 
@@ -350,22 +276,102 @@ const getEnrolledCourseFullDetails = async (req, res) => {
 
       subjects: subjectWiseData,
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       status: false,
       message: error.message,
     });
-
   }
 };
 
+const getCourseAccessDetails = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { course_id } = req.body;
+
+    if (!course_id) {
+      return res.status(400).json({
+        status: false,
+        message: "course_id is required",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(course_id)) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid course id",
+      });
+    }
+
+    const enrollment = await Enrollment.findOne({
+      user_id: userId,
+      course_id,
+    }).populate("course_id", "m_course_title");
+
+    if (!enrollment) {
+      return res.status(200).json({
+        status: true,
+        is_enrolled: false,
+        message: "User not enrolled in this course",
+      });
+    }
+
+    let remainingDays = null;
+
+    if (enrollment.access_type === "limited" && enrollment.expiry_date) {
+      const today = new Date();
+
+      const expiry = new Date(enrollment.expiry_date);
+
+      remainingDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+
+      if (remainingDays < 0) {
+        remainingDays = 0;
+      }
+    }
+
+    return res.status(200).json({
+      status: true,
+
+      is_enrolled: true,
+
+      course_id: enrollment.course_id?._id,
+
+      course_name: enrollment.course_id?.m_course_title,
+
+      access_type: enrollment.access_type,
+
+      expiry_date: enrollment.expiry_date,
+
+      remaining_days: remainingDays,
+
+      test_series_status: enrollment.test_series_status,
+
+      live_class_status: enrollment.live_class_status,
+
+      certificate_status: enrollment.certificate_status,
+
+      certificate_no: enrollment.certificate_no,
+
+      certificate_pdf: enrollment.certificate_pdf,
+
+      certificate_date: enrollment.certificate_date,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   getEnrolledFreeCourses,
   getEnrolledPremiumCourses,
-  getEnrolledCourseFullDetails
+  getEnrolledCourseFullDetails,
+  getCourseAccessDetails,
 };

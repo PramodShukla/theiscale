@@ -18,6 +18,11 @@ const {
   getAllJobApplications,
   getSingleJobApplication,
   deleteJobApplication,
+  toggleAppStatus,
+  toggleAndroidStatus,
+  toggleIosStatus,
+  toggleTestSeriesStatus,
+  toggleLiveClassStatus,
 } = require("../controllers/adminRegistrationsSectionController");
 
 router.get(
@@ -118,6 +123,41 @@ router.delete(
   authMiddleware,
   adminMiddleware,
   deleteJobApplication,
+);
+
+router.patch(
+  "/toggle-app-status/:enrollment_id",
+  authMiddleware,
+  adminMiddleware,
+  toggleAppStatus,
+);
+
+router.patch(
+  "/toggle-android-status/:enrollment_id",
+  authMiddleware,
+  adminMiddleware,
+  toggleAndroidStatus,
+);
+
+router.patch(
+  "/toggle-ios-status/:enrollment_id",
+  authMiddleware,
+  adminMiddleware,
+  toggleIosStatus,
+);
+
+router.patch(
+  "/toggle-test-series-status/:enrollment_id",
+  authMiddleware,
+  adminMiddleware,
+  toggleTestSeriesStatus,
+);
+
+router.patch(
+  "/toggle-live-class-status/:enrollment_id",
+  authMiddleware,
+  adminMiddleware,
+  toggleLiveClassStatus,
 );
 
 module.exports = router;

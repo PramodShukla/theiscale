@@ -108,33 +108,45 @@ const courseEnrollmentSchema = new mongoose.Schema(
     },
 
     app_status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: Number,
+      enum: [0,1],
+      default: 0,
     },
 
     android_status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: Number,
+      enum: [0,1],
+      default: 0,
     },
 
     ios_status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: Number,
+      enum: [0,1],
+      default: 0,
     },
 
+    // test_series_status: {
+    //   type: String,
+    //   enum: ["active", "inactive"],
+    //   default: "inactive",
+    // },
+
+    // live_class_status: {
+    //   type: String,
+    //   enum: ["active", "inactive"],
+    //   default: "inactive",
+    // },
+
     test_series_status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "inactive",
+      type: Number,
+      enum: [0, 1],
+      default: 0,
     },
 
     live_class_status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "inactive",
+      type: Number,
+      enum: [0, 1],
+      default: 0,
     },
 
     certificate_status: {

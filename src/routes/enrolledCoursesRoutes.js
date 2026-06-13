@@ -6,7 +6,8 @@ const { userMiddleware } = require("../middlewares/userMiddleware");
 const {
   getEnrolledPremiumCourses,
   getEnrolledFreeCourses,
-  getEnrolledCourseFullDetails
+  getEnrolledCourseFullDetails,
+  getCourseAccessDetails
 } = require("../controllers/enrolledCoursesController");
 
 router.get(
@@ -29,6 +30,8 @@ router.get(
   userMiddleware,
   getEnrolledCourseFullDetails
 );
+
+
 
 
 module.exports = router;
