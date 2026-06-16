@@ -124,10 +124,10 @@ const courseSchema = new mongoose.Schema(
     },
 
     m_course_status: {
-      type: String,
+      type: Number,
       // required: true,
-      enum: ["active", "inactive"],
-      default: "active",
+      enum: [1,0],
+      default: 1,
     },
 
     m_course_status_web: {

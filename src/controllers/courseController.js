@@ -8,9 +8,6 @@ const Subject = require("../models/subject");
 const Lecture = require("../models/lecture");
 const Enrollment = require("../models/course_enrollment");
 
-
-
-
 // ADD COURSE
 const addCourse = async (req, res) => {
   try {
@@ -158,10 +155,13 @@ const addCourse = async (req, res) => {
     //     .json({ status: false, message: "Invalid course status" });
     // }
 
-    if (!["active", "inactive"].includes(m_course_status?.toLowerCase())) {
+    if (
+      m_course_status !== undefined &&
+      ![0, 1, "0", "1"].includes(m_course_status)
+    ) {
       return res.status(400).json({
         status: false,
-        message: "Invalid course status",
+        message: "Invalid course status. Use 0 or 1",
       });
     }
 
@@ -275,7 +275,7 @@ const addCourse = async (req, res) => {
       m_course_recomended: Number(m_course_recomended) || 0,
       m_course_keyword: m_course_keyword || null,
 
-      m_course_status: m_course_status.toLowerCase(),
+      m_course_status: Number(m_course_status ?? 1),
       m_course_status_web: Number(m_course_status_web),
 
       // m_course_view: 0,
@@ -482,7 +482,7 @@ const getAllCourses = async (req, res) => {
 
     // STATUS FILTER
     if (status !== undefined) {
-      filter.m_course_status = status.toLowerCase();
+      filter.m_course_status = Number(status);
     }
 
     // TOTAL COUNT
@@ -494,8 +494,6 @@ const getAllCourses = async (req, res) => {
       .sort({ m_course_order: 1, _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
-
-   
 
     // Sab course ki id ek baar nikal lo
     const courseIds = courses.map((c) => c._id);
@@ -525,7 +523,6 @@ const getAllCourses = async (req, res) => {
       lectureCountMap[cid] = (lectureCountMap[cid] || 0) + 1;
     });
 
- 
     // FINAL RESPONSE
 
     const finalData = courses.map((course) => {
@@ -759,16 +756,16 @@ const updateCourse = async (req, res) => {
       updateData.m_course_keyword = body.m_course_keyword;
 
     if (isValid(body.m_course_status)) {
-      if (
-        !["active", "inactive"].includes(body.m_course_status.toLowerCase())
-      ) {
+      const status = Number(body.m_course_status);
+
+      if (![0, 1].includes(status)) {
         return res.status(400).json({
           status: false,
-          message: "Invalid course status",
+          message: "Invalid course status. Use 0 or 1",
         });
       }
 
-      updateData.m_course_status = body.m_course_status.toLowerCase();
+      updateData.m_course_status = status;
     }
     if (isValid(body.m_course_status_web))
       updateData.m_course_status_web = Number(body.m_course_status_web);
@@ -1270,8 +1267,7 @@ const changeCourseStatus = async (req, res) => {
       });
     }
 
-    course.m_course_status =
-      course.m_course_status === "active" ? "inactive" : "active";
+    course.m_course_status = course.m_course_status === 1 ? 0 : 1;
 
     await course.save();
 
@@ -1341,61 +1337,53 @@ const appGetCourseTeamList = async (req, res) => {
   }
 };
 
-
 const appGetCourseDetailsById = async (req, res) => {
   try {
-
     const { course_id } = req.body;
 
     if (!course_id) {
       return res.status(400).json({
         response: "error",
-        message: "course_id is required"
+        message: "course_id is required",
       });
     }
 
-    const course = await Course.findById(course_id)
-      .populate("m_course_category");
+    const course =
+      await Course.findById(course_id).populate("m_course_category");
 
     if (!course) {
       return res.status(404).json({
         response: "error",
-        message: "Course not found"
+        message: "Course not found",
       });
     }
 
     // TOTAL SUBJECTS
     const totalSubjects = await Subject.countDocuments({
-      m_subject_course: course._id
+      m_subject_course: course._id,
     });
 
-   
     // TOTAL LECTURES
     const totalLectures = await Lecture.countDocuments({
-      ml_course: course._id
+      ml_course: course._id,
     });
 
-    
     // COMPLETED LECTURES
     let completedLectures = 0;
 
     if (req.user?.id) {
-      completedLectures =
-        await LectureProgress.countDocuments({
-          user_id: req.user.id,
-          course_id: course._id,
-          is_completed: true
-        });
+      completedLectures = await LectureProgress.countDocuments({
+        user_id: req.user.id,
+        course_id: course._id,
+        is_completed: true,
+      });
     }
-
 
     // PERCENTAGE
     let totalPercent = 0;
 
     if (totalLectures > 0) {
-      totalPercent = Math.round(
-        (completedLectures / totalLectures) * 100
-      );
+      totalPercent = Math.round((completedLectures / totalLectures) * 100);
     }
 
     return res.status(200).json({
@@ -1404,77 +1392,56 @@ const appGetCourseDetailsById = async (req, res) => {
         {
           course_id: course._id,
 
-          course_name:
-            course.m_course_title || "",
+          course_name: course.m_course_title || "",
 
-          m_course_slung:
-            course.m_course_slug || "",
+          m_course_slung: course.m_course_slug || "",
 
-          course_pdf:
-            course.m_course_pdf || "",
+          course_pdf: course.m_course_pdf || "",
 
-          category_id:
-            course.m_course_category?._id || "",
+          category_id: course.m_course_category?._id || "",
 
-          category_name:
-            course.m_course_category?.m_category_name || "",
+          category_name: course.m_course_category?.m_category_name || "",
 
-          course_image:
-            course.m_course_banner || "",
+          course_image: course.m_course_banner || "",
 
-          course_intro:
-            course.m_course_intro || "",
+          course_intro: course.m_course_intro || "",
 
-          course_desc:
-            course.m_course_description || "",
+          course_desc: course.m_course_description || "",
 
-          course_price:
-            String(course.m_course_price || 0),
+          course_price: String(course.m_course_price || 0),
 
-          course_offerprice:
-            String(course.m_course_offer_price || 0),
+          course_offerprice: String(course.m_course_offer_price || 0),
 
-          video_link:
-            course.m_course_video_link || "",
+          video_link: course.m_course_video_link || "",
 
-          course_views:
-            String(course.m_course_view || 0),
+          course_views: String(course.m_course_view || 0),
 
-          course_rating:
-            String(course.m_course_rating || 0),
+          course_rating: String(course.m_course_rating || 0),
 
-          course_reviews:
-            String(course.m_course_reviews || 0),
+          course_reviews: String(course.m_course_reviews || 0),
 
-          course_duration:
-            String(course.m_course_duration_web || 0),
+          course_duration: String(course.m_course_duration_web || 0),
 
           // ObjectId Array
-          course_trainee:
-            course.m_course_trainee || [],
+          course_trainee: course.m_course_trainee || [],
 
-         course_updated_on: course.m_course_modified,
+          course_updated_on: course.m_course_modified,
 
-          total_subjects:
-            String(totalSubjects),
+          total_subjects: String(totalSubjects),
 
-          course_share_link:
-            course.m_course_share_link || "",
+          course_share_link: course.m_course_share_link || "",
 
-          totalPercent
-        }
-      ]
+          totalPercent,
+        },
+      ],
     });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
       response: "error",
-      message: error.message
+      message: error.message,
     });
-
   }
 };
 
@@ -1491,5 +1458,5 @@ module.exports = {
   changeCourseStatus,
 
   appGetCourseTeamList,
-  appGetCourseDetailsById
+  appGetCourseDetailsById,
 };

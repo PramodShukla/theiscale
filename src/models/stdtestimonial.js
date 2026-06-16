@@ -4,10 +4,16 @@ const StSchema = new mongoose.Schema({
   m_st_video: { type: String, default: null }, // uploaded video
   m_st_url: { type: String, default: null },   // youtube link
 
-  m_st_status: { 
-    type: String, 
-    default: "active",
-    enum:["active","inactive"]
+  // m_st_status: { 
+  //   type: String, 
+  //   default: "active",
+  //   enum:["active","inactive"]
+  // },
+
+   m_st_status: { 
+    type: Number, 
+    default: 1,
+    enum:[1,0]
   },
 
   m_st_added_on: { 
