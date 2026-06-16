@@ -9,6 +9,7 @@ const {
   updateLeadGenerate,
   changeLeadGenerateStatus,
   deleteLeadGenerate,
+  getLeadFormBySlug
 } = require("../controllers/leadGenerateController");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
@@ -18,6 +19,8 @@ router.post("/add", authMiddleware, adminMiddleware, addLeadGenerate);
 
 // get all lead generate
 router.get("/all", authMiddleware, adminMiddleware, getAllLeadGenerate);
+
+// router.get("/form/:slug", getLeadFormBySlug);
 
 // get single lead generate
 router.get("/:id", authMiddleware, adminMiddleware, getSingleLeadGenerate);

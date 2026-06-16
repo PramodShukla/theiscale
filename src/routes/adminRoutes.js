@@ -55,6 +55,7 @@ const brandVideoRoutes = require("./brandVideoRoutes");
 const contactQueriesRoutes = require("./contactQueriesRoutes");
 const hiringFormRoutes = require("./hiringFormRoutes");
 const appSettingsRoutes = require("./appSettingsRoutes");
+const dataAnalyticsRoutes = require("./dataAnalyticsRoutes");
 
 
 
@@ -114,6 +115,7 @@ router.use("/brand-video", brandVideoRoutes);
 router.use("/contact-us", contactQueriesRoutes);
 router.use("/hiring-form", hiringFormRoutes);
 router.use("/app-settings", appSettingsRoutes);
+router.use("/data-analytics", dataAnalyticsRoutes);
 
 
 

@@ -39,6 +39,11 @@ app.use("/app", appAllRoutes);
 
 
 
+const dataAnalyticsRoutes = require("./src/routes/dataAnalyticsRoutes");
+app.use("/DataAnalytics", dataAnalyticsRoutes);
+
+
+
 //  default route
 app.get("/", (req, res) => {
   res.send("API is running...");

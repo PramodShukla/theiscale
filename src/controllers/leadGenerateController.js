@@ -36,37 +36,21 @@ const addLeadGenerate = async (req, res) => {
 
     const leadGenerate = new LeadGenerate({
       m_lg_title,
-
       m_lg_slug: slug,
-
       m_lg_desc: m_lg_desc || null,
-
       m_lg_redirect_link: m_lg_redirect_link || null,
 
-      m_lg_college: m_lg_college === "true" || m_lg_college === true,
+      m_lg_college: Number(m_lg_college),
+      m_lg_education: Number(m_lg_education),
+      m_lg_field_of_study: Number(m_lg_field_of_study),
+      m_lg_branch: Number(m_lg_branch),
+      m_lg_passing_year: Number(m_lg_passing_year),
+      m_lg_state: Number(m_lg_state),
+      m_lg_gender: Number(m_lg_gender),
+      m_lg_laptop_desktop: Number(m_lg_laptop_desktop),
+      m_lg_working_professional: Number(m_lg_working_professional),
 
-      m_lg_education: m_lg_education === "true" || m_lg_education === true,
-
-      m_lg_field_of_study:
-        m_lg_field_of_study === "true" || m_lg_field_of_study === true,
-
-      m_lg_branch: m_lg_branch === "true" || m_lg_branch === true,
-
-      m_lg_passing_year:
-        m_lg_passing_year === "true" || m_lg_passing_year === true,
-
-      m_lg_state: m_lg_state === "true" || m_lg_state === true,
-
-      m_lg_gender: m_lg_gender === "true" || m_lg_gender === true,
-
-      m_lg_laptop_desktop:
-        m_lg_laptop_desktop === "true" || m_lg_laptop_desktop === true,
-
-      m_lg_working_professional:
-        m_lg_working_professional === "true" ||
-        m_lg_working_professional === true,
-
-      m_lg_status: m_lg_status || "active",
+      m_lg_status: Number(m_lg_status ?? 1),
     });
 
     const savedData = await leadGenerate.save();
@@ -138,8 +122,15 @@ const getAllLeadGenerate = async (req, res) => {
         m_lg_desc
         m_lg_redirect_link
         m_lg_status
+        m_lg_slug
         createdAt
       `);
+
+    const updatedData = data.map((item) => ({
+      ...item.toObject(),
+
+      form_url: `https://www.theiscale.com/DataAnalytics/${item.m_lg_slug}`,
+    }));
 
     return res.status(200).json({
       status: true,
@@ -151,7 +142,7 @@ const getAllLeadGenerate = async (req, res) => {
         totalPages: Math.ceil(totalRecords / limit),
       },
 
-      data,
+      data: updatedData,
     });
   } catch (error) {
     return res.status(500).json({
@@ -160,6 +151,34 @@ const getAllLeadGenerate = async (req, res) => {
     });
   }
 };
+
+// const getLeadFormBySlug = async (req, res) => {
+//   try {
+//     const { slug } = req.params;
+
+//     const form = await LeadGenerate.findOne({
+//       m_lg_slug: slug,
+//       m_lg_status: 1,
+//     });
+
+//     if (!form) {
+//       return res.status(404).json({
+//         status: false,
+//         message: "Form not found",
+//       });
+//     }
+
+//     return res.status(200).json({
+//       status: true,
+//       data: form,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       status: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
 const getSingleLeadGenerate = async (req, res) => {
   try {
@@ -249,53 +268,36 @@ const updateLeadGenerate = async (req, res) => {
         m_lg_redirect_link || existingData.m_lg_redirect_link;
     }
 
-    if (m_lg_college !== undefined) {
-      existingData.m_lg_college =
-        m_lg_college === "true" || m_lg_college === true;
-    }
+    if (m_lg_college !== undefined)
+      existingData.m_lg_college = Number(m_lg_college);
 
-    if (m_lg_education !== undefined) {
-      existingData.m_lg_education =
-        m_lg_education === "true" || m_lg_education === true;
-    }
+    if (m_lg_education !== undefined)
+      existingData.m_lg_education = Number(m_lg_education);
 
-    if (m_lg_field_of_study !== undefined) {
-      existingData.m_lg_field_of_study =
-        m_lg_field_of_study === "true" || m_lg_field_of_study === true;
-    }
+    if (m_lg_field_of_study !== undefined)
+      existingData.m_lg_field_of_study = Number(m_lg_field_of_study);
 
-    if (m_lg_branch !== undefined) {
-      existingData.m_lg_branch = m_lg_branch === "true" || m_lg_branch === true;
-    }
+    if (m_lg_branch !== undefined)
+      existingData.m_lg_branch = Number(m_lg_branch);
 
-    if (m_lg_passing_year !== undefined) {
-      existingData.m_lg_passing_year =
-        m_lg_passing_year === "true" || m_lg_passing_year === true;
-    }
+    if (m_lg_passing_year !== undefined)
+      existingData.m_lg_passing_year = Number(m_lg_passing_year);
 
-    if (m_lg_state !== undefined) {
-      existingData.m_lg_state = m_lg_state === "true" || m_lg_state === true;
-    }
+    if (m_lg_state !== undefined) existingData.m_lg_state = Number(m_lg_state);
 
-    if (m_lg_gender !== undefined) {
-      existingData.m_lg_gender = m_lg_gender === "true" || m_lg_gender === true;
-    }
+    if (m_lg_gender !== undefined)
+      existingData.m_lg_gender = Number(m_lg_gender);
 
-    if (m_lg_laptop_desktop !== undefined) {
-      existingData.m_lg_laptop_desktop =
-        m_lg_laptop_desktop === "true" || m_lg_laptop_desktop === true;
-    }
+    if (m_lg_laptop_desktop !== undefined)
+      existingData.m_lg_laptop_desktop = Number(m_lg_laptop_desktop);
 
-    if (m_lg_working_professional !== undefined) {
-      existingData.m_lg_working_professional =
-        m_lg_working_professional === "true" ||
-        m_lg_working_professional === true;
-    }
+    if (m_lg_working_professional !== undefined)
+      existingData.m_lg_working_professional = Number(
+        m_lg_working_professional,
+      );
 
-    if (m_lg_status) {
-      existingData.m_lg_status = m_lg_status;
-    }
-
+    if (m_lg_status !== undefined)
+      existingData.m_lg_status = Number(m_lg_status);
     const updatedData = await existingData.save();
 
     return res.status(200).json({
@@ -331,8 +333,7 @@ const changeLeadGenerateStatus = async (req, res) => {
       });
     }
 
-    leadGenerate.m_lg_status =
-      leadGenerate.m_lg_status === "active" ? "inactive" : "active";
+    leadGenerate.m_lg_status = leadGenerate.m_lg_status === 1 ? 0 : 1;
 
     await leadGenerate.save();
 
@@ -388,4 +389,5 @@ module.exports = {
   updateLeadGenerate,
   changeLeadGenerateStatus,
   deleteLeadGenerate,
+  // getLeadFormBySlug,
 };

@@ -29,4 +29,31 @@ const generateTokenUser = (user) => {
   );
 };
 
-module.exports = { generateTokenAdmin, generateTokenUser };
+const generateResetToken = (user) => {
+  return jwt.sign(
+    {
+      id: user._id,
+      mobile: user.c_contact,
+      type: "password_reset",
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "5m",
+    }
+  );
+};
+
+const generateRegisterToken = (mobile) => {
+  return jwt.sign(
+    {
+      mobile,
+      type: "register",
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "10m",
+    }
+  );
+};
+
+module.exports = { generateTokenAdmin, generateTokenUser, generateResetToken, generateRegisterToken };

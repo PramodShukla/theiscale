@@ -12,7 +12,9 @@ const leadGenerateSchema = new mongoose.Schema(
 
     m_lg_slug: {
       type: String,
-      default: null,
+      required:true,
+      unique:true,
+      index:true
     },
 
     m_lg_desc: {
@@ -28,56 +30,56 @@ const leadGenerateSchema = new mongoose.Schema(
    
 
     m_lg_college: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
 
     m_lg_education: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
 
     m_lg_field_of_study: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
 
     m_lg_branch: {
-      type: Boolean,
+      type: Number,
       default: false,
     },
 
     m_lg_passing_year: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
 
     m_lg_state: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
 
     m_lg_gender: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
 
     m_lg_laptop_desktop: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
 
     m_lg_working_professional: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
 
 
 
     m_lg_status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: Number,
+      enum: [0,1],
+      default: 1,
     },
 
   

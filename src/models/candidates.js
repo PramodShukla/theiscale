@@ -15,9 +15,9 @@ const candidateSchema = new mongoose.Schema({
   c_last_name: { type: String },
   c_display_name: { type: String },
 
-  c_email: { type: String, required: true },
+  c_email: { type: String,  },
 
-  c_password: { type: String, required: true },
+  c_password: { type: String,  },
   c_password_update: {
     type: Number,
     enum: [0, 1], // 0=no, 1=yes
@@ -63,7 +63,15 @@ const candidateSchema = new mongoose.Schema({
   c_fcm_id: { type: String, default: null },
   c_user_session_token: { type: String },
 
-  c_user_otp: { type: String },
+  c_user_otp: {
+    type: String,
+    default: null,
+  },
+
+  c_otp_expiry: {
+    type: Date,
+    default: null,
+  },
 
   c_user_status: {
     type: Number,
