@@ -50,9 +50,9 @@ const SSSchema = new mongoose.Schema({
   },
 
   m_ss_status: {
-    type: String,
-    enum: ["active", "inactive"],
-    default: "active",
+    type: Number,
+    enum: [0,1],
+    default: 1,
   },
 
   m_ss_added_on: {

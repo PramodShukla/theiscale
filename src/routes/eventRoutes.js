@@ -10,7 +10,10 @@ const {
   updateEvent,
   deleteEvent,
   getAllEventsDropdown,
+  appGetEventDetails,
+  appGetAllEvents
 } = require("../controllers/eventController");
+const { userMiddleware } = require("../middlewares/userMiddleware");
 
 router.post("/add-event",authMiddleware,adminMiddleware, eventUpload, addEvent);
 
@@ -27,6 +30,13 @@ router.get("/get-events-dropdown",authMiddleware,adminMiddleware, getAllEventsDr
 
 
 router.get("/public-get-events", getAllEvents);
+
+
+// Mobile Apis=============================================================================================================================
+
+router.get("/all_events", authMiddleware,userMiddleware,appGetAllEvents);
+
+router.get("/all_details", authMiddleware,userMiddleware,appGetEventDetails);
 
 
 module.exports = router;

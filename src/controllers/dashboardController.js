@@ -1,17 +1,16 @@
 const Candidate = require("../models/candidates");
 const Enrollment = require("../models/course_enrollment");
-const Course = require("../models/course");
 
 exports.getDashboard = async (req, res) => {
   try {
-
     const userId = req.user.id;
 
-    // ===============================
-    // USER
-    // ===============================
-    const user = await Candidate.findById(userId)
-      .select("c_first_name c_last_name");
+    // =========================
+    // USER DETAILS
+    // =========================
+    const user = await Candidate.findById(userId).select(
+      "c_first_name c_last_name"
+    );
 
     if (!user) {
       return res.status(404).json({
@@ -20,64 +19,41 @@ exports.getDashboard = async (req, res) => {
       });
     }
 
-    // ===============================
-    // ENROLLMENTS
-    // ===============================
+    // =========================
+    // USER ENROLLMENTS
+    // =========================
     const enrollments = await Enrollment.find({
       user_id: userId,
-      status: "active",
-    }).select("course_id");
+      status: 1,
+    }).select("course_type");
 
-    const courseIds = enrollments.map(
-      (e) => e.course_id
-    );
-
-    // ===============================
-    // COURSES
-    // ===============================
-    const courses = await Course.find({
-      _id: { $in: courseIds },
-    }).select("m_course_type");
-
-    // ===============================
-    // COUNT
-    // ===============================
     let freeCourses = 0;
     let premiumCourses = 0;
 
-    courses.forEach((course) => {
-
-      if (course.m_course_type === 1) {
+    enrollments.forEach((enrollment) => {
+      if (Number(enrollment.course_type) === 1) {
         freeCourses++;
       }
 
-      if (course.m_course_type === 2) {
+      if (Number(enrollment.course_type) === 2) {
         premiumCourses++;
       }
-
     });
 
-    // ===============================
-    // RESPONSE
-    // ===============================
-    res.status(200).json({
+    return res.status(200).json({
       status: true,
       data: {
-        name:
-          `${user.c_first_name} ${user.c_last_name}`,
+        name: `${user.c_first_name || ""} ${user.c_last_name || ""}`.trim(),
         freeCourses,
         premiumCourses,
       },
     });
-
   } catch (error) {
+    console.log("Dashboard Error:", error);
 
-    console.log(error);
-
-    res.status(500).json({
+    return res.status(500).json({
       status: false,
       message: error.message,
     });
-
   }
 };

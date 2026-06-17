@@ -134,6 +134,7 @@ const courseSchema = new mongoose.Schema(
       type: Number,
       // required: true,
       enum: [0, 1],
+      default:1
     },
 
     m_course_view: {

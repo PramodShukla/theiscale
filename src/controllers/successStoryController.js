@@ -232,7 +232,7 @@ const changeSuccessStoryStatus = async (req, res) => {
       });
     }
 
-    story.m_ss_status = story.m_ss_status === "active" ? "inactive" : "active";
+    story.m_ss_status = story.m_ss_status === 1 ? 0 : 1;
 
     await story.save();
 
@@ -272,11 +272,64 @@ const getSingleSuccessStory = async (req, res) => {
   }
 };
 
+// Mobile Apis=============================================================================================================================
+
+const appGetSuccessStories = async (req, res) => {
+  try {
+    const stories = await SuccessStory.find({
+      m_ss_status: 1,
+    }).sort({
+      m_ss_order: 1,
+    });
+
+    const data = stories.map((story) => ({
+      ms_story_id: String(story._id),
+
+      ms_candidate_name: story.m_ss_name || "",
+
+      ms_candidate_designation: story.m_ss_designation || "",
+
+      ms_candidate_image: story.m_ss_image || "",
+
+      ms_candidate_linkedin: story.m_ss_linkedin || "",
+
+      ms_candidate_feedback: story.m_ss_feedback || "",
+
+      ms_place_company: story.m_ss_placed || "",
+
+      ms_package: story.m_ss_package || "",
+
+      ms_video_url: story.m_ss_youtube_url || "",
+
+      ms_order: String(story.m_ss_order || 0),
+
+      ms_status: String(story.m_ss_status || 0),
+
+      ms_added_on: story.m_ss_added_on
+        ? story.m_ss_added_on.toISOString().replace("T", " ").substring(0, 19)
+        : "",
+    }));
+
+    return res.status(200).json({
+      response: "success",
+      data,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      response: "error",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addSuccessStory,
   updateSuccessStory,
   getAllSuccessStories,
   deleteSuccessStory,
   changeSuccessStoryStatus,
-  getSingleSuccessStory
+  getSingleSuccessStory,
+  appGetSuccessStories
 };

@@ -8,10 +8,12 @@ const {
   deleteSuccessStory,
   changeSuccessStoryStatus,
   getSingleSuccessStory,
+  appGetSuccessStories
 } = require("../controllers/successStoryController");
 const { successStoryUpload } = require("../middlewares/uploadMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
+const { userMiddleware } = require("../middlewares/userMiddleware");
 
 router.post(
   "/add-ss",
@@ -47,5 +49,12 @@ router.patch(
   adminMiddleware,
   changeSuccessStoryStatus,
 );
+
+
+
+// Mobile Apis=============================================================================================================================
+
+
+router.get("/success/story",authMiddleware,userMiddleware,appGetSuccessStories);
 
 module.exports = router;

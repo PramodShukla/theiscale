@@ -1,4 +1,5 @@
 const Event = require("../models/event");
+const EventCategory = require("../models/event_category");
 const slugify = require("slugify");
 const fs = require("fs");
 
@@ -282,10 +283,267 @@ const getAllEventsDropdown = async (req, res) => {
   }
 };
 
+// Mobile apis====================================================================================================================================
+
+const appGetAllEvents = async (req, res) => {
+  try {
+    const events = await Event.find({
+      m_event_status: "active",
+    })
+      .populate("m_event_category")
+      .sort({ m_event_added_on: -1 });
+
+    const data = events.map((event) => {
+      const category = event.m_event_category || {};
+
+      return {
+        m_event_id: String(event._id),
+        m_event_title: event.m_event_title || "",
+        m_event_slug: event.m_event_slug || "",
+
+        m_event_category: category._id ? String(category._id) : "",
+
+        m_event_cat_slug: category.m_ec_slug || category.m_category_slug || "",
+
+        // schema me nahi hai
+        m_event_for: "",
+
+        m_event_banner: event.m_event_banner || "",
+
+        m_event_date_start: event.m_event_date_start
+          ? event.m_event_date_start.toISOString().split("T")[0]
+          : "",
+
+        m_event_date_end: event.m_event_date_end
+          ? event.m_event_date_end.toISOString().split("T")[0]
+          : "",
+
+        m_event_time_start: event.m_event_time_start || "",
+
+        m_event_time_end: event.m_event_time_end || "",
+
+        m_event_skill_level: event.m_event_skill_level || "",
+
+        m_event_certificate: event.m_event_certificate || "",
+
+        m_event_lang: event.m_event_lang || "",
+
+        m_event_host: event.m_event_host || "",
+
+        m_event_url: event.m_event_url || "",
+
+        m_event_link: event.m_event_link || "",
+
+        m_event_contact_no: String(event.m_event_contact_no || ""),
+
+        m_event_whatsapp_no: String(event.m_event_whatsapp_no || ""),
+
+        m_event_desc: event.m_event_desc || "",
+
+        m_event_file: event.m_event_file || "",
+
+        m_event_no_of_enroll: String(event.m_event_no_of_enroll || ""),
+
+        m_event_order: String(event.m_event_order || ""),
+
+        m_event_status: event.m_event_status === "active" ? "1" : "0",
+
+        m_event_added_on: event.m_event_added_on
+          ? event.m_event_added_on
+              .toISOString()
+              .replace("T", " ")
+              .substring(0, 19)
+          : "",
+
+        // CATEGORY DETAILS
+        m_ec_id: category._id ? String(category._id) : "",
+
+        m_ec_title: category.m_ec_title || category.m_category_name || "",
+
+        m_ec_slug: category.m_ec_slug || category.m_category_slug || "",
+
+        m_ec_for: "",
+
+        m_ec_icon: category.m_ec_icon || "",
+
+        m_ec_banner: category.m_ec_banner || "",
+
+        m_ec_keyword: category.m_ec_keyword || "",
+
+        m_ec_desc: category.m_ec_desc || "",
+
+        m_ec_order: String(category.m_ec_order || ""),
+
+        m_ec_status: String(category.m_ec_status || ""),
+
+        m_ec_added_on: category.m_ec_added_on
+          ? category.m_ec_added_on
+              .toISOString()
+              .replace("T", " ")
+              .substring(0, 19)
+          : "",
+      };
+    });
+
+    return res.status(200).json({
+      response: "success",
+      data,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      response: "error",
+      message: error.message,
+    });
+  }
+};
+
+const appGetEventDetails = async (req, res) => {
+  try {
+    const { event_id } = req.body;
+
+    if (!event_id) {
+      return res.status(400).json({
+        response: "error",
+        message: "event_id is required",
+      });
+    }
+
+    const event = await Event.findById(event_id).populate("m_event_category");
+
+    if (!event) {
+      return res.status(404).json({
+        response: "error",
+        message: "Event not found",
+      });
+    }
+
+    return res.status(200).json({
+      response: "success",
+      data: [
+        {
+          m_event_id: String(event._id),
+
+          m_event_title: event.m_event_title || "",
+          m_event_slug: event.m_event_slug || "",
+
+          m_event_category: event.m_event_category?._id
+            ? String(event.m_event_category._id)
+            : "",
+
+          m_event_cat_slug: event.m_event_category?.m_ec_slug || "",
+
+          // schema me nahi hai
+          m_event_for: "",
+
+          m_event_banner: event.m_event_banner || "",
+
+          m_event_date_start: event.m_event_date_start
+            ? event.m_event_date_start.toISOString().split("T")[0]
+            : "",
+
+          m_event_date_end: event.m_event_date_end
+            ? event.m_event_date_end.toISOString().split("T")[0]
+            : "",
+
+          m_event_time_start: event.m_event_time_start || "",
+          m_event_time_end: event.m_event_time_end || "",
+
+          m_event_skill_level: event.m_event_skill_level || "",
+
+          m_event_certificate: event.m_event_certificate || "",
+
+          m_event_lang: event.m_event_lang || "",
+
+          m_event_host: event.m_event_host || "",
+
+          m_event_url: event.m_event_url || "",
+          m_event_link: event.m_event_link || "",
+
+          m_event_contact_no: event.m_event_contact_no
+            ? String(event.m_event_contact_no)
+            : "",
+
+          m_event_whatsapp_no: event.m_event_whatsapp_no
+            ? String(event.m_event_whatsapp_no)
+            : "",
+
+          m_event_desc: event.m_event_desc || "",
+
+          m_event_file: event.m_event_file || "",
+
+          m_event_no_of_enroll: event.m_event_no_of_enroll
+            ? String(event.m_event_no_of_enroll)
+            : "",
+
+          m_event_order: event.m_event_order ? String(event.m_event_order) : "",
+
+          // active = 1, inactive = 2
+          m_event_status: event.m_event_status === "active" ? "1" : "2",
+
+          m_event_added_on: event.m_event_added_on
+            ? event.m_event_added_on
+                .toISOString()
+                .replace("T", " ")
+                .substring(0, 19)
+            : "",
+
+          // CATEGORY DETAILS
+          m_ec_id: event.m_event_category?._id
+            ? String(event.m_event_category._id)
+            : "",
+
+          m_ec_title: event.m_event_category?.m_ec_title || "",
+
+          m_ec_slug: event.m_event_category?.m_ec_slug || "",
+
+          m_ec_for: event.m_event_category?.m_ec_for || "",
+
+          m_ec_icon: event.m_event_category?.m_ec_icon || "",
+
+          m_ec_banner: event.m_event_category?.m_ec_banner || "",
+
+          m_ec_keyword: event.m_event_category?.m_ec_keyword || "",
+
+          m_ec_desc: event.m_event_category?.m_ec_desc || "",
+
+          m_ec_order: event.m_event_category?.m_ec_order
+            ? String(event.m_event_category.m_ec_order)
+            : "",
+
+          m_ec_status:
+            event.m_event_category?.m_ec_status === "active" ? "1" : "2",
+
+          m_ec_added_on: event.m_event_category?.m_ec_added_on
+            ? event.m_event_category.m_ec_added_on
+                .toISOString()
+                .replace("T", " ")
+                .substring(0, 19)
+            : "",
+
+          event_share_link: event.m_event_slug
+            ? `https://www.theiscale.com/event-details/${event.m_event_slug}`
+            : "",
+        },
+      ],
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      response: "error",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addEvent,
   getAllEvents,
   updateEvent,
   deleteEvent,
   getAllEventsDropdown,
+  appGetEventDetails,
+  appGetAllEvents,
 };

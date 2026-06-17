@@ -8,32 +8,62 @@ const { adminMiddleware } = require("../middlewares/adminMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 const { userMiddleware } = require("../middlewares/userMiddleware");
 
-
 // ===============================
 // ADMIN ROUTES
 // ===============================
 
 // Add Job
-router.post("/add-jobs", authMiddleware, adminMiddleware, jobUpload, jobController.addJob);
+router.post(
+  "/add-jobs",
+  authMiddleware,
+  adminMiddleware,
+  jobUpload,
+  jobController.addJob,
+);
 
 // Update Job
-router.put("/update-job/:id", authMiddleware, adminMiddleware, jobUpload, jobController.updateJob);
+router.put(
+  "/update-job/:id",
+  authMiddleware,
+  adminMiddleware,
+  jobUpload,
+  jobController.updateJob,
+);
 
 // Delete Job
-router.delete("/delete-job/:id", authMiddleware, adminMiddleware, jobController.deleteJob);
+router.delete(
+  "/delete-job/:id",
+  authMiddleware,
+  adminMiddleware,
+  jobController.deleteJob,
+);
 
 // Get All Jobs (admin)
-router.get("/get-all-jobs", authMiddleware, adminMiddleware, jobController.getAllJobs);
+router.get(
+  "/get-all-jobs",
+  authMiddleware,
+  adminMiddleware,
+  jobController.getAllJobs,
+);
 
 // Get Single Job (admin)
-router.get("/get-job/:id", authMiddleware, adminMiddleware, jobController.getJobById);
+router.get(
+  "/get-job/:id",
+  authMiddleware,
+  adminMiddleware,
+  jobController.getJobById,
+);
 
-router.patch("/status/:id", authMiddleware, adminMiddleware, jobController.changeJobStatus);
-
+router.patch(
+  "/status/:id",
+  authMiddleware,
+  adminMiddleware,
+  jobController.changeJobStatus,
+);
 
 // ===============================
 // USER ROUTES
-// =============================== 
+// ===============================
 
 // Get All Jobs (public)
 router.get("/user-get-all-jobs", jobController.getAllJobs);
@@ -42,8 +72,34 @@ router.get("/user-get-all-jobs", jobController.getAllJobs);
 router.get("/user-get-job/:id", jobController.getJobById);
 
 // Apply Job (login required)
-router.post("/user-apply-job/:jobId", authMiddleware, userMiddleware, jobController.applyJob);
+router.post(
+  "/user-apply-job/:jobId",
+  authMiddleware,
+  userMiddleware,
+  jobController.applyJob,
+);
 
-router.get("/job-titles-dropdown",authMiddleware, adminMiddleware, jobController.getAllUniqueJobTitles);
+router.get(
+  "/job-titles-dropdown",
+  authMiddleware,
+  adminMiddleware,
+  jobController.getAllUniqueJobTitles,
+);
 
-module.exports = router;   
+// Mobile Apis=============================================================================================================================
+
+router.get(
+  "/jobs/list",
+  authMiddleware,
+  userMiddleware,
+  jobController.appGetAllJobs,
+);
+
+router.post(
+  "/jobs/details",
+  authMiddleware,
+  userMiddleware,
+  jobController.appGetJobDetails,
+);
+
+module.exports = router;

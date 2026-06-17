@@ -6,5 +6,6 @@ const { userMiddleware } = require("../middlewares/userMiddleware");
 const { getDashboard } = require("../controllers/dashboardController");
 
 router.get("/", authMiddleware,userMiddleware, getDashboard);
+router.get("/user_course_count", authMiddleware,userMiddleware, getDashboard);
 
 module.exports = router;

@@ -102,9 +102,9 @@ const getAllJobs = async (req, res) => {
     }
 
     // EXPERIENCE FILTER (months)
-    if (exp) {
-      filter["experience.max"] = { $gte: Number(exp) };
-    }
+    // if (exp) {
+    //   filter["experience.max"] = { $gte: Number(exp) };
+    // }
 
     const total = await Job.countDocuments(filter);
 
@@ -365,7 +365,7 @@ const changeJobStatus = async (req, res) => {
       });
     }
 
-    job.status = job.status === "open" ? "closed" : "open";
+    job.status = job.status === 1 ? 2 : 1;
 
     job.updated_at = new Date();
 
@@ -384,6 +384,158 @@ const changeJobStatus = async (req, res) => {
   }
 };
 
+// Mobile Apis ==============================================================================================================================
+
+const appGetAllJobs = async (req, res) => {
+  try {
+    let { page = 1, limit = 100 } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const skip = (page - 1) * limit;
+
+    const total = await Job.countDocuments({
+      status: 1,
+    });
+
+    const jobs = await Job.find({
+      status: 1,
+    })
+      .sort({ order: 1, _id: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const data = jobs.map((job) => {
+      const slug = job.job_title
+        ?.toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-");
+
+      return {
+        m_ju_id: String(job._id),
+
+        m_ju_title: job.job_title || "",
+
+        m_ju_image: job.company_logo || "",
+
+        m_ju_desc: job.job_description || "",
+
+        m_ju_salary_from:
+          job.salary?.min > 0 ? String(job.salary.min) : "Not disclosed",
+
+        m_ju_salary_to:
+          job.salary?.max > 0 ? String(job.salary.max) : "Not disclosed",
+
+        m_ju_location:
+          job.job_locations?.length > 0 ? job.job_locations.join(", ") : "",
+
+        m_ju_exp: job.experience || "",
+
+        m_ju_exp_date: job.last_date_to_apply
+          ? job.last_date_to_apply.toISOString().split("T")[0]
+          : "",
+
+        m_ju_slug: job.slug || "",
+
+        link: job.application_link,
+      };
+    });
+
+    return res.status(200).json({
+      response: "success",
+
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      response: "error",
+      message: error.message,
+    });
+  }
+};
+
+const appGetJobDetails = async (req, res) => {
+  try {
+    const { job_id } = req.body;
+
+    if (!job_id) {
+      return res.status(400).json({
+        response: "error",
+        message: "job_id is required",
+      });
+    }
+
+    const job = await Job.findById(job_id);
+
+    if (!job) {
+      return res.status(404).json({
+        response: "error",
+        message: "Job not found",
+      });
+    }
+
+    return res.status(200).json({
+      response: "success",
+      data: [
+        {
+          m_ju_id: String(job._id),
+          m_ju_title: job.job_title || "",
+          m_ju_slug: job.slug || "",
+          m_ju_emp_type: job.emp_type || "",
+          m_ju_role_respo: job.role_respo || "",
+          m_ju_desire_skill: job.desire_skill || "",
+          m_ju_image: job.company_logo || "",
+          m_ju_desc: job.job_description || "",
+          m_ju_func_area: job.func_area || "",
+          m_ju_interview_for: job.interview_for || "",
+          m_ju_drive_name: job.drive_name || "",
+          m_ju_vacancy: String(job.vacancy || ""),
+          m_ju_company: job.company_name || "",
+          m_ju_salary_from: job.salary.min || "",
+          m_ju_salary_to: job.salary.max || "",
+          m_ju_salary_type: String(job.salary_type || ""),
+          m_ju_allowance: job.allowance || "",
+          m_ju_state: job.m_ju_state || "",
+          m_ju_location: job.job_locations?.join(", ") || "",
+          m_ju_exp: job.experience || "",
+          m_ju_qualification: job.qualification || "",
+          m_ju_recruit_mo: job.recruiter_mobile_no || "",
+          m_ju_recruit_whatsapp: job.recruiter_whatsapp_no || "",
+          m_ju_recruit_date: job.recruiter_date || "",
+          m_ju_exp_date: job.recruiter_expire_date || "",
+          m_ju_mail_type: job.mail_type || "",
+          m_ju_mail_reciev: job.mail_reciev || "",
+          m_ju_mail: job.m_ju_mail || "",
+          m_ju_order: String(job.order || ""),
+          m_ju_status: String(job.status || ""),
+          m_ju_added_on: job.created_at
+            ? new Date(job.created_at)
+                .toISOString()
+                .replace("T", " ")
+                .substring(0, 19)
+            : "",
+        },
+      ],
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      response: "error",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addJob,
   getAllJobs,
@@ -392,5 +544,7 @@ module.exports = {
   deleteJob,
   applyJob,
   getAllUniqueJobTitles,
-  changeJobStatus
+  changeJobStatus,
+  appGetAllJobs,
+  appGetJobDetails,
 };

@@ -47,10 +47,16 @@ const jobSchema = new mongoose.Schema({
     instagram: { type: String, default: null },
   },
 
-  status: {
+  slug: {
     type: String,
-    enum: ["open", "closed"],
-    default: "open",
+    unique: true,
+    index: true,
+  },
+
+  status: {
+    type: Number,
+    enum: [0,1,2], //0-pending 1-active 2-expired
+    default: 1,
   },
 
   // RECRUITER DETAILS
@@ -87,6 +93,19 @@ const jobSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+
+  
 });
+
+jobSchema.pre("save", function (next) {
+  if (this.job_title) {
+    this.slug = slugify(this.job_title, {
+      lower: true,
+      strict: true,
+    });
+  }
+  next();
+});
+
 
 module.exports = mongoose.model("company_requirement", jobSchema);
