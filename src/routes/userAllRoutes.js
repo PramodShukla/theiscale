@@ -38,6 +38,7 @@ const contactQueriesRoutes = require("./contactQueriesRoutes");
 const hiringFormRoutes = require("./hiringFormRoutes");
 const userReviewsRoutes = require("./userReviewsRoutes");
 const videoRoutes = require("./videoRoutes");
+const locationSettingRoutes = require("./locationSettingRoutes");
 
 
 
@@ -79,5 +80,6 @@ router.use("/contact-us", contactQueriesRoutes);
 router.use("/hiring-form", hiringFormRoutes);
 router.use("/user-reviews", userReviewsRoutes);
 router.use("/video", videoRoutes);
+router.use("/location", locationSettingRoutes);
 
 module.exports = router; 

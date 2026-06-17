@@ -74,7 +74,7 @@ const updateTestimonial = async (req, res) => {
 
     // Status update
     if (req.body.m_st_status !== undefined && req.body.m_st_status !== "") {
-      data.m_st_status = req.body.m_st_status;
+      data.m_st_status = Number(req.body.m_st_status);
     }
 
     // Video update
@@ -141,8 +141,7 @@ const changeTestimonialStatus = async (req, res) => {
       });
     }
 
-    testimonial.m_st_status =
-      testimonial.m_st_status === "active" ? "inactive" : "active";
+    testimonial.m_st_status = testimonial.m_st_status === 1 ? 0 : 1;
 
     testimonial.m_st_updated_on = new Date();
 
@@ -166,5 +165,5 @@ module.exports = {
   getAllTestimonials,
   updateTestimonial,
   deleteTestimonial,
-  changeTestimonialStatus
+  changeTestimonialStatus,
 };
