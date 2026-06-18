@@ -6,6 +6,7 @@ const {
   getDashboardStats,
   getMonthWiseRegistrations,
   getTopCourses,
+  getRecentActivities
 } = require("../controllers/adminDashboardController");
 
 const { authMiddleware } = require("../middlewares/authMiddleware");
@@ -26,5 +27,7 @@ router.get(
   adminMiddleware,
   getTopCourses,
 );
+
+router.get("/recent_activities",authMiddleware, adminMiddleware, getRecentActivities);
 
 module.exports = router;

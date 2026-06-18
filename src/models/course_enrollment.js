@@ -16,15 +16,15 @@ const courseEnrollmentSchema = new mongoose.Schema(
 
     course_type: {
       type: Number,
-      enum: [1,2],
+      enum: [1,2],  // free=1 , paid =2
       required: true,
       default:1
     },
 
     payment_status: {
-      type: String,
-      enum: ["pending", "success", "failed"],
-      default: "pending",
+      type: Number,
+      enum: [0,1,2],//["2=pending", "1=success", "0=failed"],
+      default: 2,
     },
 
     amount: {
@@ -151,9 +151,9 @@ const courseEnrollmentSchema = new mongoose.Schema(
     },
 
     certificate_status: {
-      type: String,
+      type: Number,
       enum: [0,1,2,3],// ["0=not_requested", "1=pending", "2=approved", "3=declined"],
-      default: "not_requested",
+      default: 0,
     },
 
     certificate_approved_at: {

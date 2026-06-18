@@ -5,6 +5,7 @@ const { generateTokenUser } = require("../utils/token");
 // const Candidate = require("../models/candidate");
 const sendSms = require("../utils/sendSms");
 const { generateResetToken, generateRegisterToken } = require("../utils/token");
+const validator = require("validator");
 
 // REGISTER
 // exports.register = async (req, res) => {
@@ -309,13 +310,12 @@ const { generateResetToken, generateRegisterToken } = require("../utils/token");
 //   }
 // };
 
-
 // //  LOGIN
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await Candidate.findOne({ c_email: email });
+    const user = await Candidate.findOne({ c_email: email.toLowerCase() });
 
     if (!user) {
       return res.status(400).send({
@@ -454,16 +454,12 @@ exports.sendOtp = async (req, res) => {
       c_contact: mobile,
     });
 
-    const otp = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString();
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Existing User
     if (user) {
       user.c_user_otp = otp;
-      user.c_otp_expiry = new Date(
-        Date.now() + 5 * 60 * 1000
-      );
+      user.c_otp_expiry = new Date(Date.now() + 5 * 60 * 1000);
 
       await user.save();
     }
@@ -473,39 +469,28 @@ exports.sendOtp = async (req, res) => {
       user = await Candidate.create({
         c_contact: mobile,
         c_user_otp: otp,
-        c_otp_expiry: new Date(
-          Date.now() + 5 * 60 * 1000
-        ),
+        c_otp_expiry: new Date(Date.now() + 5 * 60 * 1000),
       });
     }
 
-    const message =
-      `${otp} is the OTP to authenticate login credential. Do not share with anyone. - The iScale`;
+    const message = `${otp} is the OTP to authenticate login credential. Do not share with anyone. - The iScale`;
 
-    await sendSms(
-      message,
-      mobile,
-      "1307173398514201568"
-    );
+    await sendSms(message, mobile, "1307173398514201568");
 
     return res.status(200).json({
       status: true,
       message: "OTP sent successfully",
     });
-
   } catch (error) {
-
     return res.status(500).json({
       status: false,
       message: error.message,
     });
-
   }
 };
 
 exports.verifyOtp = async (req, res) => {
   try {
-
     const { mobile, otp } = req.body;
 
     const user = await Candidate.findOne({
@@ -526,10 +511,7 @@ exports.verifyOtp = async (req, res) => {
       });
     }
 
-    if (
-      !user.c_otp_expiry ||
-      user.c_otp_expiry < new Date()
-    ) {
+    if (!user.c_otp_expiry || user.c_otp_expiry < new Date()) {
       return res.status(400).json({
         status: false,
         message: "OTP expired",
@@ -543,13 +525,8 @@ exports.verifyOtp = async (req, res) => {
     await user.save();
 
     // Existing Registered User
-    if (
-      user.c_first_name &&
-      user.c_email
-    ) {
-
-      const token =
-        generateTokenUser(user);
+    if (user.c_first_name && user.c_email && user.c_password) {
+      const token = generateTokenUser(user);
 
       return res.status(200).json({
         status: true,
@@ -560,8 +537,7 @@ exports.verifyOtp = async (req, res) => {
     }
 
     // New User
-    const registerToken =
-      generateRegisterToken(mobile);
+    const registerToken = generateRegisterToken(mobile);
 
     return res.status(200).json({
       status: true,
@@ -569,39 +545,45 @@ exports.verifyOtp = async (req, res) => {
       message: "Complete registration",
       registerToken,
     });
-
   } catch (error) {
-
     return res.status(500).json({
       status: false,
       message: error.message,
     });
-
   }
 };
 
 exports.register = async (req, res) => {
   try {
-    const {
-      fname,
-      lname,
-      email,
-      whatsapp,
-      gender,
-    } = req.body;
+    const { fname, lname, email, password, whatsapp, gender } = req.body;
 
     const mobile = req.registerUser.mobile;
 
-    if (
-      !fname ||
-      !lname ||
-      !email ||
-      !whatsapp ||
-      !gender
-    ) {
+    if (!fname || !lname || !email || !password || !whatsapp || !gender) {
       return res.status(400).json({
         status: false,
         message: "All fields are required",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        status: false,
+        message: "The password must be at least 6 digits long.",
+      });
+    }
+
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({
+        status: false,
+        message: "Enter the email in the correct format.",
+      });
+    }
+
+    if (String(whatsapp).length !== 10) {
+      return res.status(400).json({
+        status: false,
+        message: "The WhatsApp number must be 10 digits long.",
       });
     }
 
@@ -626,10 +608,9 @@ exports.register = async (req, res) => {
     }
 
     // Email duplicate check
-    const existingEmail =
-      await Candidate.findOne({
-        c_email: email,
-      });
+    const existingEmail = await Candidate.findOne({
+      c_email: email.toLowerCase(),
+    });
 
     if (existingEmail) {
       return res.status(400).json({
@@ -638,46 +619,44 @@ exports.register = async (req, res) => {
       });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Update User
     user.c_first_name = fname;
     user.c_last_name = lname;
     user.c_display_name = fname;
 
-    user.c_email = email;
+    user.c_email = email.toLowerCase();
+
+    user.c_password = hashedPassword;
 
     user.c_whatsapp = whatsapp;
     user.c_gender = gender;
 
     user.c_mobile_verified = 1;
     user.c_user_status = 1;
+    user.c_email_verified = 0;
 
     user.c_register_date = new Date();
-    user.candidate_idno =
-      Date.now().toString();
+    user.candidate_idno = Date.now().toString();
 
     await user.save();
 
     // Direct Login Token
-    const token =
-      generateTokenUser(user);
+    const token = generateTokenUser(user);
 
     return res.status(201).json({
       status: true,
-      message:
-        "Registration successful",
+      message: "Registration successful",
       token,
     });
-
   } catch (error) {
-
     return res.status(500).json({
       status: false,
       message: error.message,
     });
-
   }
 };
-
 
 // Forget password
 exports.sendForgotPasswordOtp = async (req, res) => {
@@ -753,6 +732,12 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
         message: "OTP expired",
       });
     }
+
+    // OTP verified ho gaya
+    user.c_user_otp = null;
+    user.c_otp_expiry = null;
+
+    await user.save();
 
     const resetToken = generateResetToken(user);
 

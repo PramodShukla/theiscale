@@ -57,7 +57,7 @@ const candidateSchema = new mongoose.Schema({
     },
   },
 
-  c_contact: { type: Number, default: null },
+  c_contact: { type: Number, default: null ,unique:true, index:true},
   c_alt_contact: { type: Number, default: null },
 
   c_fcm_id: { type: String, default: null },

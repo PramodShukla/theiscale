@@ -242,15 +242,33 @@ const courseSchema = new mongoose.Schema(
 );
 
 // Auto-generate slug from title
-courseSchema.pre("save", function (next) {
+// courseSchema.pre("save", function (next) {
+//   if (this.m_course_title && !this.m_course_slug) {
+//     this.m_course_slug = slugify(this.m_course_title, {
+//       lower: true,
+//       strict: true,
+//       replacement: "-",
+//     });
+//   }
+//   // next();
+// });
+
+
+courseSchema.pre("save", function(next) {
+
   if (this.m_course_title && !this.m_course_slug) {
-    this.m_course_slug = slugify(this.m_course_title, {
-      lower: true,
-      strict: true,
-      replacement: "-",
-    });
+
+    this.m_course_slug = slugify(
+      this.m_course_title,
+      {
+        lower:true,
+        strict:true,
+        replacement:"-"
+      }
+    );
   }
-  // next();
+
+  next();
 });
 
 module.exports = mongoose.model("course", courseSchema);

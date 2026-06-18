@@ -199,9 +199,9 @@ const enrollCourse = async (req, res) => {
         user_id,
         course_id,
 
-        course_type: "free",
+        course_type: 1,
 
-        payment_status: "success",
+        payment_status: 1,
 
         amount: 0,
 
@@ -218,16 +218,16 @@ const enrollCourse = async (req, res) => {
 
         progress: 0,
 
-        status: "active",
+        status: 1,
 
-        app_status: "active",
-        android_status: "active",
-        ios_status: "active",
+        app_status: 1,
+        android_status: 1,
+        ios_status: 1,
 
-        test_series_status: "inactive",
-        live_class_status: "inactive",
+        test_series_status: 0,
+        live_class_status: 0,
 
-        certificate_status: "pending",
+        certificate_status: 0,
       });
 
       return res.status(200).json({
@@ -244,7 +244,7 @@ const enrollCourse = async (req, res) => {
     if (course.m_course_type === 2) {
 
       // TEMP PAYMENT STATUS
-      const payment_status = "success";
+      const payment_status = 1;
 
       // ===============================
       // ACCESS LOGIC
@@ -289,7 +289,7 @@ const enrollCourse = async (req, res) => {
         user_id,
         course_id,
 
-        course_type: "paid",
+        course_type: 2,
 
         payment_status,
 
@@ -303,7 +303,7 @@ const enrollCourse = async (req, res) => {
 
         payable_amount: payableAmount,
 
-        coupon_code: coupon_code || null,
+        coupon_id: coupon_code || null,
 
         access_type,
 
@@ -311,16 +311,16 @@ const enrollCourse = async (req, res) => {
 
         progress: 0,
 
-        status: "active",
+        status: 1,
 
-        app_status: "active",
-        android_status: "active",
-        ios_status: "active",
+        app_status: 1,
+        android_status: 1,
+        ios_status: 1,
 
-        test_series_status: "inactive",
-        live_class_status: "inactive",
+        test_series_status: 0,
+        live_class_status: 0,
 
-        certificate_status: "pending",
+        certificate_status: 0,
       });
 
       return res.status(200).json({

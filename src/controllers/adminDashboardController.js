@@ -25,7 +25,7 @@ const getDashboardStats = async (req, res) => {
     const courseData = await CourseEnrollment.aggregate([
       {
         $match: {
-          payment_status: "success",
+          payment_status: 1,
         },
       },
       {
@@ -35,7 +35,7 @@ const getDashboardStats = async (req, res) => {
             $sum: 1,
           },
           totalRevenue: {
-            $sum: "$amount",
+            $sum: "$payable_amount",
           },
         },
       },
@@ -44,7 +44,7 @@ const getDashboardStats = async (req, res) => {
     const packageData = await TestPackageEnrollment.aggregate([
       {
         $match: {
-          payment_status: "success",
+          payment_status: 1,
         },
       },
       {
@@ -162,7 +162,7 @@ const getTopCourses = async (req, res) => {
     const topCourses = await CourseEnrollment.aggregate([
       {
         $match: {
-          payment_status: "success",
+          payment_status: 1,
         },
       },
 
@@ -243,8 +243,50 @@ const getTopCourses = async (req, res) => {
   }
 };
 
+const getRecentActivities = async (req, res) => {
+  try {
+    const [latestCandidates, latestEnrollments] = await Promise.all([
+      // Latest 10 Registrations
+      Candidate.find()
+        .select(
+          "c_first_name c_last_name c_display_name c_email c_contact c_register_date",
+        )
+        .sort({ c_register_date: -1 })
+        .limit(10),
+
+      // Latest 10 Course Enrollments
+      CourseEnrollment.find()
+        .select("user_id course_id enrolled_on coupon_id")
+        .populate({
+          path: "user_id",
+          select: "c_first_name c_last_name c_display_name c_email c_contact",
+        })
+        .populate({
+          path: "course_id",
+          select: "m_course_title",
+        })
+        .sort({ enrolled_on: -1 })
+        .limit(10),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        latestCandidates,
+        latestEnrollments,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getMonthWiseRegistrations,
   getTopCourses,
+  getRecentActivities,
 };
