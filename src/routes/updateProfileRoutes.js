@@ -14,4 +14,10 @@ router.put("/", authMiddleware, userMiddleware, updateProfileController.updatePr
 // update password
 router.put("/change-password", authMiddleware,userMiddleware, updateProfileController.changePassword);
 
+
+// Mobile Apis=============================================================================================================================
+
+
+router.put("/update_user",authMiddleware,userMiddleware,updateProfileController.appUpdateUserProfileApp);
+
 module.exports = router;

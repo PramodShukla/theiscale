@@ -127,3 +127,175 @@ exports.changePassword = async (req, res) => {
     });
   }
 };
+
+// Mobile Apis=============================================================================================================================
+
+exports.appUpdateUserProfileApp = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const {
+      user_name,
+      user_bio,
+      occupation,
+      address,
+      pincode,
+      city,
+      state,
+      date_of_birth,
+      gender,
+      alternate_contact,
+      email,
+      parent_name,
+    } = req.body;
+
+    const updateData = {};
+
+    // ==========================================
+    // Only update if field is sent
+    // ==========================================
+
+    if (user_name !== undefined) {
+      const nameParts = user_name.trim().split(" ");
+
+      updateData.c_first_name = nameParts[0] || "";
+      updateData.c_last_name = nameParts.slice(1).join(" ") || "";
+      updateData.c_display_name = user_name;
+    }
+
+    if (user_bio !== undefined) {
+      updateData.c_bio = user_bio;
+    }
+
+    if (occupation !== undefined) {
+      updateData.m_occupation = occupation;
+    }
+
+    if (address !== undefined) {
+      updateData.c_current_address1 = address;
+    }
+
+    if (pincode !== undefined) {
+      updateData.c_current_pincode = pincode;
+    }
+
+    if (gender !== undefined) {
+      updateData.c_gender = gender;
+    }
+
+    if (alternate_contact !== undefined) {
+      updateData.c_alt_contact = alternate_contact;
+    }
+
+    if (email !== undefined) {
+      updateData.c_email = email;
+    }
+
+    if (parent_name !== undefined) {
+      updateData.c_guardian = parent_name;
+    }
+
+    if (date_of_birth !== undefined) {
+      updateData.c_dob = new Date(date_of_birth);
+    }
+
+    // ==========================================
+    // State Lookup
+    // ==========================================
+
+    if (state) {
+      const State = require("../models/state");
+
+      const stateData = await State.findOne({
+        state_name: { $regex: `^${state}$`, $options: "i" },
+      });
+
+      if (stateData) {
+        updateData.c_current_state = stateData._id;
+      }
+    }
+
+    // ==========================================
+    // City Lookup
+    // ==========================================
+
+    if (city) {
+      const City = require("../models/city");
+
+      const cityData = await City.findOne({
+        city_name: { $regex: `^${city}$`, $options: "i" },
+      });
+
+      if (cityData) {
+        updateData.c_current_city = cityData._id;
+      }
+    }
+
+    const user = await Candidate.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+      .populate("c_current_state", "state_name")
+      .populate("c_current_city", "city_name");
+
+    if (!user) {
+      return res.status(404).json({
+        response: "failed",
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      response: "success",
+      message: "Successfully Update",
+      users: [
+        {
+          user_id: user.candidate_idno || "",
+
+          user_name: `${user.c_first_name || ""} ${
+            user.c_last_name || ""
+          }`.trim(),
+
+          user_contact: user.c_contact || "",
+
+          alt_contact: user.c_alt_contact || "",
+
+          user_email: user.c_email || "",
+
+          user_gender: user.c_gender || "",
+
+          c_profile_image: user.c_profile_image || "",
+
+          user_dob: user.c_dob ? user.c_dob.toISOString().split("T")[0] : "",
+
+          user_state: user.c_current_state?.state_name || "",
+
+          user_city: user.c_current_city?.city_name || "",
+
+          user_pincode: user.c_current_pincode || "",
+
+          user_address: user.c_current_address1 || "",
+
+          user_status: user.c_user_status || "",
+
+          user_fcm_id: user.c_fcm_id || "",
+
+          parent_name: user.c_guardian || "",
+
+          user_occupation: user.m_occupation || "",
+
+          c_bio: user.c_bio || "",
+        },
+      ],
+    });
+  } catch (error) {
+    return res.status(500).json({
+      response: "failed",
+      message: error.message,
+    });
+  }
+};

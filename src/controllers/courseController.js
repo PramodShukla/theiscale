@@ -7,6 +7,8 @@ const LectureProgress = require("../models/lecture_progress");
 const Subject = require("../models/subject");
 const Lecture = require("../models/lecture");
 const Enrollment = require("../models/course_enrollment");
+// const CourseEnrollment = require("../models/course_enrollment");
+const CourseEnrollment = require("../models/course_enrollment");
 
 // ADD COURSE
 const addCourse = async (req, res) => {
@@ -1445,6 +1447,222 @@ const appGetCourseDetailsById = async (req, res) => {
   }
 };
 
+// const appGetTopTrendingCourses = async (req, res) => {
+//   try {
+//     const topCourses = await Enrollment.aggregate([
+//       {
+//         $match: {
+//           payment_status: 1, // only successful purchases
+//           status: 1,
+//         },
+//       },
+
+//       {
+//         $group: {
+//           _id: "$course_id",
+//           totalEnrollments: {
+//             $sum: 1,
+//           },
+//         },
+//       },
+
+//       {
+//         $sort: {
+//           totalEnrollments: -1,
+//         },
+//       },
+
+//       {
+//         $limit: 10,
+//       },
+
+//       {
+//         $lookup: {
+//           from: "courses", // mongodb collection name
+//           localField: "_id",
+//           foreignField: "_id",
+//           as: "course",
+//         },
+//       },
+
+//       {
+//         $unwind: "$course",
+//       },
+
+//       {
+//         $project: {
+//           _id: 0,
+
+//           totalEnrollments: 1,
+
+//           course_id: "$course._id",
+
+//           m_course_title: "$course.m_course_title",
+
+//           m_course_slug: "$course.m_course_slug",
+
+//           m_course_banner: "$course.m_course_banner",
+
+//           m_course_intro: "$course.m_course_intro",
+
+//           m_course_type: "$course.m_course_type",
+
+//           m_course_price: "$course.m_course_price",
+
+//           m_course_offer_price: "$course.m_course_offer_price",
+
+//           m_course_rating: "$course.m_course_rating",
+
+//           m_course_reviews: "$course.m_course_reviews",
+
+//           m_course_view: "$course.m_course_view",
+
+//           m_course_status: "$course.m_course_status",
+//         },
+//       },
+//     ]);
+
+//     res.json({
+//       status: true,
+//       message: "Top trending courses fetched successfully",
+//       total: topCourses.length,
+//       data: topCourses,
+//     });
+//   } catch (err) {
+//     res.status(500).json({
+//       status: false,
+//       message: err.message,
+//     });
+//   }
+// };
+
+
+
+const appGetTopTrendingCourses = async (req, res) => {
+  try {
+    const trendingCourses = await CourseEnrollment.aggregate([
+      {
+        $match: {
+          status: 1, // active enrollment only
+        },
+      },
+
+      {
+        $group: {
+          _id: "$course_id",
+          totalEnrollments: { $sum: 1 },
+        },
+      },
+
+      {
+        $sort: {
+          totalEnrollments: -1,
+        },
+      },
+
+      {
+        $limit: 10,
+      },
+
+      {
+        $lookup: {
+          from: "courses",
+          localField: "_id",
+          foreignField: "_id",
+          as: "course",
+        },
+      },
+
+      {
+        $unwind: "$course",
+      },
+
+      // category populate
+      {
+        $lookup: {
+          from: "categories",
+          localField: "course.m_course_category",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$category",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $project: {
+          totalEnrollments: 1,
+
+          m_course_id: "$course._id",
+          m_course_lang: "$course.m_course_lang",
+          m_course_category: "$course.m_course_category",
+          m_course_cat_slug: "$course.m_course_cat_slug",
+          m_course_title: "$course.m_course_title",
+          m_course_slug: "$course.m_course_slug",
+          m_course_intro: "$course.m_course_intro",
+          m_course_banner: "$course.m_course_banner",
+          m_course_pdf: "$course.m_course_pdf",
+          m_course_video_link: "$course.m_course_video_link",
+          m_course_description: "$course.m_course_description",
+          m_course_type: "$course.m_course_type",
+          m_course_price: "$course.m_course_price",
+          m_course_offer_price: "$course.m_course_offer_price",
+          m_course_popular: "$course.m_course_popular",
+          m_course_recomended: "$course.m_course_recomended",
+          m_course_keyword: "$course.m_course_keyword",
+          m_course_status: "$course.m_course_status",
+          m_course_status_web: "$course.m_course_status_web",
+          m_course_view: "$course.m_course_view",
+          m_course_like: "$course.m_course_like",
+          m_course_dislike: "$course.m_course_dislike",
+          m_course_rating: "$course.m_course_rating",
+          m_course_reviews: "$course.m_course_reviews",
+          m_course_brochure: "$course.m_course_brochure",
+          m_course_duration_app: "$course.m_course_duration_app",
+          m_course_duration_web: "$course.m_course_duration_web",
+          m_course_trainee: "$course.m_course_trainee",
+          m_course_feestructure: "$course.m_course_feestructure",
+          m_course_certificate: "$course.m_course_certificate",
+          m_course_app_g_link: "$course.m_course_app_g_link",
+          m_course_web_g_link: "$course.m_course_web_g_link",
+          m_course_graphy_instruction:
+            "$course.m_course_graphy_instruction",
+          m_course_share: "$course.m_course_share",
+          m_course_order: "$course.m_course_order",
+
+          m_category_id: "$category._id",
+          m_category_name: "$category.m_category_name",
+          m_category_slug: "$category.m_category_slug",
+          m_category_desc: "$category.m_category_desc",
+          m_category_icon: "$category.m_category_icon",
+          m_category_banner: "$category.m_category_banner",
+
+          trending_count: "$totalEnrollments",
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      response: "success",
+      data: trendingCourses,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      response: "error",
+      message: error.message,
+    });
+  }
+};
+
+
+
 module.exports = {
   addCourse,
   getAllCourses,
@@ -1459,4 +1677,5 @@ module.exports = {
 
   appGetCourseTeamList,
   appGetCourseDetailsById,
+  appGetTopTrendingCourses,
 };

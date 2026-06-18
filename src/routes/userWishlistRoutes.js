@@ -20,6 +20,9 @@ const {
   getAllNotesWishlistsAdmin,
   getSingleNotesWishlist,
   deleteNotesWishlist,
+
+  appAddToWishlist,
+  appGetWishlist,
 } = require("../controllers/userWishlistController");
 
 const { authMiddleware } = require("../middlewares/authMiddleware");
@@ -132,5 +135,16 @@ router.delete(
   adminMiddleware,
   deleteNotesWishlist,
 );
+
+// Mobile Apis=============================================================================================================================
+
+router.post(
+  "/insert/wishlist",
+  authMiddleware,
+  userMiddleware,
+  appAddToWishlist,
+);
+
+router.get("/user/wishlist", authMiddleware, userMiddleware, appGetWishlist);
 
 module.exports = router;

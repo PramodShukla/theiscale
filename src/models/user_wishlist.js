@@ -12,11 +12,11 @@ const wishlistSchema = new mongoose.Schema(
     },
 
     wishlist_type: {
-      type: String,
+      type: Number,
 
-      enum: ["course", "package", "notes", "webinar", "event", "batch"],
+      enum: [1,2,3,4,5,6],//["1=course", "2=package", "3=notes", "4=webinar", "5=event", "6=batch"],
 
-      default: "course",
+      default: 1,
     },
 
     course_id: {

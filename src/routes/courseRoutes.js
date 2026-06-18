@@ -20,6 +20,7 @@ const {
   changeCourseStatus,
   appGetCourseTeamList,
   appGetCourseDetailsById,
+  appGetTopTrendingCourses
 } = require("../controllers/courseController");
 
 router.post(
@@ -83,5 +84,7 @@ router.post(
 );
 
 router.post("/course_details", authMiddleware,userMiddleware, appGetCourseDetailsById);
+
+router.get("/trending_course", authMiddleware,userMiddleware,appGetTopTrendingCourses);
 
 module.exports = router;
