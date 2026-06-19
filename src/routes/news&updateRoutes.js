@@ -1,3 +1,4 @@
+console.log("News&updates Routes Loaded");
 const express = require("express");
 const router = express.Router();
 
@@ -14,21 +15,28 @@ const { newsupdatesUpload } = require("../middlewares/uploadMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 
-router.post("/add-news&updates", authMiddleware, adminMiddleware, newsupdatesUpload, addNews);
+router.get("/test", (req, res) => {
+  res.json({
+    status: true,
+    message: "working",
+  });
+});
 
-router.put("/update-news&updates/:id", authMiddleware, adminMiddleware, newsupdatesUpload, updateNews); 
+router.post("/add", authMiddleware, adminMiddleware, newsupdatesUpload, addNews);
 
-router.get("/all-news&updates", authMiddleware, adminMiddleware, getAllNews);
+router.put("/update/:id", authMiddleware, adminMiddleware, newsupdatesUpload, updateNews); 
 
-router.get("/single-news&updates/:id", authMiddleware, adminMiddleware, getSingleNews); 
+router.get("/all", authMiddleware, adminMiddleware, getAllNews);
 
-router.delete("/delete-news&updates/:id", authMiddleware, adminMiddleware, deleteNews);
+router.get("/:id", authMiddleware, adminMiddleware, getSingleNews); 
+
+router.delete("/:id", authMiddleware, adminMiddleware, deleteNews);
 
 router.patch("/status/:id", authMiddleware, adminMiddleware, changeNewsStatus);
 
-router.get("/public-all-news&updates", getAllNews);
+router.get("/public-all-news_updates", getAllNews);
 
-router.get("/public-single-news&updates/:id", getSingleNews); 
+router.get("/public-single-news_updates/:id", getSingleNews); 
 
 
 

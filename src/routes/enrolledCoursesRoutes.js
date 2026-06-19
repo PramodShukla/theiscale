@@ -7,7 +7,8 @@ const {
   getEnrolledPremiumCourses,
   getEnrolledFreeCourses,
   getEnrolledCourseFullDetails,
-  getCourseAccessDetails
+  getCourseAccessDetails,
+  appGetMyCourses
 } = require("../controllers/enrolledCoursesController");
 
 router.get(
@@ -30,6 +31,11 @@ router.get(
   userMiddleware,
   getEnrolledCourseFullDetails
 );
+
+// Mobile Apis=============================================================================================================================
+
+
+router.get("/user/courses",authMiddleware,userMiddleware,appGetMyCourses);
 
 
 

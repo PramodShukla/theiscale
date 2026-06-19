@@ -6,6 +6,11 @@ const Subject = require("../models/subject");
 const Lecture = require("../models/lecture");
 const LectureProgress = require("../models/lecture_progress");
 
+// const CourseEnrollment = require("../models/courseEnrollment");
+// const Subject = require("../models/subject");
+// const Lecture = require("../models/lecture");
+// const LectureProgress = require("../models/lectureProgress");
+
 // GET ENROLLED FREE COURSES
 const getEnrolledFreeCourses = async (req, res) => {
   try {
@@ -369,9 +374,100 @@ const getCourseAccessDetails = async (req, res) => {
   }
 };
 
+// Mobile Apis=============================================================================================================================
+
+
+
+const appGetMyCourses = async (req, res) => {
+  try {
+    const user_id = req.user.id;
+
+    const enrollments = await Enrollment.find({
+      user_id,
+      status: 1,
+    })
+      .populate("course_id")
+      .sort({ enrolled_on: -1 });
+
+    const user_courses = await Promise.all(
+      enrollments.map(async (enrollment) => {
+        const course = enrollment.course_id;
+
+        if (!course) return null;
+
+        // Total Subjects
+        const totalSubjects = await Subject.countDocuments({
+          m_subject_course: course._id,
+        });
+
+        // Total Lectures
+        const totalLectures = await Lecture.countDocuments({
+          ml_course: course._id,
+        });
+
+        // Completed Lectures
+        const completedLectures = await LectureProgress.countDocuments({
+          user_id,
+          course_id: course._id,
+          is_completed: true,
+        });
+
+        // Progress %
+        const progress =
+          totalLectures > 0
+            ? Math.round((completedLectures / totalLectures) * 100)
+            : 0;
+
+        // Remaining Days
+        let remainingDays = 0;
+
+        if (enrollment.access_type === "limited" && enrollment.expiry_date) {
+          const diff = new Date(enrollment.expiry_date).getTime() - Date.now();
+
+          remainingDays =
+            diff > 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : 0;
+        }
+
+        return {
+          course_id: course._id,
+          course_name: course.m_course_title || "",
+          course_image: course.m_course_banner || "",
+          course_price: course.m_course_price || 0,
+          course_offerprice: course.m_course_offer_price || 0,
+          course_views: course.m_course_view || 0,
+          course_rating: course.m_course_rating || 0,
+          course_reviews: course.m_course_reviews || 0,
+          course_duration: course.m_course_duration_app || 0,
+
+          registration_date: enrollment.enrolled_on
+            ? enrollment.enrolled_on.toISOString().split("T")[0]
+            : "",
+
+          remaining_days: remainingDays,
+
+          total_subjects: totalSubjects,
+
+          progress: progress,
+        };
+      }),
+    );
+
+    return res.status(200).json({
+      response: "success",
+      user_courses: user_courses.filter(Boolean),
+    });
+  } catch (error) {
+    return res.status(500).json({
+      response: "failed",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getEnrolledFreeCourses,
   getEnrolledPremiumCourses,
   getEnrolledCourseFullDetails,
   getCourseAccessDetails,
+  appGetMyCourses
 };

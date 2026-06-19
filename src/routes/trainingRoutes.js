@@ -6,12 +6,14 @@ const {
   getAllTH,
   getTHByCourse,
   updateTH,
-  deleteTH
+  deleteTH,
+  appGetCourseHighlights
 } = require("../controllers/trainingController");
 
 const { authMiddleware } = require("../middlewares/authMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
 const { thUpload } = require("../middlewares/uploadMiddleware");
+const { userMiddleware } = require("../middlewares/userMiddleware");
 
 // ADD
 router.post("/add-th", authMiddleware, adminMiddleware, thUpload, addTH);
@@ -34,5 +36,15 @@ router.delete("/delete-th/:id", authMiddleware, adminMiddleware, deleteTH);
 
 
 router.get("/public-get-th/:course_id", getTHByCourse);
+
+
+
+
+
+// Mobile Apis=============================================================================================================================
+
+
+
+router.post("/get/training/highlights", authMiddleware,userMiddleware,appGetCourseHighlights);
 
 module.exports = router;

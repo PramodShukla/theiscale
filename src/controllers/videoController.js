@@ -81,7 +81,7 @@ const playVideo = async (req, res) => {
     const enrollment = await Enrollment.findOne({
       user_id: req.user.id,
       course_id: courseId,
-      status: "active",
+      status: 1,
     }).lean();
 
     // console.log("ENROLLMENT =>", enrollment);
@@ -96,8 +96,8 @@ const playVideo = async (req, res) => {
     // PAYMENT CHECK
 
     if (
-      enrollment.course_type === "paid" &&
-      enrollment.payment_status !== "success"
+      enrollment.course_type === 2 &&
+      enrollment.payment_status !== 1
     ) {
       return res.status(403).json({
         status: false,

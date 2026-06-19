@@ -1,3 +1,4 @@
+console.log("Admin Routes Loaded");
 const express = require("express");
 const router = express.Router();
 
@@ -83,7 +84,7 @@ router.use("/ppt", pptRoutes);
 router.use("/client", clientRoutes);
 router.use("/success-story", successStoryRoutes);
 router.use("/allied", alliedRoutes);
-router.use("/news&updates", newsupdateRoutes);
+router.use("/news_updates", newsupdateRoutes);
 router.use("/news", newsRoutes);
 router.use("/registrations", adminRegistrationsSectionRoutes);
 router.use("/certificate", certificateRoutes);

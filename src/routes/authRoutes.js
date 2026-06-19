@@ -5,24 +5,9 @@ const {
   resetPasswordMiddleware,
 } = require("../middlewares/resetPasswordMiddleware");
 
-const {
-registerMiddleware
-} = require("../middlewares/registrationMiddleware");
-
-// router.post("/register", authController.register);
-
-// router.post("/send-register-otp", authController.sendRegisterOtp);
-
-// router.post("/verify-register-otp", authController.verifyRegisterOtp);
-
-// router.post("/register", registerMiddleware, authController.register);
+const { registerMiddleware } = require("../middlewares/registrationMiddleware");
 
 router.post("/login", authController.login);
-
-// router.post("/send-otp", authController.sendOtp);
-
-// router.post("/verify-otp", authController.verifyOtp);
-
 
 //login+register
 router.post("/send-otp", authController.sendOtp);
@@ -30,8 +15,6 @@ router.post("/send-otp", authController.sendOtp);
 router.post("/verify-otp", authController.verifyOtp);
 
 router.post("/register", registerMiddleware, authController.register);
-
-
 
 // Forget Password
 router.post("/send-forgot-password-otp", authController.sendForgotPasswordOtp);

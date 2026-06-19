@@ -2,6 +2,7 @@ const Training = require("../models/course_training");
 const Course = require("../models/course");
 const fs = require("fs");
 
+
 // ===============================
 // ADD TRAINING HIGHLIGHT
 // ===============================
@@ -12,7 +13,7 @@ const addTH = async (req, res) => {
     if (!course_id || !title) {
       return res.status(400).json({
         status: false,
-        message: "course_id and title required"
+        message: "course_id and title required",
       });
     }
 
@@ -20,13 +21,11 @@ const addTH = async (req, res) => {
     if (!course) {
       return res.status(404).json({
         status: false,
-        message: "Course not found"
+        message: "Course not found",
       });
     }
 
-    const image = req.files?.th_icon
-      ? req.files.th_icon[0].path
-      : null;
+    const image = req.files?.th_icon ? req.files.th_icon[0].path : null;
 
     const newTH = new Training({
       type: 1, // course
@@ -38,7 +37,7 @@ const addTH = async (req, res) => {
       description,
       active: active ? Number(active) : 1,
 
-      created: new Date()
+      created: new Date(),
     });
 
     const saved = await newTH.save();
@@ -46,14 +45,12 @@ const addTH = async (req, res) => {
     res.status(201).json({
       status: true,
       message: "Training Highlight added",
-      data: saved
+      data: saved,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // ===============================
 // GET ALL
@@ -63,12 +60,10 @@ const getAllTH = async (req, res) => {
     const data = await Training.find({ type: 1 }).sort({ _id: -1 });
 
     res.json({ status: true, data });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // ===============================
 // GET BY COURSE
@@ -79,16 +74,14 @@ const getTHByCourse = async (req, res) => {
 
     const data = await Training.find({
       course_id,
-      type: 1
+      type: 1,
     }).sort({ _id: -1 });
 
     res.json({ status: true, data });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // ===============================
 // UPDATE
@@ -101,7 +94,7 @@ const updateTH = async (req, res) => {
     if (!th) {
       return res.status(404).json({
         status: false,
-        message: "Not found"
+        message: "Not found",
       });
     }
 
@@ -123,14 +116,12 @@ const updateTH = async (req, res) => {
     res.json({
       status: true,
       message: "Updated successfully",
-      data: updated
+      data: updated,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // ===============================
 // DELETE
@@ -143,7 +134,7 @@ const deleteTH = async (req, res) => {
     if (!th) {
       return res.status(404).json({
         status: false,
-        message: "Not found"
+        message: "Not found",
       });
     }
 
@@ -155,11 +146,65 @@ const deleteTH = async (req, res) => {
 
     res.json({
       status: true,
-      message: "Deleted successfully"
+      message: "Deleted successfully",
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+// Mobile Apis=============================================================================================================================
+
+
+const appGetCourseHighlights = async (req, res) => {
+  try {
+    const { course_id } = req.body;
+
+    if (!course_id) {
+      return res.status(400).json({
+        response: "failed",
+        message: "course_id is required",
+      });
+    }
+
+    // Check Course Exists
+    const course = await Course.findById(course_id);
+
+    if (!course) {
+      return res.status(404).json({
+        response: "failed",
+        message: "Course not found",
+      });
+    }
+
+    // Get Highlights
+    const highlightsData = await Training.find({
+      course_id,
+      active: 1,
+    }).sort({ _id: 1 });
+
+    const highlights = highlightsData.map((item) => ({
+      highlight_id: item._id,
+      course_id: item.course_id || "0",
+      test_id: item.test_id || "0",
+      notes_id: item.notes_id || "0",
+      webinar_id: item.webinar_id || "0",
+      highlight_icon: item.icon || "",
+      highlight_title: item.title || "",
+      highlight_desc: item.description || "",
+      active: item.active,
+    }));
+
+    return res.status(200).json({
+      response: "success",
+      message: "Successfully Found",
+      highlights,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      response: "failed",
+      message: error.message,
+    });
   }
 };
 
@@ -168,5 +213,7 @@ module.exports = {
   getAllTH,
   getTHByCourse,
   updateTH,
-  deleteTH
+  deleteTH,
+
+  appGetCourseHighlights,
 };

@@ -44,7 +44,7 @@ const addJob = async (req, res) => {
       },
       order: req.body.order || 0,
 
-      status: req.body.status || "open",
+      status: req.body.status || 1,
     };
 
     const job = await Job.create(jobData);
@@ -84,7 +84,7 @@ const getAllJobs = async (req, res) => {
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
 
-    let filter = { status: "open" };
+    let filter = { status: 1 };
 
     // LOCATION FILTER
     if (location) {
@@ -222,7 +222,7 @@ const updateJob = async (req, res) => {
       job.order = req.body.order || 0;
     }
     if ("status" in req.body) {
-      job.status = req.body.status || "open";
+      job.status = req.body.status || 1;
     }
 
     job.updated_at = new Date();
@@ -333,7 +333,7 @@ const applyJob = async (req, res) => {
 const getAllUniqueJobTitles = async (req, res) => {
   try {
     const data = await Job.distinct("job_title", {
-      status: "open",
+      status: 1,
     });
 
     return res.status(200).json({

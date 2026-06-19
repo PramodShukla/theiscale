@@ -1,3 +1,5 @@
+console.log("News&updates controller Loaded");
+
 const News = require("../models/news&update");
 const fs = require("fs");
 

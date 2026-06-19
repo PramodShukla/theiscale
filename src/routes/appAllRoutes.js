@@ -12,6 +12,8 @@ const eventRoutes = require("../routes/eventRoutes");
 const successStoryRoutes = require("../routes/successStoryRoutes");
 const updateProfileRoutes = require("../routes/updateProfileRoutes");
 const userWishlistRoutes = require("../routes/userWishlistRoutes");
+const enrolledCoursesRoutes = require("../routes/enrolledCoursesRoutes");
+const trainingRoutes = require("../routes/trainingRoutes");
 
 
 router.use("/course", courseRoutes);
@@ -23,6 +25,9 @@ router.use("/events", eventRoutes);
 router.use("/ss", successStoryRoutes);
 router.use("/profile", updateProfileRoutes);
 router.use("/wishlist", userWishlistRoutes);
+router.use("/enrolled_courses", enrolledCoursesRoutes);
+router.use("/training_highlightes", trainingRoutes);
+
 
 
 
