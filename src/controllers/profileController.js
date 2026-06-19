@@ -1,6 +1,7 @@
 const Candidate = require("../models/candidates");
 
-exports.getMyProfile = async (req, res) => {
+
+const getMyProfile = async (req, res) => {
   try {
     const userId = req.user.id; // from JWT middleware
 
@@ -43,3 +44,87 @@ exports.getMyProfile = async (req, res) => {
     });
   }
 };
+
+
+// Mobile Apis=============================================================================================================================
+
+
+
+const appGetMyProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await Candidate.findById(userId)
+      .populate("c_current_state", "state_name")
+      .populate("c_current_city", "city_name");
+
+    if (!user) {
+      return res.status(404).json({
+        response: "failed",
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      response: "success",
+      message: "Detail fetched",
+      data: {
+        user_id: user._id,
+        user_name:
+          user.c_display_name ||
+          `${user.c_first_name || ""} ${user.c_last_name || ""}`.trim(),
+
+        user_contact: user.c_contact || "",
+        alt_contact: user.c_alt_contact || "",
+
+        user_email: user.c_email || "",
+
+        user_gender: user.c_gender || "",
+
+        c_profile_image: user.c_profile_image || "",
+
+        user_dob: user.c_dob
+          ? new Date(user.c_dob).toLocaleDateString("en-GB").replace(/\//g, "-")
+          : "",
+
+        user_state:
+          user.c_current_state?.state_name ||
+          user.c_current_state?.name ||
+          "",
+
+        user_city:
+          user.c_current_city?.city_name ||
+          user.c_current_city?.name ||
+          "",
+
+        user_pincode: user.c_current_pincode || "",
+
+        user_address: [
+          user.c_current_address1,
+          user.c_current_address2,
+        ]
+          .filter(Boolean)
+          .join(" "),
+
+        user_status: user.c_user_status || 0,
+
+        user_fcm_id: user.c_fcm_id || "",
+
+        parent_name: user.c_user_parent || "",
+
+        user_occupation: user.m_occupation || "",
+
+        c_bio: user.c_bio || "",
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      response: "failed",
+      message: error.message,
+    });
+  }
+};
+
+module.exports={
+  getMyProfile,appGetMyProfile
+}

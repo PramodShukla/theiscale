@@ -164,7 +164,7 @@ const changeNewsStatus = async (req, res) => {
 
     // TOGGLE STATUS
     news.m_news_status =
-      news.m_news_status === "active" ? "inactive" : "active";
+      news.m_news_status === 1 ? 0 : 1;
 
     await news.save();
 

@@ -14,6 +14,9 @@ const updateProfileRoutes = require("../routes/updateProfileRoutes");
 const userWishlistRoutes = require("../routes/userWishlistRoutes");
 const enrolledCoursesRoutes = require("../routes/enrolledCoursesRoutes");
 const trainingRoutes = require("../routes/trainingRoutes");
+const profileRoutes = require("../routes/profileRoutes");
+const newsRoutes = require("../routes/newsRoutes");
+
 
 
 router.use("/course", courseRoutes);
@@ -27,6 +30,8 @@ router.use("/profile", updateProfileRoutes);
 router.use("/wishlist", userWishlistRoutes);
 router.use("/enrolled_courses", enrolledCoursesRoutes);
 router.use("/training_highlightes", trainingRoutes);
+router.use("/profile", profileRoutes);
+router.use("/news", newsRoutes);
 
 
 
