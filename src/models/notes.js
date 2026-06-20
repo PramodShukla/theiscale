@@ -46,15 +46,15 @@ const notesSchema = new mongoose.Schema(
     },
 
     notes_status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: Number,
+      enum: [0,1],
+      default: 1,
     },
 
     notes_type: {
-      type: String,
-      enum: ["free", "paid"],
-      default: "free",
+      type: Number,
+      enum: [1,2], // 1=free , 2= paid
+      default: 1,
     },
 
     notes_price: {

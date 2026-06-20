@@ -44,9 +44,9 @@ const ecSchema = new mongoose.Schema({
   },
 
   m_ec_status: {
-    type: String,
-    enum: ["active", "inactive"],
-    default: "active",
+    type: Number,
+    enum: [0,1],
+    default: 1,
   },
 
   m_ec_added_on: {

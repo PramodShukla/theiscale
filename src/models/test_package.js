@@ -10,11 +10,13 @@ const testPackageSchema = new mongoose.Schema({
   m_package_title: {
     type: String,
     required: true,
+    trim:true
   },
 
   m_package_language: {
     type: String,
     required: true,
+    trim:true
   },
 
   m_package_image: {
@@ -30,11 +32,13 @@ const testPackageSchema = new mongoose.Schema({
   m_package_intro: {
     type: String,
     default: null,
+    trim:true
   },
 
   m_package_description: {
     type: String,
     default: null,
+    trim:true
   },
 
   m_package_test_category: {
@@ -45,7 +49,7 @@ const testPackageSchema = new mongoose.Schema({
 
   m_package_type: {
     type: String,
-    enum: ["free", "paid"],
+    enum: [1, 2], // 1=free , 2=paid
     default: null,
   },
 
@@ -61,6 +65,7 @@ const testPackageSchema = new mongoose.Schema({
 
   m_package_status: {
     type: Number,
+    enum:[0,1],
     default: 1,
   },
 

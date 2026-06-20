@@ -8,7 +8,9 @@ const {
   getEnrolledFreeCourses,
   getEnrolledCourseFullDetails,
   getCourseAccessDetails,
-  appGetMyCourses
+  appGetMyCourses,
+  appGetEnrollmentStatus,
+  appGetCertificateStatus
 } = require("../controllers/enrolledCoursesController");
 
 router.get(
@@ -29,15 +31,20 @@ router.get(
   "/course-full-details/:course_id",
   authMiddleware,
   userMiddleware,
-  getEnrolledCourseFullDetails
+  getEnrolledCourseFullDetails,
 );
 
 // Mobile Apis=============================================================================================================================
 
+router.get("/user/courses", authMiddleware, userMiddleware, appGetMyCourses);
 
-router.get("/user/courses",authMiddleware,userMiddleware,appGetMyCourses);
+router.post(
+  "/check/enrolled/status",
+  authMiddleware,
+  userMiddleware,
+  appGetEnrollmentStatus,
+);
 
-
-
+router.post("/get/certificate",authMiddleware,userMiddleware, appGetCertificateStatus);
 
 module.exports = router;

@@ -27,7 +27,7 @@ const TestCategorySchema = new mongoose.Schema(
     test_category_description: {
       type: String,
       default: null,
-      trim:true,
+      trim:true,       
     },
 
     test_category_status: {

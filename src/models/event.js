@@ -5,6 +5,7 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true,
     maxlength: 200,
+    trim:true
   },
 
   m_event_slug: {
@@ -54,9 +55,9 @@ const eventSchema = new mongoose.Schema({
   m_event_order: Number,
 
   m_event_status: {
-    type: String,
-    enum: ["active", "inactive"],
-    default: "active",
+    type: Number,
+    enum: [0,1],
+    default: 1,
   },
 
   m_event_added_on: {

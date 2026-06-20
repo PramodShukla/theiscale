@@ -8,6 +8,8 @@ const Instructor = require("../models/instructor");
 const Course = require("../models/course");
 const mongoose = require("mongoose");
 
+const Batch = require("../models/batch");
+
 // DELETE FILE HELPER
 const deleteFile = (filePath) => {
   try {
@@ -657,6 +659,78 @@ const getBatchesDropdown = async (req, res) => {
   }
 };
 
+// Mobile Apis=============================================================================================================================
+
+
+
+
+const appGetRunningBatches = async (req, res) => {
+  try {
+    const batches = await Batch.find({
+      m_batch_status: 1,
+    })
+      .populate({
+        path: "batch_course",
+        select: "m_course_title",
+      })
+      .sort({ order: 1 });
+
+    const formattedBatches = batches.map((batch) => ({
+      id: String(batch._id),
+
+      batch_name: batch.batch_name || "",
+
+      batch_instructor: batch.batch_instructor || "",
+
+      batch_course_id: batch.batch_course
+        ? String(batch.batch_course._id)
+        : "",
+
+      batch_course_name:
+        batch.batch_course?.m_course_title || "",
+
+      m_course_title:
+        batch.batch_course?.m_course_title || "",
+
+      batch_description:
+        batch.m_batch_notice_desc || "",
+
+      batch_date: batch.batch_date
+        ? batch.batch_date.toISOString().split("T")[0]
+        : "",
+
+      start_time: batch.start_time || "",
+
+      end_time: batch.end_time || "",
+
+      m_batch_days: batch.m_batch_days?.join(",") || "",
+
+      topic: batch.subject || "",
+
+      strength: String(batch.strength || 0),
+
+      // schema me field nahi hai
+      m_batch_type: "0",
+
+      m_batch_status: String(batch.m_batch_status),
+
+      m_batch_image: batch.m_batch_image || "",
+    }));
+
+    return res.status(200).json({
+      response: "success",
+      batch: formattedBatches,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      response: "error",
+      message: error.message,
+    });
+  }
+};
+
+
+
 module.exports = {
   addBatch,
   updateBatch,
@@ -664,4 +738,5 @@ module.exports = {
   getSingleBatch,
   deleteBatch,
   getBatchesDropdown,
+  appGetRunningBatches
 };

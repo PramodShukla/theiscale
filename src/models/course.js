@@ -80,6 +80,7 @@ const courseSchema = new mongoose.Schema(
       type: String,
       trim: true,
       // required: true,
+      trim:true
     },
 
     m_course_type: {

@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 
 const jobSchema = new mongoose.Schema({
   job_title: { type: String, required: true, trim: true },
 
   company_name: { type: String, required: true, trim: true },
 
-  company_logo: { type: String, default: null },
+  company_logo: { type: String, default: null, trim: true },
 
   last_date_to_apply: { type: Date, default: null },
 
@@ -33,18 +34,19 @@ const jobSchema = new mongoose.Schema({
   experience: {
     type: String,
     default: null,
+    trim: true,
   },
 
-  job_description: { type: String, default: null },
+  job_description: { type: String, default: null, trim: true },
 
-  application_link: { type: String, default: null },
+  application_link: { type: String, default: null, trim: true },
 
   // SOCIAL LINKS (FLEXIBLE)
   company_social_links: {
-    linkedin: { type: String, default: null },
-    website: { type: String, default: null },
-    twitter: { type: String, default: null },
-    instagram: { type: String, default: null },
+    linkedin: { type: String, default: null, trim: true },
+    website: { type: String, default: null, trim: true },
+    twitter: { type: String, default: null, trim: true },
+    instagram: { type: String, default: null, trim: true },
   },
 
   slug: {
@@ -55,7 +57,7 @@ const jobSchema = new mongoose.Schema({
 
   status: {
     type: Number,
-    enum: [0,1,2], //0-pending 1-active 2-expired
+    enum: [0, 1, 2], //0-pending 1-active 2-expired
     default: 1,
   },
 
@@ -63,11 +65,13 @@ const jobSchema = new mongoose.Schema({
   recruiter_mobile_no: {
     type: String,
     default: null,
+    trim: true,
   },
 
   recruiter_whatsapp_no: {
     type: String,
     default: null,
+    trim: true,
   },
 
   recruiter_date: {
@@ -93,8 +97,6 @@ const jobSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-
-  
 });
 
 jobSchema.pre("save", function (next) {
@@ -104,8 +106,7 @@ jobSchema.pre("save", function (next) {
       strict: true,
     });
   }
-  next();
+  // next();
 });
-
 
 module.exports = mongoose.model("company_requirement", jobSchema);

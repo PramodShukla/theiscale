@@ -34,14 +34,15 @@ const notesSubCategorySchema =
       notes_subcategory_description: {
         type: String,
         default: null,
+        trim:true
       },
 
       
 
       notes_subcategory_status: {
-        type: String,
-        enum: ["active", "inactive"],
-        default: "active",
+        type: Number,
+        enum: [0,1],
+        default: 1,
       },
 
       

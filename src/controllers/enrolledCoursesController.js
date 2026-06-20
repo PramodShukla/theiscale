@@ -5,11 +5,7 @@ const Course = require("../models/course");
 const Subject = require("../models/subject");
 const Lecture = require("../models/lecture");
 const LectureProgress = require("../models/lecture_progress");
-
-// const CourseEnrollment = require("../models/courseEnrollment");
-// const Subject = require("../models/subject");
-// const Lecture = require("../models/lecture");
-// const LectureProgress = require("../models/lectureProgress");
+const Candidate = require("../models/candidates");
 
 // GET ENROLLED FREE COURSES
 const getEnrolledFreeCourses = async (req, res) => {
@@ -376,8 +372,6 @@ const getCourseAccessDetails = async (req, res) => {
 
 // Mobile Apis=============================================================================================================================
 
-
-
 const appGetMyCourses = async (req, res) => {
   try {
     const user_id = req.user.id;
@@ -464,10 +458,197 @@ const appGetMyCourses = async (req, res) => {
   }
 };
 
+const appGetEnrollmentStatus = async (req, res) => {
+  try {
+    const { course_id } = req.body;
+    const user_id = req.user.id;
+
+    if (!course_id) {
+      return res.status(400).json({
+        response: "error",
+        message: "Course ID is required",
+      });
+    }
+
+    const enrollment = await Enrollment.findOne({
+      user_id,
+      course_id,
+    })
+      .populate("course_id")
+      .populate("coupon_id");
+
+    if (!enrollment) {
+      return res.status(404).json({
+        response: "error",
+        message: "Enrollment not found",
+      });
+    }
+
+    const candidate = await Candidate.findById(user_id);
+
+    const fullName = `${candidate?.c_first_name || ""} ${
+      candidate?.c_last_name || ""
+    }`.trim();
+
+    // Remaining Days
+    let remainingDays = 0;
+
+    if (enrollment.expiry_date) {
+      remainingDays = Math.max(
+        0,
+        Math.ceil(
+          (new Date(enrollment.expiry_date) - new Date()) /
+            (1000 * 60 * 60 * 24),
+        ),
+      );
+    }
+
+    return res.status(200).json({
+      response: "success",
+      message: "Enrolled",
+      data: {
+        t_reg_id: String(enrollment._id),
+
+        t_reg_type: String(enrollment.course_type),
+
+        t_reg_user: String(enrollment.user_id),
+
+        t_reg_course: String(enrollment.course_id?._id),
+
+        t_reg_package: "0",
+
+        t_reg_notes: "0",
+
+        t_reg_webinar: null,
+
+        t_reg_date: enrollment.enrolled_on
+          ? enrollment.enrolled_on.toISOString().split("T")[0]
+          : null,
+
+        t_reg_price_type: "",
+
+        t_reg_amount: String(enrollment.amount || 0),
+
+        t_reg_payble: String(enrollment.payable_amount || 0),
+
+        t_reg_coupon_id: enrollment.coupon_id
+          ? String(enrollment.coupon_id._id)
+          : "0",
+
+        t_reg_discount: String(enrollment.discount_amount || 0),
+
+        t_reg_coupon: enrollment.coupon_code || "",
+
+        t_reg_pay_mode: enrollment.payment_mode || "",
+
+        t_reg_transaction_id: enrollment.transaction_id || "",
+
+        t_reg_remarks: String(enrollment.remarks || 1),
+
+        t_reg_status: String(enrollment.status),
+
+        // Agar web_status field nahi hai to filhal status use kar lo
+        t_reg_status_web: String(enrollment.status),
+
+        t_reg_status_android: String(enrollment.android_status),
+
+        t_reg_status_live_class: String(enrollment.live_class_status),
+
+        t_reg_status_test_series: String(enrollment.test_series_status),
+
+        t_payment_status: String(enrollment.payment_status),
+
+        t_reg_added_on: enrollment.createdAt,
+
+        t_reg_register_from: String(enrollment.register_from || 0),
+
+        batch_name: enrollment.batch_name || "",
+
+        t_reg_durration: String(remainingDays),
+
+        t_reg_web_durration: String(remainingDays),
+
+        t_reg_request_certificate: String(
+          enrollment.certificate_status > 0 ? 1 : 0,
+        ),
+
+        t_reg_certificate_name: fullName,
+
+        t_reg_certificate_status: String(enrollment.certificate_status),
+
+        t_reg_certificate_number: enrollment.certificate_no,
+
+        t_reg_certificate_pdf: enrollment.certificate_pdf,
+
+        t_reg_certificate_date: enrollment.certificate_approved_at
+          ? enrollment.certificate_approved_at.toISOString().split("T")[0]
+          : "0000-00-00",
+
+        remaining_days: String(remainingDays),
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      response: "error",
+      message: error.message,
+    });
+  }
+};
+
+
+
+const appGetCertificateStatus = async (req, res) => {
+  try {
+    const { course_id } = req.body;
+
+    const user_id = req.user.id; // token se
+
+    if (!course_id) {
+      return res.status(400).json({
+        response: "failed",
+        message: "Course id is required",
+      });
+    }
+
+    const enrollment = await Enrollment.findOne({
+      user_id,
+      course_id,
+      status: 1,
+    });
+
+    if (!enrollment) {
+      return res.status(404).json({
+        response: "failed",
+        message: "Enrollment not found",
+      });
+    }
+
+    return res.status(200).json({
+      response: "success",
+      message: "fetch",
+      cerificate: {
+        user_id: enrollment.user_id.toString(),
+        course_id: enrollment.course_id.toString(),
+        certificate_number: enrollment.certificate_no || "",
+        certificate_file: enrollment.certificate_pdf || "",
+        status: String(enrollment.certificate_status),
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      response: "failed",
+      message: error.message,
+    });
+  }
+};
+
+
 module.exports = {
   getEnrolledFreeCourses,
   getEnrolledPremiumCourses,
   getEnrolledCourseFullDetails,
   getCourseAccessDetails,
-  appGetMyCourses
+  appGetMyCourses,
+  appGetEnrollmentStatus,
+  appGetCertificateStatus
 };

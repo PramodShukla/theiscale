@@ -24,8 +24,8 @@ const addJob = async (req, res) => {
       job_locations: req.body.location || [],
 
       salary: {
-        min: req.body.salary_from || 0,
-        max: req.body.salary_to || 0,
+        min: Number(req.body.salary_from) || 0,
+        max: Number(req.body.salary_to) || 0,
       },
 
       salary_type: req.body.salary_type || "PM",
@@ -36,15 +36,22 @@ const addJob = async (req, res) => {
 
       application_link: req.body.apply_link,
 
-      company_social_links: {
-        linkedin: req.body.social_links?.linkedin,
-        website: req.body.social_links?.website,
-        twitter: req.body.social_links?.twitter,
-        instagram: req.body.social_links?.instagram,
-      },
-      order: req.body.order || 0,
+      // company_social_links: {
+      //   linkedin: req.body.social_links?.linkedin,
+      //   website: req.body.social_links?.website,
+      //   twitter: req.body.social_links?.twitter,
+      //   instagram: req.body.social_links?.instagram,
+      // },
 
-      status: req.body.status || 1,
+      company_social_links: {
+        linkedin: req.body.linkedin || null,
+        website: req.body.website || null,
+        twitter: req.body.twitter || null,
+        instagram: req.body.instagram || null,
+      },
+      order: req.body.order !== undefined ? Number(req.body.order) : 0,
+
+      status: req.body.status !== undefined ? Number(req.body.status) : 1,
     };
 
     const job = await Job.create(jobData);
@@ -153,7 +160,18 @@ const getJobById = async (req, res) => {
 
 const updateJob = async (req, res) => {
   try {
+    // const job = await Job.findById(req.params.id);
+    // const oldLogo = job.company_logo;
+
     const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({
+        status: false,
+        message: "Job not found",
+      });
+    }
+
     const oldLogo = job.company_logo;
 
     if (!job) {
@@ -164,11 +182,11 @@ const updateJob = async (req, res) => {
     }
 
     if ("salary_from" in req.body) {
-      job.salary.min = req.body.salary_from || 0;
+      job.salary.min = Number(req.body.salary_from) || 0;
     }
 
     if ("salary_to" in req.body) {
-      job.salary.max = req.body.salary_to || 0;
+      job.salary.max = Number(req.body.salary_to) || 0;
     }
 
     if ("salary_type" in req.body) {
@@ -219,10 +237,10 @@ const updateJob = async (req, res) => {
     }
 
     if ("order" in req.body) {
-      job.order = req.body.order || 0;
+      job.order = Number(req.body.order);
     }
     if ("status" in req.body) {
-      job.status = req.body.status || 1;
+      job.status = Number(req.body.status);
     }
 
     job.updated_at = new Date();
@@ -407,11 +425,11 @@ const appGetAllJobs = async (req, res) => {
       .limit(limit);
 
     const data = jobs.map((job) => {
-      const slug = job.job_title
-        ?.toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/\s+/g, "-");
+      // const slug = job.job_title
+      //   ?.toLowerCase()
+      //   .trim()
+      //   .replace(/[^\w\s-]/g, "")
+      //   .replace(/\s+/g, "-");
 
       return {
         m_ju_id: String(job._id),

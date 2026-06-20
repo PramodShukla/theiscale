@@ -9,6 +9,7 @@ const {
   getSingleBatch,
   deleteBatch,
   getBatchesDropdown,
+  appGetRunningBatches
 } = require("../controllers/batchController");
 
 const { authMiddleware } = require("../middlewares/authMiddleware");
@@ -16,6 +17,7 @@ const { authMiddleware } = require("../middlewares/authMiddleware");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
 
 const { batchUpload } = require("../middlewares/uploadMiddleware");
+const { userMiddleware } = require("../middlewares/userMiddleware");
 
 // ADD
 router.post("/add", authMiddleware, adminMiddleware, batchUpload, addBatch);
@@ -39,5 +41,10 @@ router.get("/get/:id", authMiddleware, adminMiddleware, getSingleBatch);
 router.delete("/delete/:id", authMiddleware, adminMiddleware, deleteBatch);
 
 router.get("/dropdown", authMiddleware, adminMiddleware, getBatchesDropdown);
+
+
+// Mobile Apis=============================================================================================================================
+
+router.get("/get_batch",authMiddleware,userMiddleware,appGetRunningBatches);
 
 module.exports = router;

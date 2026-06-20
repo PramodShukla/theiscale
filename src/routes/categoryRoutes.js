@@ -7,10 +7,13 @@ const {
   getAllCategories,
   updateCategory,
   deleteCategory,
-  appGetCategoryWiseCourses
+  appGetCategoryWiseCourses,
+  appGetCategories,
+  appGetCoursesByCategory
 } = require("../controllers/categoryController");
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
+const { userMiddleware } = require("../middlewares/userMiddleware");
 
 // multiple file upload
 router.post(
@@ -50,6 +53,13 @@ router.delete(
   deleteCategory,
 );
 
-router.get("/get_category_courses", appGetCategoryWiseCourses);
+// Mobile Apis=============================================================================================================================
+
+
+router.get("/get_category_courses",authMiddleware,userMiddleware, appGetCategoryWiseCourses);
+
+router.get("/get/categories",authMiddleware,userMiddleware, appGetCategories);
+
+router.post("/get/courses",authMiddleware,userMiddleware, appGetCoursesByCategory);
 
 module.exports = router;

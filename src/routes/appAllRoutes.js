@@ -16,6 +16,8 @@ const enrolledCoursesRoutes = require("../routes/enrolledCoursesRoutes");
 const trainingRoutes = require("../routes/trainingRoutes");
 const profileRoutes = require("../routes/profileRoutes");
 const newsRoutes = require("../routes/newsRoutes");
+const searchRoutes = require("../routes/searchRoutes");
+const batchRoutes = require("../routes/batchRoutes");
 
 
 
@@ -32,6 +34,8 @@ router.use("/enrolled_courses", enrolledCoursesRoutes);
 router.use("/training_highlightes", trainingRoutes);
 router.use("/profile", profileRoutes);
 router.use("/news", newsRoutes);
+router.use("/search", searchRoutes);
+router.use("/batch", batchRoutes);
 
 
 

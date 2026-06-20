@@ -16,14 +16,14 @@ const courseEnrollmentSchema = new mongoose.Schema(
 
     course_type: {
       type: Number,
-      enum: [1,2],  // free=1 , paid =2
+      enum: [1, 2], // free=1 , paid =2
       required: true,
-      default:1
+      default: 1,
     },
 
     payment_status: {
       type: Number,
-      enum: [0,1,2],//["2=pending", "1=success", "0=failed"],
+      enum: [0, 1, 2], //["2=pending", "1=success", "0=failed"],
       default: 2,
     },
 
@@ -93,7 +93,7 @@ const courseEnrollmentSchema = new mongoose.Schema(
 
     status: {
       type: Number,
-      enum: [1,0],
+      enum: [1, 0],
       default: 1,
     },
 
@@ -110,19 +110,19 @@ const courseEnrollmentSchema = new mongoose.Schema(
 
     app_status: {
       type: Number,
-      enum: [0,1],
+      enum: [0, 1],
       default: 0,
     },
 
     android_status: {
       type: Number,
-      enum: [0,1],
+      enum: [0, 1],
       default: 0,
     },
 
     ios_status: {
       type: Number,
-      enum: [0,1],
+      enum: [0, 1],
       default: 0,
     },
 
@@ -152,7 +152,7 @@ const courseEnrollmentSchema = new mongoose.Schema(
 
     certificate_status: {
       type: Number,
-      enum: [0,1,2,3],// ["0=not_requested", "1=pending", "2=approved", "3=declined"],
+      enum: [0, 1, 2, 3], // ["0=not_requested", "1=pending", "2=approved", "3=declined"],
       default: 0,
     },
 
@@ -180,6 +180,38 @@ const courseEnrollmentSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+
+    payment_mode: {
+      type: String,
+      default: null,
+    },
+
+    transaction_id: {
+      type: String,
+      default: null,
+    },
+
+    coupon_code: {
+      type: String,
+      default: null,
+    },
+
+    register_from: {
+      type: Number,
+      default: null, // later decide 1=web,2=android,etc
+    },
+
+    remarks: {
+      type: Number,
+      default: 1,
+    },
+
+    certificate_name: {
+      type: String,
+      default: null,
+    },
+
+    
   },
   {
     timestamps: true,
