@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const crypto = require("crypto");
 
 const jobSchema = new mongoose.Schema({
   job_title: { type: String, required: true, trim: true },
@@ -101,11 +102,17 @@ const jobSchema = new mongoose.Schema({
 
 jobSchema.pre("save", function (next) {
   if (this.job_title) {
-    this.slug = slugify(this.job_title, {
-      lower: true,
-      strict: true,
-    });
+    const random = crypto.randomBytes(3).toString("hex");
+
+    this.slug =
+      slugify(this.job_title, {
+        lower: true,
+        strict: true,
+      }) +
+      "-" +
+      random;
   }
+
   // next();
 });
 

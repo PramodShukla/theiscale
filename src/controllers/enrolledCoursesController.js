@@ -14,8 +14,8 @@ const getEnrolledFreeCourses = async (req, res) => {
 
     const enrollments = await Enrollment.find({
       user_id: userId,
-      course_type: "free",
-      status: "active",
+      course_type: 1,
+      status: 1,
     })
 
       // FULL COURSE DETAILS
@@ -62,8 +62,8 @@ const getEnrolledPremiumCourses = async (req, res) => {
 
     const enrollments = await Enrollment.find({
       user_id: userId,
-      course_type: "paid",
-      status: "active",
+      course_type: 2,
+      status: 1,
     })
 
       // FULL COURSE DETAILS
@@ -129,7 +129,7 @@ const getEnrolledCourseFullDetails = async (req, res) => {
     const enrollment = await Enrollment.findOne({
       user_id: userId,
       course_id: course_id,
-      status: "active",
+      status: 1,
     }).lean();
 
     if (!enrollment) {
@@ -141,8 +141,8 @@ const getEnrolledCourseFullDetails = async (req, res) => {
 
     // PAID COURSE PAYMENT CHECK
     if (
-      enrollment.course_type === "paid" &&
-      enrollment.payment_status !== "success"
+      enrollment.course_type === 2 &&
+      enrollment.payment_status !== 1
     ) {
       return res.status(403).json({
         status: false,

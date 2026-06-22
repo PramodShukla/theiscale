@@ -21,7 +21,11 @@ const addJob = async (req, res) => {
 
       recruiter_expire_date: req.body.recruiter_expire_date || null,
 
-      job_locations: req.body.location || [],
+      job_locations: req.body.location
+        ? Array.isArray(req.body.location)
+          ? req.body.location
+          : [req.body.location]
+        : [],
 
       salary: {
         min: Number(req.body.salary_from) || 0,

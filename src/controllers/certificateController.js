@@ -116,14 +116,14 @@ const requestCertificate = async (req, res) => {
     // }
 
     // already pending
-    if (enrollment.certificate_status === "pending") {
+    if (enrollment.certificate_status === 1) {
       return res.status(400).json({
         status: false,
         message: "Certificate request already submitted",
       });
     }
 
-    enrollment.certificate_status = "pending";
+    enrollment.certificate_status = 1;
 
     enrollment.certificate_declined_reason = null;
 
@@ -166,7 +166,7 @@ const getCertificateRequests = async (req, res) => {
 
     const filter = {
       certificate_status: {
-        $ne: "not_requested",
+        $ne: 0,
       },
     };
 
@@ -175,7 +175,7 @@ const getCertificateRequests = async (req, res) => {
     // =========================================
 
     if (status) {
-      filter.certificate_status = status;
+      filter.certificate_status = Number(status);
     }
 
     // =========================================
@@ -270,7 +270,7 @@ const getCertificateRequests = async (req, res) => {
 
           course_progress: progress,
 
-          certificate_status: item.certificate_status || "pending",
+          certificate_status: item.certificate_status || 1,
 
           certificate_no: item.certificate_no || null,
 
@@ -318,7 +318,7 @@ const updateCertificateStatus = async (req, res) => {
     }
 
     // APPROVED
-    if (status === "approved") {
+    if (status === 2) {
       // certificate number required
       if (!certificate_no) {
         return res.status(400).json({
@@ -338,7 +338,7 @@ const updateCertificateStatus = async (req, res) => {
       // uploaded pdf path
       const certificatePdf = req.files.certificate_pdf[0].path;
 
-      enrollment.certificate_status = "approved";
+      enrollment.certificate_status = 2;
 
       enrollment.certificate_no = certificate_no;
 
@@ -350,8 +350,8 @@ const updateCertificateStatus = async (req, res) => {
     }
 
     // DECLINED
-    else if (status === "declined") {
-      enrollment.certificate_status = "declined";
+    else if (Number(status) === 3) {
+      enrollment.certificate_status = 3;
 
       enrollment.certificate_declined_reason = declined_reason || null;
 
@@ -362,7 +362,7 @@ const updateCertificateStatus = async (req, res) => {
 
     // PENDING
     else {
-      enrollment.certificate_status = "pending";
+      enrollment.certificate_status = 1;
 
       enrollment.certificate_no = null;
 
@@ -420,7 +420,7 @@ const downloadCertificate = async (req, res) => {
       });
     }
 
-    if (enrollment.certificate_status !== "approved") {
+    if (enrollment.certificate_status !== 2) {
       return res.status(400).json({
         status: false,
         message: "Certificate not approved yet",
@@ -436,7 +436,7 @@ const downloadCertificate = async (req, res) => {
       });
     }
 
-    res.download(filePath); // 👈 actual download starts here
+    res.download(filePath); //  actual download starts here
 
   } catch (error) {
     return res.status(500).json({

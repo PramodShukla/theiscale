@@ -543,7 +543,7 @@ const getAllCourses = async (req, res) => {
         price: course.m_course_type === 1 ? "N/A" : course.m_course_price,
         offer_price:
           course.m_course_type === 1 ? "N/A" : course.m_course_offer_price,
-        status: course.m_course_status === "active" ? "Active" : "Inactive",
+        status: course.m_course_status === 1 ? 1 : 0,
         slug: course.m_course_slug,
 
         // Extra Fields
