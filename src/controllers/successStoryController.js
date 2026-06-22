@@ -31,7 +31,7 @@ const addSuccessStory = async (req, res) => {
 
       m_ss_package: req.body.m_ss_package || "N/A",
 
-      m_ss_order: req.body.m_ss_order || 0,
+      m_ss_order: req.body.m_ss_order ? Number(req.body.m_ss_order) : 0,
 
       m_ss_feedback: req.body.m_ss_feedback || null,
     });
@@ -111,7 +111,7 @@ const updateSuccessStory = async (req, res) => {
     }
 
     if ("m_ss_order" in req.body) {
-      story.m_ss_order = req.body.m_ss_order || 0;
+      story.m_ss_order = req.body.m_ss_order ? Number(req.body.m_ss_order) : 0;
     }
 
     // =========================
@@ -169,6 +169,43 @@ const getAllSuccessStories = async (req, res) => {
         { m_ss_placed: { $regex: search, $options: "i" } },
       ];
     }
+
+    const data = await SuccessStory.find(filter)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ _id: -1 });
+
+    const total = await SuccessStory.countDocuments(filter);
+
+    res.json({
+      status: true,
+      total,
+      page,
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+const publicGetAllSuccessStories = async (req, res) => {
+  try {
+    let { page = 1, limit = 100, search, } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    let filter = {};
+
+    filter.m_ss_status = 1;
+
+    if (search) {
+      filter.$or = [
+        { m_ss_name: { $regex: search, $options: "i" } },
+        { m_ss_placed: { $regex: search, $options: "i" } },
+      ];
+    }
+
 
     const data = await SuccessStory.find(filter)
       .skip((page - 1) * limit)
@@ -331,5 +368,6 @@ module.exports = {
   deleteSuccessStory,
   changeSuccessStoryStatus,
   getSingleSuccessStory,
-  appGetSuccessStories
+  appGetSuccessStories,
+  publicGetAllSuccessStories
 };

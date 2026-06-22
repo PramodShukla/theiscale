@@ -228,7 +228,7 @@ const getCourseRegistrations = async (req, res) => {
           batch_subject: enrollment.batch_id?.subject || null,
 
           // CERTIFICATE
-          certificate_status: enrollment.certificate_status || "pending",
+          certificate_status: enrollment.certificate_status || 1,
 
           // if coupon is available
           coupon: enrollment.coupon_id
@@ -610,7 +610,7 @@ const changeTestPackageAccessStatus = async (req, res) => {
     // =========================
 
     enrollment.access_status =
-      enrollment.access_status === "active" ? "inactive" : "active";
+      enrollment.access_status === 1 ? 0 : 1;
 
     await enrollment.save();
 
@@ -679,7 +679,7 @@ const getNotesRegistrations = async (req, res) => {
     // =========================
 
     if (enrollment_status) {
-      filter.enrollment_status = enrollment_status;
+      filter.enrollment_status = Number(enrollment_status);
     }
 
     // =========================
@@ -841,7 +841,7 @@ const getNotesRegistrations = async (req, res) => {
         // ENROLLMENT DETAILS
         // =========================
 
-        enrollment_status: item.enrollment_status || "active",
+        enrollment_status: item.enrollment_status || 1,
 
         enrolled_at: item.enrolled_at || item.createdAt,
 
@@ -1301,145 +1301,7 @@ const deleteEventRegistration = async (req, res) => {
   }
 };
 
-// const getAllJobApplications = async (req, res) => {
-//   try {
-//     let {
-//       page = 1,
-//       limit = 10,
-//       search = "",
-//       job_id,
-//       company_name,
-//       from_date,
-//       to_date,
-//     } = req.query;
 
-//     page = parseInt(page) || 1;
-
-//     limit = parseInt(limit) || 10;
-
-//     const skip = (page - 1) * limit;
-
-//     // FILTER
-//     let filter = {};
-
-//     // JOB FILTER
-//     if (job_id) {
-//       filter.job_id = job_id;
-//     }
-
-//     // DATE FILTER
-//     if (from_date || to_date) {
-//       filter.applied_at = {};
-
-//       if (from_date) {
-//         filter.applied_at.$gte = new Date(from_date);
-//       }
-
-//       if (to_date) {
-//         const endDate = new Date(to_date);
-
-//         endDate.setHours(23, 59, 59, 999);
-
-//         filter.applied_at.$lte = endDate;
-//       }
-//     }
-
-//     // GET DATA
-//     let data = await JobApplication.find(filter)
-
-//       .populate({
-//         path: "user_id",
-
-//         select: `
-//             c_first_name
-//             c_last_name
-//             c_email
-//             c_contact
-//             c_current_city
-//           `,
-//       })
-
-//       .populate({
-//         path: "job_id",
-
-//         select: `
-//             job_title
-//             company_name
-//             job_locations
-//             salary
-//             experience
-//           `,
-//       })
-
-//       .sort({
-//         applied_at: -1,
-//       })
-
-//       .skip(skip)
-
-//       .limit(limit)
-
-//       .lean();
-
-//     // COMPANY FILTER
-//     if (company_name) {
-//       data = data.filter((item) =>
-//         item.job_id?.company_name
-//           ?.toLowerCase()
-//           .includes(company_name.toLowerCase()),
-//       );
-//     }
-
-//     // SEARCH FILTER
-//     if (search) {
-//       const text = search.toLowerCase();
-
-//       data = data.filter((item) => {
-//         const userName =
-//           `${item.user_id?.c_first_name || ""} ${item.user_id?.c_last_name || ""}`.toLowerCase();
-
-//         const email = item.user_id?.c_email?.toLowerCase() || "";
-
-//         const mobile = String(item.user_id?.c_contact || "");
-
-//         const jobTitle = item.job_id?.job_title?.toLowerCase() || "";
-
-//         const company = item.job_id?.company_name?.toLowerCase() || "";
-
-//         return (
-//           userName.includes(text) ||
-//           email.includes(text) ||
-//           mobile.includes(text) ||
-//           jobTitle.includes(text) ||
-//           company.includes(text)
-//         );
-//       });
-//     }
-
-//     // TOTAL
-//     const totalRecords = data.length;
-
-//     // RESPONSE
-
-//     return res.status(200).json({
-//       status: true,
-
-//       current_page: page,
-
-//       total_pages: Math.ceil(totalRecords / limit),
-
-//       total_records: totalRecords,
-
-//       data,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-
-//       message: error.message,
-//     });
-//   }
-// };
 
 const getAllJobApplications = async (req, res) => {
   try {

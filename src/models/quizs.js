@@ -31,7 +31,7 @@ const QuizSchema = new mongoose.Schema({
   m_quiz_remark: { type: String,  },
   m_quiz_status: { type: Number, enum:[0,1], default:1 },
 
-  m_quiz_type: { type: Number, default: 2 } // 1=paid, 2=free
+  m_quiz_type: { type: Number,enum:[1,2], default: 2 } // 1=paid, 2=free
 });
 
 module.exports = mongoose.model("quizs", QuizSchema);    

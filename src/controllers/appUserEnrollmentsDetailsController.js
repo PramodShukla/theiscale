@@ -858,10 +858,7 @@ const updatePurchasedNotesStatus = async (req, res) => {
     // =====================================
     // TOGGLE STATUS
     // =====================================
-    enrollment.enrollment_status =
-      enrollment.enrollment_status === "active"
-        ? "inactive"
-        : "active";
+    enrollment.enrollment_status = enrollment.enrollment_status === 1 ? 0 : 1;
 
     await enrollment.save();
 

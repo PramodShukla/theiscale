@@ -797,7 +797,7 @@ const getAllUserNotes = async (req, res) => {
       notes_id: {
         $in: notesIds,
       },
-      enrollment_status: "active",
+      enrollment_status: 1,
     }).select("notes_id");
 
     const enrolledIds = enrollments.map((item) => item.notes_id.toString());
@@ -893,7 +893,7 @@ const getSingleUserNotes = async (req, res) => {
 
       notes_id: id,
 
-      enrollment_status: "active",
+      enrollment_status: 1,
     });
 
     return res.status(200).json({
@@ -951,7 +951,7 @@ const enrollNotes = async (req, res) => {
 
       notes_id,
 
-      enrollment_status: "active",
+      enrollment_status: 1,
     });
 
     if (alreadyEnrolled) {
@@ -971,7 +971,7 @@ const enrollNotes = async (req, res) => {
 
       notes_id,
 
-      enrollment_status: "active",
+      enrollment_status: 1,
     });
 
     return res.status(201).json({
@@ -995,7 +995,7 @@ const getMyEnrolledNotes = async (req, res) => {
     const enrollments = await NotesEnrollment.find({
       user_id: req.user.id,
 
-      enrollment_status: "active",
+      enrollment_status: 1,
     })
 
       .populate({

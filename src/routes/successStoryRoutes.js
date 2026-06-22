@@ -8,7 +8,8 @@ const {
   deleteSuccessStory,
   changeSuccessStoryStatus,
   getSingleSuccessStory,
-  appGetSuccessStories
+  appGetSuccessStories,
+  publicGetAllSuccessStories
 } = require("../controllers/successStoryController");
 const { successStoryUpload } = require("../middlewares/uploadMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
@@ -37,7 +38,7 @@ router.delete(
   deleteSuccessStory,
 );
 
-router.get("/public-all-ss", getAllSuccessStories);
+router.get("/public-all-ss", publicGetAllSuccessStories);
 
 router.get("/:id", authMiddleware, adminMiddleware, getSingleSuccessStory);
 

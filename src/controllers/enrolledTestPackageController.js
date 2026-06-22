@@ -52,7 +52,7 @@ const enrollTestPackage = async (req, res) => {
       await TestPackageEnrollment.findOne({
         user_id: userId,
         test_package_id,
-        payment_status: "success",
+        payment_status: 1,
       });
 
     if (alreadyPurchased) {
@@ -81,10 +81,10 @@ const enrollTestPackage = async (req, res) => {
     // FREE / PAID
     // =========================
 
-    let paymentStatus = "pending";
+    let paymentStatus = 2;
 
-    if (pkg.m_package_type === "free") {
-      paymentStatus = "success";
+    if (pkg.m_package_type === 1) {
+      paymentStatus = 1;
     }
 
     // =========================
@@ -98,7 +98,7 @@ const enrollTestPackage = async (req, res) => {
         test_package_id,
 
         package_type:
-          pkg.m_package_type || "free",
+          pkg.m_package_type || 1,
 
         payment_status: paymentStatus,
 
@@ -120,7 +120,7 @@ const enrollTestPackage = async (req, res) => {
 
         remark: remark || null,
 
-        access_status: "active",
+        access_status: 1,
 
         access_type: "lifetime",
 
@@ -181,13 +181,13 @@ const myPurchasedPackages = async (
 
     const filter = {
       user_id: userId,
-      access_status: "active",
+      access_status: 1,
     };
 
     // optional payment filter
     if (payment_status) {
-      filter.payment_status =
-        payment_status;
+      filter.payment_status = Number(payment_status);
+      
     }
 
     let data =

@@ -23,20 +23,19 @@ const addQuiz = async (req, res) => {
       m_quiz_remark,
       m_quiz_status,
       m_quiz_city,
-      m_quiz_lang
+      m_quiz_lang,
+      m_quiz_type 
     } = req.body;
 
     if (!m_quiz_title) {
       return res.status(400).json({
         status: false,
-        message: "Quiz title is required"
+        message: "Quiz title is required",
       });
     }
 
     // FILES
-    const icon = req.files?.m_quiz_icon
-      ? req.files.m_quiz_icon[0].path
-      : null;
+    const icon = req.files?.m_quiz_icon ? req.files.m_quiz_icon[0].path : null;
 
     const banner = req.files?.m_quiz_banner
       ? req.files.m_quiz_banner[0].path
@@ -44,7 +43,7 @@ const addQuiz = async (req, res) => {
 
     // AUTO ID
     const lastQuiz = await Quiz.findOne().sort({ m_quiz_id: -1 });
-    const newId = lastQuiz ? lastQuiz.m_quiz_id + 1 : 1;
+    const newId = lastQuiz ? Number(lastQuiz.m_quiz_id) + 1 : 1;
 
     const quiz = new Quiz({
       m_quiz_id: newId,
@@ -72,10 +71,11 @@ const addQuiz = async (req, res) => {
       m_quiz_enddate,
       m_quiz_endTime,
 
-      m_quiz_status: m_quiz_status ? Number(m_quiz_status) : 1,
+      m_quiz_status: m_quiz_status !== undefined ? Number(m_quiz_status) : 1,
 
       m_quiz_city,
-      m_quiz_lang
+      m_quiz_lang,
+      m_quiz_type: m_quiz_type !== undefined ? Number(m_quiz_type) : 2,
     });
 
     const saved = await quiz.save();
@@ -83,14 +83,12 @@ const addQuiz = async (req, res) => {
     res.status(201).json({
       status: true,
       message: "Quiz added successfully",
-      data: saved
+      data: saved,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 const updateQuiz = async (req, res) => {
   try {
@@ -100,7 +98,7 @@ const updateQuiz = async (req, res) => {
     if (!quiz) {
       return res.status(404).json({
         status: false,
-        message: "Quiz not found"
+        message: "Quiz not found",
       });
     }
 
@@ -110,6 +108,18 @@ const updateQuiz = async (req, res) => {
     Object.keys(fields).forEach((key) => {
       quiz[key] = fields[key];
     });
+
+    if ("m_quiz_status" in fields) {
+      if (![0, 1].includes(Number(fields.m_quiz_status))) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid quiz status. Use 0 or 1",
+        });
+      }
+
+      quiz.m_quiz_status = Number(fields.m_quiz_status);
+      delete fields.m_quiz_status;
+    }
 
     // FILE UPDATE
     if (req.files?.m_quiz_icon) {
@@ -131,9 +141,8 @@ const updateQuiz = async (req, res) => {
     res.json({
       status: true,
       message: "Quiz updated successfully",
-      data: updated
+      data: updated,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -158,9 +167,8 @@ const getAllQuiz = async (req, res) => {
       total,
       page,
       pages: Math.ceil(total / limit),
-      data
+      data,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -175,11 +183,11 @@ const getQuizByPackage = async (req, res) => {
     limit = Number(limit);
 
     const total = await Quiz.countDocuments({
-      m_quiz_package: package_id
+      m_quiz_package: package_id,
     });
 
     const data = await Quiz.find({
-      m_quiz_package: package_id
+      m_quiz_package: package_id,
     })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -190,9 +198,8 @@ const getQuizByPackage = async (req, res) => {
       total,
       page,
       pages: Math.ceil(total / limit),
-      data
+      data,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -207,7 +214,7 @@ const deleteQuiz = async (req, res) => {
     if (!quiz) {
       return res.status(404).json({
         status: false,
-        message: "Quiz not found"
+        message: "Quiz not found",
       });
     }
 
@@ -224,9 +231,8 @@ const deleteQuiz = async (req, res) => {
 
     res.json({
       status: true,
-      message: "Quiz deleted successfully"
+      message: "Quiz deleted successfully",
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
@@ -237,5 +243,5 @@ module.exports = {
   updateQuiz,
   getAllQuiz,
   getQuizByPackage,
-  deleteQuiz
+  deleteQuiz,
 };
