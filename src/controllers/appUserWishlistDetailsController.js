@@ -32,7 +32,7 @@ const getCourseWishlistByUser = async (req, res) => {
     const filter = {
       user_id: userId,
 
-      wishlist_type: "course",
+      wishlist_type: 1,
     };
 
     // =====================================
@@ -109,7 +109,7 @@ const getSingleCourseWishlist = async (req, res) => {
     const data = await Wishlist.findOne({
       _id: id,
 
-      wishlist_type: "course",
+      wishlist_type: 1,
     })
       .populate("user_id","-c_password")
       .populate("course_id");
@@ -164,7 +164,7 @@ const deleteCourseWishlist = async (req, res) => {
     const data = await Wishlist.findOne({
       _id: id,
 
-      wishlist_type: "course",
+      wishlist_type: 1,
     });
 
     if (!data) {
@@ -224,7 +224,7 @@ const getTestSeriesWishlistByUser = async (req, res) => {
     const filter = {
       user_id: userId,
 
-      wishlist_type: "package",
+      wishlist_type: 2,
     };
 
     // =====================================
@@ -302,7 +302,7 @@ const getSingleTestSeriesWishlist = async (req, res) => {
     const data = await Wishlist.findOne({
       _id: id,
 
-      wishlist_type: "package",
+      wishlist_type: 2,
     })
       .populate("user_id","-c_password")
       .populate("package_id");
@@ -357,7 +357,7 @@ const deleteTestSeriesWishlist = async (req, res) => {
     const data = await Wishlist.findOne({
       _id: id,
 
-      wishlist_type: "package",
+      wishlist_type: 2,
     });
 
     if (!data) {
@@ -417,7 +417,7 @@ const getNotesWishlistByUser = async (req, res) => {
     const filter = {
       user_id: userId,
 
-      wishlist_type: "notes",
+      wishlist_type: 3,
     };
 
     // =====================================
@@ -495,7 +495,7 @@ const getSingleNotesWishlist = async (req, res) => {
     const data = await Wishlist.findOne({
       _id: id,
 
-      wishlist_type: "notes",
+      wishlist_type: 3,
     })
       .populate("user_id","-c_password")
       .populate("notes_id");
@@ -550,7 +550,7 @@ const deleteNotesWishlist = async (req, res) => {
     const data = await Wishlist.findOne({
       _id: id,
 
-      wishlist_type: "notes",
+      wishlist_type: 3,
     });
 
     if (!data) {

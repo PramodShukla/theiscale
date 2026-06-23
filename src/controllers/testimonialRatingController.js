@@ -433,10 +433,10 @@ const updateTestimonialRating = async (req, res) => {
     // ==========================================
 
     if (isValidValue(status)) {
-      if (!["active", "inactive"].includes(status)) {
+      if (![1, 0].includes(status)) {
         return res.status(400).send({
           status: false,
-          message: "Status must be active or inactive",
+          message: "Status must be 0 or 1",
         });
       }
 
@@ -502,7 +502,7 @@ const changeTestimonialRatingStatus = async (req, res) => {
     // TOGGLE STATUS
     // ==========================================
 
-    review.status = review.status === "active" ? "inactive" : "active";
+    review.status = review.status === 1 ? 0 : 1;
 
     await review.save();
 

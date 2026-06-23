@@ -533,7 +533,7 @@ const updatePurchasedTestSeriesStatus = async (req, res) => {
     // =====================================
 
     enrollment.access_status =
-      enrollment.access_status === "active" ? "inactive" : "active";
+      enrollment.access_status === 1 ? 0 : 1;
 
     // =====================================
     // SAVE

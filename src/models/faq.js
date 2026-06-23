@@ -25,6 +25,8 @@ const faqSchema = new mongoose.Schema({
 
   m_faq_status: {
     type: Number,
+    enum:[0,1],
+    default:1,
     required: true
   },
 

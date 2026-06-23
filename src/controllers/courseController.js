@@ -539,7 +539,7 @@ const getAllCourses = async (req, res) => {
           : "N/A",
         banner: course.m_course_banner,
         video: course.m_course_video_link,
-        course_type: course.m_course_type === 1 ? "Free" : "Paid",
+        course_type: course.m_course_type === 1 ? 1 : 2,
         price: course.m_course_type === 1 ? "N/A" : course.m_course_price,
         offer_price:
           course.m_course_type === 1 ? "N/A" : course.m_course_offer_price,
@@ -991,7 +991,7 @@ const getPopularCourses = async (req, res) => {
       title: c.m_course_title,
       code: c.m_course_code,
       banner: c.m_course_banner,
-      type: c.m_course_type === 1 ? "Free" : "Paid",
+      type: c.m_course_type === 1 ? 1 : 2,
       price: c.m_course_type === 1 ? "N/A" : c.m_course_price,
       offer_price: c.m_course_type === 1 ? "N/A" : c.m_course_offer_price,
       slug: c.m_course_slug,
@@ -1049,7 +1049,7 @@ const getRecommendedCourses = async (req, res) => {
       title: c.m_course_title,
       code: c.m_course_code,
       banner: c.m_course_banner,
-      type: c.m_course_type === 1 ? "Free" : "Paid",
+      type: c.m_course_type === 1 ? 1 : 2,
       price: c.m_course_type === 1 ? "N/A" : c.m_course_price,
       offer_price: c.m_course_type === 1 ? "N/A" : c.m_course_offer_price,
       slug: c.m_course_slug,
@@ -1141,12 +1141,12 @@ const getCourseById = async (req, res) => {
 
       description: course.m_course_description,
 
-      course_type: course.m_course_type === 1 ? "Free" : "Paid",
+      course_type: course.m_course_type === 1 ? 1 : 2,
       price: course.m_course_price,
       offer_price: course.m_course_offer_price,
 
-      status: course.m_course_status === "active" ? "Active" : "Inactive",
-      status_web: course.m_course_status_web === 1 ? "Active" : "Inactive",
+      status: course.m_course_status === 1 ? 1 : 0,
+      status_web: course.m_course_status_web === 1 ? 1 : 0,
 
       duration_app: course.m_course_duration_app,
       duration_web: course.m_course_duration_web,
@@ -1446,95 +1446,6 @@ const appGetCourseDetailsById = async (req, res) => {
     });
   }
 };
-
-// const appGetTopTrendingCourses = async (req, res) => {
-//   try {
-//     const topCourses = await Enrollment.aggregate([
-//       {
-//         $match: {
-//           payment_status: 1, // only successful purchases
-//           status: 1,
-//         },
-//       },
-
-//       {
-//         $group: {
-//           _id: "$course_id",
-//           totalEnrollments: {
-//             $sum: 1,
-//           },
-//         },
-//       },
-
-//       {
-//         $sort: {
-//           totalEnrollments: -1,
-//         },
-//       },
-
-//       {
-//         $limit: 10,
-//       },
-
-//       {
-//         $lookup: {
-//           from: "courses", // mongodb collection name
-//           localField: "_id",
-//           foreignField: "_id",
-//           as: "course",
-//         },
-//       },
-
-//       {
-//         $unwind: "$course",
-//       },
-
-//       {
-//         $project: {
-//           _id: 0,
-
-//           totalEnrollments: 1,
-
-//           course_id: "$course._id",
-
-//           m_course_title: "$course.m_course_title",
-
-//           m_course_slug: "$course.m_course_slug",
-
-//           m_course_banner: "$course.m_course_banner",
-
-//           m_course_intro: "$course.m_course_intro",
-
-//           m_course_type: "$course.m_course_type",
-
-//           m_course_price: "$course.m_course_price",
-
-//           m_course_offer_price: "$course.m_course_offer_price",
-
-//           m_course_rating: "$course.m_course_rating",
-
-//           m_course_reviews: "$course.m_course_reviews",
-
-//           m_course_view: "$course.m_course_view",
-
-//           m_course_status: "$course.m_course_status",
-//         },
-//       },
-//     ]);
-
-//     res.json({
-//       status: true,
-//       message: "Top trending courses fetched successfully",
-//       total: topCourses.length,
-//       data: topCourses,
-//     });
-//   } catch (err) {
-//     res.status(500).json({
-//       status: false,
-//       message: err.message,
-//     });
-//   }
-// };
 
 
 

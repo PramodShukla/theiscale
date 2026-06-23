@@ -64,7 +64,7 @@ router.use("/ppt", pptRoutes);
 router.use("/client", clientRoutes);
 router.use("/success-story", successStoryRoutes);
 router.use("/allied", alliedRoutes);
-router.use("/news&updates", newsupdateRoutes);
+router.use("/news_updates", newsupdateRoutes);
 router.use("/news", newsRoutes);
 router.use("/enroll-course", courseEnrollmentRoutes);
 router.use("/topics", topicsRoutes);

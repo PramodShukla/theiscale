@@ -22,6 +22,10 @@ router.get("/test", (req, res) => {
   });
 });
 
+
+
+
+
 router.post("/add", authMiddleware, adminMiddleware, newsupdatesUpload, addNews);
 
 router.put("/update/:id", authMiddleware, adminMiddleware, newsupdatesUpload, updateNews); 
@@ -34,7 +38,7 @@ router.delete("/:id", authMiddleware, adminMiddleware, deleteNews);
 
 router.patch("/status/:id", authMiddleware, adminMiddleware, changeNewsStatus);
 
-router.get("/public-all-news_updates", getAllNews);
+router.get("/public/all_news_updates", getAllNews);
 
 router.get("/public-single-news_updates/:id", getSingleNews); 
 

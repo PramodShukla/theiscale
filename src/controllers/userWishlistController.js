@@ -49,7 +49,7 @@ const addCourseToWishlist = async (req, res) => {
     const wishlist = await UserWishlist.create({
       user_id: req.user.id,
 
-      wishlist_type: "course",
+      wishlist_type: 1,
 
       course_id,
     });
@@ -75,7 +75,7 @@ const getMyCourseWishlist = async (req, res) => {
     const data = await UserWishlist.find({
       user_id: req.user.id,
 
-      wishlist_type: "course",
+      wishlist_type: 1,
     })
 
       .populate({
@@ -137,7 +137,7 @@ const getAllCourseWishlistsAdmin = async (req, res) => {
     // FILTER
 
     let filter = {
-      wishlist_type: "course",
+      wishlist_type: 1,
     };
 
     // COURSE FILTER
@@ -277,7 +277,7 @@ const getSingleCourseWishlist = async (req, res) => {
 
     const data = await UserWishlist.findOne({
       _id: wishlistId,
-      wishlist_type: "course",
+      wishlist_type: 1,
     })
 
       .populate({
@@ -327,7 +327,7 @@ const deleteCourseWishlist = async (req, res) => {
 
     const wishlist = await UserWishlist.find({
       wishlistId,
-      wishlist_type: "course",
+      wishlist_type: 1,
     });
 
     if (!wishlist) {
@@ -381,7 +381,7 @@ const addTestPackageToWishlist = async (req, res) => {
 
       package_id,
 
-      wishlist_type: "package",
+      wishlist_type: 2,
     });
 
     if (exists) {
@@ -395,7 +395,7 @@ const addTestPackageToWishlist = async (req, res) => {
     const wishlist = await UserWishlist.create({
       user_id: req.user.id,
 
-      wishlist_type: "package",
+      wishlist_type: 2,
 
       package_id,
     });
@@ -421,7 +421,7 @@ const getMyTestPackageWishlist = async (req, res) => {
     const data = await UserWishlist.find({
       user_id: req.user.id,
 
-      wishlist_type: "package",
+      wishlist_type: 2,
     })
 
       .populate({
@@ -491,7 +491,7 @@ const getAllTestPackageWishlistsAdmin = async (req, res) => {
     const skip = (page - 1) * limit;
 
     let filter = {
-      wishlist_type: "package",
+      wishlist_type: 2,
     };
 
     // PACKAGE FILTER
@@ -627,7 +627,7 @@ const getSingleTestPackageWishlist = async (req, res) => {
     const data = await UserWishlist.findOne({
       _id: wishlistId,
 
-      wishlist_type: "package",
+      wishlist_type: 2,
     })
 
       .populate({
@@ -688,7 +688,7 @@ const deleteTestPackageWishlist = async (req, res) => {
     const wishlist = await UserWishlist.findOne({
       _id: wishlistId,
 
-      wishlist_type: "package",
+      wishlist_type: 2,
     });
 
     if (!wishlist) {
@@ -744,7 +744,7 @@ const addNotesToWishlist = async (req, res) => {
 
       notes_id,
 
-      wishlist_type: "notes",
+      wishlist_type: 3,
     });
 
     if (exists) {
@@ -758,7 +758,7 @@ const addNotesToWishlist = async (req, res) => {
     const wishlist = await UserWishlist.create({
       user_id: req.user.id,
 
-      wishlist_type: "notes",
+      wishlist_type: 3,
 
       notes_id,
     });
@@ -786,7 +786,7 @@ const getMyNotesWishlist = async (req, res) => {
     const data = await UserWishlist.find({
       user_id: req.user.id,
 
-      wishlist_type: "notes",
+      wishlist_type: 3,
     })
 
       .populate({
@@ -847,7 +847,7 @@ const getAllNotesWishlistsAdmin = async (req, res) => {
     // FILTER
 
     let filter = {
-      wishlist_type: "notes",
+      wishlist_type: 3,
     };
 
     // NOTES FILTER
@@ -986,7 +986,7 @@ const getSingleNotesWishlist = async (req, res) => {
     const data = await UserWishlist.findOne({
       _id: wishlistId,
 
-      wishlist_type: "notes",
+      wishlist_type: 3,
     })
 
       .populate({
@@ -1037,7 +1037,7 @@ const deleteNotesWishlist = async (req, res) => {
     const wishlist = await UserWishlist.findOne({
       _id: wishlistId,
 
-      wishlist_type: "notes",
+      wishlist_type: 3,
     });
 
     if (!wishlist) {

@@ -29,7 +29,7 @@ const wishlistSchema = new mongoose.Schema(
 
     package_id: {
       type: mongoose.Schema.Types.ObjectId,
-
+      
       ref: "test_package",
 
       default: null,

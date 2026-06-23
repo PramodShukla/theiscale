@@ -72,19 +72,19 @@ const getAllCoupons = async (req, res) => {
         let typeData = null;
         let type_name = null;
 
-        if (coupon.coupon_type === "course") {
+        if (coupon.coupon_type === 1) {
           typeData = await Course.findById(coupon.coupon_type_id);
 
           type_name = typeData?.m_course_title || null;
-        } else if (coupon.coupon_type === "testpackage") {
+        } else if (coupon.coupon_type === 2) {
           typeData = await TestPackage.findById(coupon.coupon_type_id);
 
           type_name = typeData?.m_package_title || null;
-        } else if (coupon.coupon_type === "notes") {
+        } else if (coupon.coupon_type === 3) {
           typeData = await Notes.findById(coupon.coupon_type_id);
 
           type_name = typeData?.notes_name || null;
-        } else if (coupon.coupon_type === "webinar") {
+        } else if (coupon.coupon_type === 4) {
           typeData = await Webinar.findById(coupon.coupon_type_id);
 
           type_name = typeData?.m_webinar_title || null;
@@ -165,19 +165,19 @@ const getSingleCoupon = async (req, res) => {
     let typeData = null;
     let type_name = null;
 
-    if (coupon.coupon_type === "course") {
+    if (coupon.coupon_type === 1) {
       typeData = await Course.findById(coupon.coupon_type_id);
 
       type_name = typeData?.m_course_title || null;
-    } else if (coupon.coupon_type === "testpackage") {
+    } else if (coupon.coupon_type === 2) {
       typeData = await TestPackage.findById(coupon.coupon_type_id);
 
       type_name = typeData?.m_package_title || null;
-    } else if (coupon.coupon_type === "notes") {
+    } else if (coupon.coupon_type === 3) {
       typeData = await Notes.findById(coupon.coupon_type_id);
 
       type_name = typeData?.notes_name || null;
-    } else if (coupon.coupon_type === "webinar") {
+    } else if (coupon.coupon_type === 4) {
       typeData = await Webinar.findById(coupon.coupon_type_id);
 
       type_name = typeData?.m_webinar_title || null;
@@ -243,7 +243,7 @@ const addCoupon = async (req, res) => {
 
       coupon_visible: req.body.coupon_visible || "yes",
 
-      coupon_status: req.body.coupon_status || "active",
+      coupon_status: req.body.coupon_status || 1,
     });
 
     res.json({
@@ -329,7 +329,7 @@ const changeCouponStatus = async (req, res) => {
     }
 
     coupon.coupon_status =
-      coupon.coupon_status === "active" ? "inactive" : "active";
+      coupon.coupon_status === 1 ? 0 : 1;
 
     await coupon.save();
 

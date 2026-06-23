@@ -229,9 +229,9 @@ const addNotes = async (req, res) => {
 
       notes_pdf: pdfPath,
 
-      notes_status: notes_status || "active",
+      notes_status: notes_status || 1,
 
-      notes_type: notes_type || "free",
+      notes_type: notes_type || 1,
 
       notes_price: notes_price || 0,
 
@@ -418,7 +418,7 @@ const changeNotesStatus = async (req, res) => {
     }
 
     notes.notes_status =
-      notes.notes_status === "active" ? "inactive" : "active";
+      notes.notes_status === 1 ? 0 : 1;
 
     await notes.save();
 
@@ -721,7 +721,7 @@ const getAllUserNotes = async (req, res) => {
     const notes_subcategory_id = req.query.notes_subcategory_id || "";
 
     let filter = {
-      notes_status: "active",
+      notes_status: 1,
     };
 
     // =========================

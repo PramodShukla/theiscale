@@ -17,8 +17,8 @@ const couponSchema = new mongoose.Schema(
 
     // course | testpackage | notes | webinar
     coupon_type: {
-      type: String,
-      enum: ["course", "testpackage", "notes", "webinar"],
+      type: Number,
+      enum: [1,2,3,4],//["1=course", "2=testpackage", "3=notes", "4=webinar"],
       default: null,
     },
 
@@ -91,9 +91,9 @@ const couponSchema = new mongoose.Schema(
     },
 
     coupon_status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: Number,
+      enum: [0, 1],
+      default: 1,
     },
 
     coupon_added_on: {

@@ -57,60 +57,7 @@ exports.createCategory = async (req, res) => {
   }
 };
 
-// GET ALL CATEGORIES
-// exports.getAllCategories = async (req, res) => {
-//   try {
-//     const categories = await Category.find()
-//       .sort({ m_category_order: 1 }); // order wise sorting
 
-//     res.send({
-//       status: true,
-//       message: "Categories fetched successfully",
-//       data: categories,
-//     });
-
-//   } catch (e) {
-//     res.status(500).send({
-//       status: false,
-//       message: e.message,
-//     });
-//   }
-// };
-
-// exports.getAllCategories = async (req, res) => {
-//   try {
-
-//     // ✅ pagination params
-//     let page = parseInt(req.query.page) || 1;
-//     let limit = parseInt(req.query.limit) || 10;
-
-//     let skip = (page - 1) * limit;
-
-//     // ✅ data query with pagination
-//     const categories = await Category.find()
-//       .sort({ m_category_order: 1 })
-//       .skip(skip)
-//       .limit(limit);
-
-//     // ✅ total records count
-//     const total = await Category.countDocuments();
-
-//     res.send({
-//       status: true,
-//       message: "Categories fetched successfully",
-//       page,
-//       totalPages: Math.ceil(total / limit),
-//       totalRecords: total,
-//       data: categories,
-//     });
-
-//   } catch (e) {
-//     res.status(500).send({
-//       status: false,
-//       message: e.message,
-//     });
-//   }
-// };
 
 exports.getAllCategories = async (req, res) => {
   try {

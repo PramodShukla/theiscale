@@ -94,7 +94,7 @@ const getAllEventCategory = async (req, res) => {
 const getEventCategoryDropdown = async (req, res) => {
   try {
     const data = await EventCategory.find({
-      m_ec_status: "active",
+      m_ec_status: 1,
     }).select("_id m_ec_title");
 
     res.json({

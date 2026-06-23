@@ -28,9 +28,9 @@ const testimonialRatingSchema = new mongoose.Schema(
     },
 
     status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: Number,
+      enum: [0, 1],
+      default: 1,
     },
   },
   {
