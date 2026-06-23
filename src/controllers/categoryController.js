@@ -196,7 +196,7 @@ exports.appGetCategoryWiseCourses = async (req, res) => {
     for (const category of categories) {
       const courses = await Course.find({
         m_course_category: category._id,
-        m_course_status: "active",
+        m_course_status: 1,
       });
 
       const formattedCourses = courses.map((course) => ({

@@ -434,14 +434,14 @@ exports.changeAdminStatus = async (req, res) => {
       });
     }
 
-    admin.kh_status = admin.kh_status === "active" ? "inactive" : "active";
+    admin.kh_status = admin.kh_status === 1 ? 0 : 1;
 
     await admin.save();
 
     res.status(200).json({
       status: true,
       message: `Admin ${
-        admin.kh_status === "active" ? "activated" : "deactivated"
+        admin.kh_status 
       } successfully`,
       data: {
         _id: admin._id,

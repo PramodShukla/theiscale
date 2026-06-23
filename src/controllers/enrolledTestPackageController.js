@@ -131,7 +131,7 @@ const enrollTestPackage = async (req, res) => {
       status: true,
 
       message:
-        paymentStatus === "success"
+        paymentStatus === 1
           ? "Test package enrolled successfully"
           : "Payment pending",
 

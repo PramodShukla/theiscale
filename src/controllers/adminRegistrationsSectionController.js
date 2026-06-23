@@ -427,7 +427,7 @@ const getAllTestPackageEnrollments = async (req, res) => {
     // =========================
 
     if (payment_status) {
-      filter.payment_status = payment_status;
+      filter.payment_status = Number(payment_status);
     }
 
     if (package_id) {

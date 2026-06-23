@@ -48,7 +48,7 @@ const testPackageSchema = new mongoose.Schema({
   },
 
   m_package_type: {
-    type: String,
+    type: Number,
     enum: [1, 2], // 1=free , 2=paid
     default: null,
   },

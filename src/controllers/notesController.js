@@ -229,9 +229,9 @@ const addNotes = async (req, res) => {
 
       notes_pdf: pdfPath,
 
-      notes_status: notes_status || 1,
+      notes_status: Number(notes_status) || 1,
 
-      notes_type: notes_type || 1,
+      notes_type: Number(notes_type) || 1,
 
       notes_price: notes_price || 0,
 

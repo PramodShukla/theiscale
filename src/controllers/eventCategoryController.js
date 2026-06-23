@@ -20,7 +20,7 @@ const addEventCategory = async (req, res) => {
       m_ec_keyword: req.body.m_ec_keyword,
       m_ec_desc: req.body.m_ec_desc,
       m_ec_order: req.body.m_ec_order,
-      m_ec_status: req.body.m_ec_status || "active",
+      m_ec_status: req.body.m_ec_status || 1,
     });
 
     res.json({

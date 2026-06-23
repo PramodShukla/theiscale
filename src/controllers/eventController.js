@@ -62,7 +62,7 @@ const addEvent = async (req, res) => {
       m_event_no_of_enroll: req.body.m_event_no_of_enroll,
       m_event_order: req.body.m_event_order,
 
-      m_event_status: req.body.m_event_status?.trim() || "active",
+      m_event_status: req.body.m_event_status?.trim() || 1,
 
       // FILES
       m_event_banner: req.files?.m_event_banner?.[0]?.path,
@@ -228,7 +228,7 @@ const getAllEventsDropdown = async (req, res) => {
 
     // FILTER
     const filter = {
-      m_event_status: "active",
+      m_event_status: 1,
     };
 
     // SEARCH
@@ -288,7 +288,7 @@ const getAllEventsDropdown = async (req, res) => {
 const appGetAllEvents = async (req, res) => {
   try {
     const events = await Event.find({
-      m_event_status: "active",
+      m_event_status: 1,
     })
       .populate("m_event_category")
       .sort({ m_event_added_on: -1 });
@@ -346,7 +346,7 @@ const appGetAllEvents = async (req, res) => {
 
         m_event_order: String(event.m_event_order || ""),
 
-        m_event_status: event.m_event_status === "active" ? "1" : "0",
+        m_event_status: event.m_event_status,
 
         m_event_added_on: event.m_event_added_on
           ? event.m_event_added_on
@@ -480,7 +480,7 @@ const appGetEventDetails = async (req, res) => {
           m_event_order: event.m_event_order ? String(event.m_event_order) : "",
 
           // active = 1, inactive = 2
-          m_event_status: event.m_event_status === "active" ? "1" : "2",
+          m_event_status: event.m_event_status,
 
           m_event_added_on: event.m_event_added_on
             ? event.m_event_added_on
@@ -513,7 +513,7 @@ const appGetEventDetails = async (req, res) => {
             : "",
 
           m_ec_status:
-            event.m_event_category?.m_ec_status === "active" ? "1" : "2",
+            event.m_event_category?.m_ec_status === 1 ? 1 : 0,
 
           m_ec_added_on: event.m_event_category?.m_ec_added_on
             ? event.m_event_category.m_ec_added_on

@@ -55,7 +55,7 @@ const addNotesCategory = async (req, res) => {
         nc_name,
 
         nc_status:
-          nc_status || "active",
+          Number(nc_status) || 1,
 
         nc_keywords:
           nc_keywords || null,
@@ -206,7 +206,7 @@ const getNotesCategoryDropdown =
     try {
       const data =
         await NotesCategory.find({
-          nc_status: "active",
+          nc_status: 1,
         })
           .select(`
           _id
@@ -260,9 +260,9 @@ const changeNotesCategoryStatus =
       }
 
       category.nc_status =
-        category.nc_status === "active"
-          ? "inactive"
-          : "active";
+        category.nc_status === 1
+          ? 0
+          : 1;
 
       await category.save();
 
@@ -348,7 +348,7 @@ const updateNotesCategory = async (
       category.nc_name = nc_name;
 
     if (nc_status !== undefined && nc_status !== "")
-      category.nc_status = nc_status;
+      category.nc_status = Number(nc_status);
 
     if (nc_keywords !== undefined)
       category.nc_keywords = nc_keywords;
