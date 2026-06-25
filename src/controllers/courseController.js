@@ -1154,28 +1154,11 @@ const getCourseById = async (req, res) => {
       popular: course.m_course_popular,
       recommended: course.m_course_recomended,
 
-      trainees: course.m_course_trainee.map((t) => ({
+      trainees: (course.m_course_trainee || []).map((t) => ({
         trainee_id: t._id,
-
         name: t.member_name,
-
-        position: t.member_position,
-
         image: t.member_image,
-
-        expertise: t.member_expertise,
-
-        experience: t.member_experience,
-
         linkedin: t.member_linkedin,
-
-        bio: t.member_bio,
-
-        type: t.member_type,
-
-        status: t.member_status,
-
-        order: t.member_order,
       })),
 
       views: course.m_course_view,
@@ -1447,8 +1430,6 @@ const appGetCourseDetailsById = async (req, res) => {
   }
 };
 
-
-
 const appGetTopTrendingCourses = async (req, res) => {
   try {
     const trendingCourses = await CourseEnrollment.aggregate([
@@ -1541,8 +1522,7 @@ const appGetTopTrendingCourses = async (req, res) => {
           m_course_certificate: "$course.m_course_certificate",
           m_course_app_g_link: "$course.m_course_app_g_link",
           m_course_web_g_link: "$course.m_course_web_g_link",
-          m_course_graphy_instruction:
-            "$course.m_course_graphy_instruction",
+          m_course_graphy_instruction: "$course.m_course_graphy_instruction",
           m_course_share: "$course.m_course_share",
           m_course_order: "$course.m_course_order",
 
@@ -1571,8 +1551,6 @@ const appGetTopTrendingCourses = async (req, res) => {
     });
   }
 };
-
-
 
 module.exports = {
   addCourse,
