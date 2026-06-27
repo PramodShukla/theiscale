@@ -4,11 +4,14 @@ const Lecture = require("../models/lecture");
 
 const LectureProgress = require("../models/lecture_progress");
 
+const {
+  generateCertificatePDF,
+  generateUniqueCertNo,
+} = require("../utils/certificateGenerator");
+
 const fs = require("fs");
 
 const path = require("path");
-
-
 
 // =======================================================
 // CALCULATE COURSE PROGRESS
@@ -302,99 +305,259 @@ const getCertificateRequests = async (req, res) => {
 // UPDATE CERTIFICATE STATUS
 // =======================================================
 
+// const updateCertificateStatus = async (req, res) => {
+//   try {
+//     const enrollmentId = req.params.enrollment_id;
+
+//     const { status, certificate_no, declined_reason } = req.body;
+
+//     const enrollment = await Enrollment.findById(enrollmentId);
+
+//     if (!enrollment) {
+//       return res.status(404).json({
+//         status: false,
+//         message: "Enrollment not found",
+//       });
+//     }
+
+//     // APPROVED
+//     if (status === 2) {
+//       // certificate number required
+//       if (!certificate_no) {
+//         return res.status(400).json({
+//           status: false,
+//           message: "Certificate number required",
+//         });
+//       }
+
+//       // pdf required
+//       if (!req.files || !req.files.certificate_pdf) {
+//         return res.status(400).json({
+//           status: false,
+//           message: "Certificate PDF required",
+//         });
+//       }
+
+//       // uploaded pdf path
+//       const certificatePdf = req.files.certificate_pdf[0].path;
+
+//       enrollment.certificate_status = 2;
+
+//       enrollment.certificate_no = certificate_no;
+
+//       enrollment.certificate_pdf = certificatePdf;
+
+//       enrollment.certificate_approved_at = new Date();
+
+//       enrollment.certificate_declined_reason = null;
+//     }
+
+//     // DECLINED
+//     else if (Number(status) === 3) {
+//       enrollment.certificate_status = 3;
+
+//       enrollment.certificate_declined_reason = declined_reason || null;
+
+//       enrollment.certificate_no = null;
+
+//       enrollment.certificate_pdf = null;
+//     }
+
+//     // PENDING
+//     else {
+//       enrollment.certificate_status = 1;
+
+//       enrollment.certificate_no = null;
+
+//       enrollment.certificate_pdf = null;
+
+//       enrollment.certificate_declined_reason = null;
+//     }
+
+//     await enrollment.save();
+
+//     return res.status(200).json({
+//       status: true,
+
+//       message: "Certificate status updated successfully",
+//     });
+//   } catch (error) {
+//     // delete uploaded certificate pdf if error occurs
+//     if (
+//       req.files &&
+//       req.files.certificate_pdf &&
+//       req.files.certificate_pdf[0]
+//     ) {
+//       const filePath = req.files.certificate_pdf[0].path;
+
+//       // check file exists
+//       if (fs.existsSync(filePath)) {
+//         fs.unlinkSync(filePath);
+//       }
+//     }
+//     return res.status(500).json({
+//       status: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+// const updateCertificateStatus = async (req, res) => {
+//   try {
+//     const enrollmentId = req.params.enrollment_id;
+//     const { status, declined_reason } = req.body; // Ab certificate_no body se lene ki zarurat nahi
+
+//     const enrollment = await Enrollment.findById(enrollmentId)
+//       .populate("user_id")
+//       .populate("course_id");
+
+//     if (!enrollment) {
+//       return res
+//         .status(404)
+//         .json({ status: false, message: "Enrollment not found" });
+//     }
+
+//     // APPROVED
+//     if (Number(status) === 2) {
+//       // 1. Unique No Generate karein
+//       const uniqueCertNo = generateUniqueCertNo();
+
+//       // 2. Data nikaalein
+//       const userName = `${enrollment.user_id.c_first_name} ${enrollment.user_id.c_last_name}`;
+//       const courseTitle = enrollment.course_id.m_course_title;
+
+//       // 3. PDF Generate karein
+//       const filePath = await generateCertificatePDF(
+//         userName,
+//         courseTitle,
+//         uniqueCertNo,
+//       );
+
+//       // 4. DB Update
+//       enrollment.certificate_status = 2;
+//       enrollment.certificate_no = uniqueCertNo;
+//       enrollment.certificate_pdf = filePath;
+//       enrollment.certificate_approved_at = new Date();
+//       enrollment.certificate_declined_reason = null;
+//     }
+
+//     // DECLINED
+//     else if (Number(status) === 3) {
+//       enrollment.certificate_status = 3;
+//       enrollment.certificate_declined_reason =
+//         declined_reason || "Criteria not met";
+//       enrollment.certificate_no = null;
+//       enrollment.certificate_pdf = null;
+//     }
+
+//     // PENDING (Status 1)
+//     else {
+//       enrollment.certificate_status = 1;
+//       enrollment.certificate_no = null;
+//       enrollment.certificate_pdf = null;
+//     }
+
+//     await enrollment.save();
+
+//     return res.status(200).json({
+//       status: true,
+//       message: "Certificate status updated and PDF generated successfully",
+//       data: {
+//         cert_no: enrollment.certificate_no,
+//         pdf_url: enrollment.certificate_pdf,
+//       },
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       status: false,
+//       message: "Error: " + error.message,
+//     });
+//   }
+// };
+
 const updateCertificateStatus = async (req, res) => {
   try {
     const enrollmentId = req.params.enrollment_id;
+    const { status, declined_reason } = req.body;
 
-    const { status, certificate_no, declined_reason } = req.body;
-
-    const enrollment = await Enrollment.findById(enrollmentId);
+    // Deep Population का उपयोग करें ताकि course के अंदर category मिल सके
+    const enrollment = await Enrollment.findById(enrollmentId)
+      .populate("user_id")
+      .populate({
+        path: "course_id",
+        populate: {
+          path: "m_course_category", // यह field name है आपके courseSchema में
+          model: "category", // यह model name है
+        },
+      });
 
     if (!enrollment) {
-      return res.status(404).json({
-        status: false,
-        message: "Enrollment not found",
-      });
+      return res
+        .status(404)
+        .json({ status: false, message: "Enrollment not found" });
     }
 
     // APPROVED
-    if (status === 2) {
-      // certificate number required
-      if (!certificate_no) {
-        return res.status(400).json({
-          status: false,
-          message: "Certificate number required",
-        });
-      }
+    if (Number(status) === 2) {
+      // 1. Unique No Generate karein (Pass Enrollment model)
+      const uniqueCertNo = await generateUniqueCertNo(Enrollment);
 
-      // pdf required
-      if (!req.files || !req.files.certificate_pdf) {
-        return res.status(400).json({
-          status: false,
-          message: "Certificate PDF required",
-        });
-      }
+      // 2. Data nikaalein
+      const userName = `${enrollment.user_id.c_first_name} ${enrollment.user_id.c_last_name}`;
+      const courseTitle = enrollment.course_id.m_course_title;
 
-      // uploaded pdf path
-      const certificatePdf = req.files.certificate_pdf[0].path;
+      // Category Name extract karein (Safe access)
+      const categoryName =
+        enrollment.course_id.m_course_category?.m_category_name || "bootcamp";
 
+      // 3. PDF Generate karein (Category Name ke saath)
+      const filePath = await generateCertificatePDF(
+        userName,
+        courseTitle,
+        categoryName, // यहाँ categoryName भेजा जा रहा है
+        uniqueCertNo,
+      );
+
+      // 4. DB Update
       enrollment.certificate_status = 2;
-
-      enrollment.certificate_no = certificate_no;
-
-      enrollment.certificate_pdf = certificatePdf;
-
+      enrollment.certificate_no = uniqueCertNo;
+      enrollment.certificate_pdf = filePath;
       enrollment.certificate_approved_at = new Date();
-
       enrollment.certificate_declined_reason = null;
     }
 
     // DECLINED
     else if (Number(status) === 3) {
       enrollment.certificate_status = 3;
-
-      enrollment.certificate_declined_reason = declined_reason || null;
-
+      enrollment.certificate_declined_reason =
+        declined_reason || "Criteria not met";
       enrollment.certificate_no = null;
-
       enrollment.certificate_pdf = null;
     }
 
-    // PENDING
+    // PENDING (Status 1)
     else {
       enrollment.certificate_status = 1;
-
       enrollment.certificate_no = null;
-
       enrollment.certificate_pdf = null;
-
-      enrollment.certificate_declined_reason = null;
     }
 
     await enrollment.save();
 
     return res.status(200).json({
       status: true,
-
-      message: "Certificate status updated successfully",
+      message: "Certificate status updated and PDF generated successfully",
+      data: {
+        cert_no: enrollment.certificate_no,
+        pdf_url: enrollment.certificate_pdf,
+      },
     });
   } catch (error) {
-    // delete uploaded certificate pdf if error occurs
-    if (
-      req.files &&
-      req.files.certificate_pdf &&
-      req.files.certificate_pdf[0]
-    ) {
-      const filePath = req.files.certificate_pdf[0].path;
-
-      // check file exists
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    }
+    console.error(error);
     return res.status(500).json({
       status: false,
-      message: error.message,
+      message: "Error: " + error.message,
     });
   }
 };
@@ -437,7 +600,6 @@ const downloadCertificate = async (req, res) => {
     }
 
     res.download(filePath); //  actual download starts here
-
   } catch (error) {
     return res.status(500).json({
       status: false,

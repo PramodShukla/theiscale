@@ -85,15 +85,17 @@ const getAllJobs = async (req, res) => {
   try {
     let {
       page = 1,
-      limit = 10,
+      limit = 100,
       location,
       minSalary,
       maxSalary,
       exp,
+      fromDate,
+      toDate,
     } = req.query;
 
     page = parseInt(page) || 1;
-    limit = parseInt(limit) || 10;
+    limit = parseInt(limit) || 100;
 
     let filter = { status: 1 };
 
@@ -116,6 +118,32 @@ const getAllJobs = async (req, res) => {
     // if (exp) {
     //   filter["experience.max"] = { $gte: Number(exp) };
     // }
+
+    // DATE FILTER
+    if (fromDate || toDate) {
+      filter.$and = [];
+
+      // Job Created Date (created_at)
+      if (fromDate) {
+        filter.$and.push({
+          created_at: {
+            $gte: new Date(fromDate),
+          },
+        });
+      }
+
+      // Last Date To Apply
+      if (toDate) {
+        const endDate = new Date(toDate);
+        endDate.setHours(23, 59, 59, 999);
+
+        filter.$and.push({
+          last_date_to_apply: {
+            $lte: endDate,
+          },
+        });
+      }
+    }
 
     const total = await Job.countDocuments(filter);
 

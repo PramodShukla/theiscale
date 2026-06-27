@@ -41,11 +41,18 @@ router.get(
   getCertificateRequests,
 );
 
+// router.put(
+//   "/update-status/:enrollment_id",
+//   authMiddleware,
+//   adminMiddleware,
+//   certificateUpload,
+//   updateCertificateStatus,
+// );
+
 router.put(
   "/update-status/:enrollment_id",
   authMiddleware,
   adminMiddleware,
-  certificateUpload,
   updateCertificateStatus,
 );
 

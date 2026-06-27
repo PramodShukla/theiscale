@@ -22,6 +22,11 @@ app.use(
   express.static(path.join(__dirname, "src/uploads"))
 );
 
+app.use(
+  "/assets",
+  express.static(path.join(__dirname, "/assets"))
+);
+
 
 // Admin routes
 const adminRoutes = require("./src/routes/adminRoutes");
