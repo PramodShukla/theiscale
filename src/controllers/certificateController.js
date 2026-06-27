@@ -608,6 +608,52 @@ const downloadCertificate = async (req, res) => {
   }
 };
 
+const downloadCertificateByEnrollmentId = async (req, res) => {
+  try {
+    const { enrollment_id } = req.params;
+
+    const enrollment = await Enrollment.findById(enrollment_id);
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    if (enrollment.certificate_status !== 2) {
+      return res.status(400).json({
+        status: false,
+        message: "Certificate not approved yet",
+      });
+    }
+
+    if (!enrollment.certificate_pdf) {
+      return res.status(404).json({
+        status: false,
+        message: "Certificate PDF not found",
+      });
+    }
+
+    if (!fs.existsSync(enrollment.certificate_pdf)) {
+      return res.status(404).json({
+        status: false,
+        message: "Certificate file does not exist",
+      });
+    }
+
+    return res.download(
+      enrollment.certificate_pdf,
+      `${enrollment.certificate_no || "certificate"}.pdf`,
+    );
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getCertificateStatus,
 
@@ -618,4 +664,5 @@ module.exports = {
   updateCertificateStatus,
 
   downloadCertificate,
+  downloadCertificateByEnrollmentId,
 };

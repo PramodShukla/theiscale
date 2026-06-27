@@ -14,6 +14,7 @@ const {
   getCertificateRequests,
   updateCertificateStatus,
   downloadCertificate,
+  downloadCertificateByEnrollmentId
 } = require("../controllers/certificateController");
 
 const { adminMiddleware } = require("../middlewares/adminMiddleware");
@@ -54,6 +55,11 @@ router.put(
   authMiddleware,
   adminMiddleware,
   updateCertificateStatus,
+);
+
+router.get(
+  "/get/certificate/:enrollment_id",
+  downloadCertificateByEnrollmentId,
 );
 
 module.exports = router;

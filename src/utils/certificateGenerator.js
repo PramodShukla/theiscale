@@ -46,7 +46,7 @@ const generateCertificatePDF = async (
         courseSize: 30,
         courseX: 400,
         courseY: 300,
-        courseColor: rgb(0.2, 0.2, 0.2),
+        courseColor: rgb(0.2, 0.2, 0.2), 
         // Date "On May 2026" के लिए
         dateY: 250,
         datePart1: "On ",
