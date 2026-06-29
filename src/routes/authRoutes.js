@@ -8,6 +8,7 @@ const {
 const { registerMiddleware } = require("../middlewares/registrationMiddleware");
 
 router.post("/login", authController.login);
+router.post("/login-contact-password", authController.loginWithPassword);
 
 
 
@@ -29,7 +30,7 @@ router.post("/verify-otp", authController.verifyOtp);
 
 router.post("/register", registerMiddleware, authController.register);
 
-router.post("/create-password", authController.createPassword);
+router.post("/create-password",registerMiddleware, authController.createPassword);
 
 
 

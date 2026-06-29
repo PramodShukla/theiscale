@@ -49,6 +49,67 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.loginWithPassword = async (req, res) => {
+  try {
+    const { mobile, password } = req.body;
+
+    if (!mobile || !password) {
+      return res.status(400).json({
+        status: false,
+        message: "Mobile and Password are required",
+      });
+    }
+
+    const user = await Candidate.findOne({
+      c_contact: mobile,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    // Password exists?
+    if (!user.c_password) {
+      return res.status(400).json({
+        status: false,
+        message: "Password not created",
+        isPass: 0,
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.c_password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid password",
+      });
+    }
+
+    const token = generateTokenUser(user);
+
+    return res.status(200).json({
+      status: true,
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.c_display_name,
+        email: user.c_email,
+        mobile: user.c_contact,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 exports.checkMobile = async (req, res) => {
   try {
     const { mobile } = req.body;
