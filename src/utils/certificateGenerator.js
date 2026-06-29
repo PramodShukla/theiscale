@@ -40,40 +40,40 @@ const generateCertificatePDF = async (
     // --- CONFIGURATION ---
     if (cat.includes("data science")) {
       config = {
-        nameSize: 70,
-        nameY: 420,
+        nameSize: 80,
+        nameY: 750,
         nameColor: rgb(0, 0, 0),
-        courseSize: 30,
+        courseSize: 40,
         courseX: 400,
-        courseY: 300,
+        courseY: 320,
         courseColor: rgb(0.2, 0.2, 0.2), 
         // Date "On May 2026" के लिए
-        dateY: 250,
+        dateY: 350,
         datePart1: "On ",
         color1: rgb(0, 0, 0),
         color2: rgb(0.5, 0, 0), // "On" Black, "Date" Dark Red
-        certNoSize: 20,
+        certNoSize: 30,
         certNoX: 80,
-        certNoY: 60,
+        certNoY: 70,
         certNoColor: rgb(0, 0, 0.8),
       };
     } else if (cat.includes("data analyst")) {
       config = {
         nameSize: 70,
-        nameY: 420,
+        nameY: 890,
         nameColor: rgb(0, 0, 0),
         courseSize: 30,
         courseX: 400,
-        courseY: 300,
+        courseY: 700,
         courseColor: rgb(0.2, 0.2, 0.2),
         // Date "On May 2026" के लिए
-        dateY: 250,
+        dateY: 550,
         datePart1: "On ",
         color1: rgb(0, 0, 0),
         color2: rgb(0.5, 0, 0), // "On" Black, "Date" Dark Red
-        certNoSize: 20,
+        certNoSize: 30,
         certNoX: 80,
-        certNoY: 60,
+        certNoY: 400,
         certNoColor: rgb(0, 0, 0.8),
       };
     } else {

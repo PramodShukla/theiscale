@@ -9,12 +9,47 @@ const { registerMiddleware } = require("../middlewares/registrationMiddleware");
 
 router.post("/login", authController.login);
 
-//login+register
-router.post("/send-otp", authController.sendOtp);
+
+
+
+
+
+// //login+register
+// router.post("/send-otp", authController.sendOtp);
+
+// router.post("/verify-otp", authController.verifyOtp);
+
+// router.post("/register", registerMiddleware, authController.register);
+
+
+
+router.post("/send-otp", authController.checkMobile);
 
 router.post("/verify-otp", authController.verifyOtp);
 
 router.post("/register", registerMiddleware, authController.register);
+
+router.post("/create-password", authController.createPassword);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Forget Password
 router.post("/send-forgot-password-otp", authController.sendForgotPasswordOtp);
