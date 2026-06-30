@@ -27,7 +27,7 @@ const generateCertificatePDF = async (
   try {
     const cat = String(categoryName || "bootcamp").toLowerCase();
 
-    // डेट तैयार करना
+    // create date
     const now = new Date();
     const monthYear = now.toLocaleString("default", {
       month: "long",
@@ -40,61 +40,100 @@ const generateCertificatePDF = async (
     // --- CONFIGURATION ---
     if (cat.includes("data science")) {
       config = {
-        nameSize: 80,
-        nameY: 750,
-        nameColor: rgb(0, 0, 0),
-        courseSize: 40,
-        courseX: 400,
-        courseY: 320,
-        courseColor: rgb(0.2, 0.2, 0.2), 
-        // Date "On May 2026" के लिए
-        dateY: 350,
+        nameSize: 120,
+        nameY: 580,
+        nameColor: rgb(0.17, 0.17, 0.17),
+        courseSize: 45,
+        courseX: 740,
+        courseY: 455,
+        courseColor: rgb(0.46, 0.098, 0.098),
+        dateX: 700,
+        dateY: 400,
         datePart1: "On ",
-        color1: rgb(0, 0, 0),
-        color2: rgb(0.5, 0, 0), // "On" Black, "Date" Dark Red
-        certNoSize: 30,
-        certNoX: 80,
-        certNoY: 70,
-        certNoColor: rgb(0, 0, 0.8),
+        color1: rgb(0.17, 0.17, 0.17),
+        color2: rgb(0.474, 0.094, 0.098),
+        certNoSize: 50,
+        certNoX: 450,
+        certNoY: 220,
+
+        certNoColor: rgb(0.188, 0.188, 0.188),
       };
     } else if (cat.includes("data analyst")) {
       config = {
-        nameSize: 70,
-        nameY: 890,
-        nameColor: rgb(0, 0, 0),
-        courseSize: 30,
-        courseX: 400,
+        nameSize: 110,
+        nameY: 840,
+        nameColor: rgb(0.46, 0.09, 0.09),
+        courseSize: 45,
+        courseX: 290,
         courseY: 700,
-        courseColor: rgb(0.2, 0.2, 0.2),
-        // Date "On May 2026" के लिए
-        dateY: 550,
+        courseColor: rgb(0.46, 0.09, 0.1),
+        dateX: 500,
+        dateY: 650,
         datePart1: "On ",
-        color1: rgb(0, 0, 0),
-        color2: rgb(0.5, 0, 0), // "On" Black, "Date" Dark Red
-        certNoSize: 30,
+        color1: rgb(0.17, 0.17, 0.17),
+        color2: rgb(0.46, 0.1, 0.094),
+        certNoSize: 55,
         certNoX: 80,
-        certNoY: 400,
-        certNoColor: rgb(0, 0, 0.8),
+        certNoY: 420,
+        certNoColor: rgb(0.17, 0.17, 0.17),
       };
     } else {
       // Bootcamp Style (Conducted By ...)
       config = {
-        nameSize: 70,
-        nameY: 450,
+        // ==========================
+        // NAME
+        // ==========================
+        nameSize: 85,
+        nameX: 870, // null = auto center
+        nameY: 620,
         nameColor: rgb(0, 0, 0),
-        courseSize: 30,
-        courseX: 300,
-        courseY: 320,
-        courseColor: rgb(0, 0, 0),
+
+        // ==========================
+        // COURSE
+        // ==========================
+        // courseSize: 40,
+        // courseX: 410,
+        // courseY: 455,
+        // courseColor: rgb(0, 0, 0),
+
+        // // ==========================
+        // // CONDUCTED TEXT
+        // // ==========================
+        // conductedText: "Conducted By The iScale.",
+        // conductedSize: 40,
+        // conductedX: 300,
+        // conductedY: 285,
+        // conductedColor: rgb(0, 0, 0),
+
+        // COURSE + CONDUCTED (Combined)
+        courseSize: 40,
+
+        courseY: 455,
+
+        courseRightX: 1520, // Right Side Fix
+
+        courseColor: rgb(1, 0, 0),
+
         conductedText: " Conducted By The iScale.",
-        // Date "Date: 04 May 2026" के लिए
-        dateY: 280,
+
+        conductedColor: rgb(0, 0, 0),
+
+        // ==========================
+        // DATE
+        // ==========================
         dateLabel: "Date: ",
         dateValue: fullDate,
+        dateSize: 40,
+        dateX: 1150,
+        dateY: 360,
         dateColor: rgb(0, 0, 0.5),
-        certNoSize: 22,
-        certNoX: 80,
-        certNoY: 60,
+
+        // ==========================
+        // CERTIFICATE NUMBER
+        // ==========================
+        certNoSize: 42,
+        certNoX: 470,
+        certNoY: 140,
         certNoColor: rgb(0, 0, 0),
       };
     }
@@ -132,39 +171,76 @@ const generateCertificatePDF = async (
     // 1. Name
     page.drawText(userName, {
       x:
+        config.nameX ??
         image.width / 2 -
-        nameFont.widthOfTextAtSize(userName, config.nameSize) / 2,
+          nameFont.widthOfTextAtSize(userName, config.nameSize) / 2,
+
       y: config.nameY,
+
       size: config.nameSize,
+
       font: nameFont,
+
       color: config.nameColor,
     });
 
     // 2. Course & Conducted Text
-    const fullCourseText = cat.includes("data")
-      ? courseTitle
-      : courseTitle + config.conductedText;
-    page.drawText(fullCourseText, {
-      x: config.courseX,
-      y: config.courseY,
-      size: config.courseSize,
-      font: secFont,
-      color: config.courseColor,
-    });
+    if (cat.includes("data")) {
+      page.drawText(courseTitle, {
+        x: config.courseX,
+        y: config.courseY,
+        size: config.courseSize,
+        font: secFont,
+        color: config.courseColor,
+      });
+    } else {
+      // Course
+      const courseWidth = secFont.widthOfTextAtSize(
+        courseTitle,
+        config.courseSize,
+      );
+
+      const conductedWidth = secFont.widthOfTextAtSize(
+        config.conductedText,
+        config.courseSize,
+      );
+
+      const totalWidth = courseWidth + conductedWidth;
+
+      // Right side fix
+      const startX = config.courseRightX - totalWidth;
+
+      // Course
+      page.drawText(courseTitle, {
+        x: startX,
+        y: config.courseY,
+        size: config.courseSize,
+        font: secFont,
+        color: config.courseColor,
+      });
+
+      // Conducted
+      page.drawText(config.conductedText, {
+        x: startX + courseWidth,
+        y: config.courseY,
+        size: config.courseSize,
+        font: secFont,
+        color: config.conductedColor,
+      });
+    }
 
     // 3. Dynamic Date Logic
     if (cat.includes("data")) {
-      // "On May 2026"
       const w1 = secFont.widthOfTextAtSize(config.datePart1, config.courseSize);
       page.drawText(config.datePart1, {
-        x: 400,
+        x: config.dateX,
         y: config.dateY,
         size: config.courseSize,
         font: secFont,
         color: config.color1,
       });
       page.drawText(monthYear, {
-        x: 400 + w1,
+        x: config.dateX + w1,
         y: config.dateY,
         size: config.courseSize,
         font: secFont,
@@ -173,9 +249,9 @@ const generateCertificatePDF = async (
     } else {
       // "Date: 04 May 2026"
       page.drawText(`${config.dateLabel}${config.dateValue}`, {
-        x: config.courseX,
+        x: config.dateX,
         y: config.dateY,
-        size: config.courseSize,
+        size: config.dateSize,
         font: secFont,
         color: config.dateColor,
       });
