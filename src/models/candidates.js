@@ -99,7 +99,11 @@ const candidateSchema = new mongoose.Schema({
   c_current_address1: { type: String, default: null },
   c_current_address2: { type: String, default: null },
 
-  c_current_country: { type: Number, default: null }, // type =string kar sakte hai
+  c_current_country: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "countries",
+    default: null,
+  }, // type =string kar sakte hai
   // c_current_state: { type: String, default: null },
   // c_current_city: { type: String, default: null },
   c_current_district: { type: String, default: null },
