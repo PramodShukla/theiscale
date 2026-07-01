@@ -1,4 +1,4 @@
-console.log("News&updates Routes Loaded");
+
 const express = require("express");
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-console.log("Admin Routes Loaded");
+
 const express = require("express");
 const router = express.Router();
 

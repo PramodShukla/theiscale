@@ -36,4 +36,9 @@ router.get("/:id", authMiddleware, adminMiddleware, getSingleBrandVideo);
 
 router.delete("/:id", authMiddleware, adminMiddleware, deleteBrandVideo);
 
+
+// public api
+
+router.get("/public/all", getAllBrandVideos);
+
 module.exports = router;
