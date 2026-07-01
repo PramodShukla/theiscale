@@ -50,6 +50,8 @@ router.get(
   locationController.getCountryDropdown,
 );
 
+router.get("/public/country/dropdown", locationController.getCountryDropdown);
+
 // DELETE COUNTRY
 router.delete(
   "/country/delete/:id",
@@ -155,6 +157,8 @@ router.get(
   adminMiddleware,
   locationController.getCityDropdown,
 );
+
+router.get("/public/city/dropdown", locationController.getCityDropdown);
 
 // DELETE CITY
 router.delete(

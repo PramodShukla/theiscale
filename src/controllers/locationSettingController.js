@@ -467,7 +467,7 @@ const getStateDropdown = async (req, res) => {
   try {
     let {
       page = 1,
-      limit = 10,
+      limit = 100,
       m_state_country,
     } = req.query;
 
@@ -1046,7 +1046,7 @@ const getCityDropdown = async (req, res) => {
   try {
     let {
       page = 1,
-      limit = 10,
+      limit = 100,
       m_city_country,
       m_city_state,
     } = req.query;
