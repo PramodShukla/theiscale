@@ -13,6 +13,39 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email) {
+      return res.status(400).json({
+        status: false,
+        message: "Email is required",
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        status: false,
+        message: "Password is required",
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        status: false,
+        message: "Please enter a valid email address",
+      });
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        status: false,
+        message:
+          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one special character.",
+      });
+    }
+
     const user = await Candidate.findOne({ c_email: email.toLowerCase() });
 
     if (!user) {
@@ -57,6 +90,23 @@ exports.loginWithPassword = async (req, res) => {
       return res.status(400).json({
         status: false,
         message: "Mobile and Password are required",
+      });
+    }
+
+    if (mobile.length !== 10) {
+      return res.status(400).json({
+        status: false,
+        message: "Mobile number must be 10 digits",
+      });
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        status: false,
+        message:
+          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one special character.",
       });
     }
 
@@ -121,6 +171,13 @@ exports.checkMobile = async (req, res) => {
       });
     }
 
+    if (mobile.length !== 10) {
+      return res.status(400).json({
+        status: false,
+        message: "Mobile number must be 10 digits",
+      });
+    }
+
     const user = await Candidate.findOne({
       c_contact: Number(mobile),
     });
@@ -169,6 +226,20 @@ exports.checkMobile = async (req, res) => {
 exports.verifyOtp = async (req, res) => {
   try {
     const { mobile, otp } = req.body;
+
+    if (!mobile) {
+      return res.status(400).json({
+        status: false,
+        message: "Mobile number is required",
+      });
+    }
+
+    if (mobile.length !== 10) {
+      return res.status(400).json({
+        status: false,
+        message: "Mobile number must be 10 digits",
+      });
+    }
 
     const user = await Candidate.findOne({
       c_contact: Number(mobile),
@@ -342,10 +413,29 @@ exports.register = async (req, res) => {
       });
     }
 
-    if (password.length < 6) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
       return res.status(400).json({
         status: false,
-        message: "The password must be at least 6 digits long.",
+        message: "Please enter a valid email address",
+      });
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        status: false,
+        message:
+          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one special character.",
+      });
+    }
+
+    if (whatsapp.length !== 10) {
+      return res.status(400).json({
+        status: false,
+        message: "Mobile number must be 10 digits",
       });
     }
 
@@ -445,6 +535,23 @@ exports.createPassword = async (req, res) => {
       });
     }
 
+    if (mobile.length !== 10) {
+      return res.status(400).json({
+        status: false,
+        message: "Mobile number must be 10 digits",
+      });
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        status: false,
+        message:
+          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one special character.",
+      });
+    }
+
     const user = await Candidate.findOne({
       c_contact: Number(mobile),
     });
@@ -492,6 +599,13 @@ exports.sendForgotPasswordOtp = async (req, res) => {
   try {
     const { mobile } = req.body;
 
+    if (mobile.length !== 10) {
+      return res.status(400).json({
+        status: false,
+        message: "Mobile number must be 10 digits",
+      });
+    }
+
     const user = await Candidate.findOne({
       c_contact: mobile,
     });
@@ -536,6 +650,13 @@ exports.sendForgotPasswordOtp = async (req, res) => {
 exports.verifyForgotPasswordOtp = async (req, res) => {
   try {
     const { mobile, otp } = req.body;
+
+    if (mobile.length !== 10) {
+      return res.status(400).json({
+        status: false,
+        message: "Mobile number must be 10 digits",
+      });
+    }
 
     const user = await Candidate.findOne({
       c_contact: mobile,
@@ -586,6 +707,16 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { password, confirm_password } = req.body;
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        status: false,
+        message:
+          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one special character.",
+      });
+    }
 
     if (password !== confirm_password) {
       return res.status(400).json({
