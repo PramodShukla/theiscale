@@ -18,8 +18,8 @@ router.post(
 // Get All Images
 router.get(
   "/",
-  authMiddleware,
-  adminMiddleware,
+  // authMiddleware,
+  // adminMiddleware,
   galleryController.getAllImages,
 );
 
