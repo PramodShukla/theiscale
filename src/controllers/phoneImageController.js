@@ -1,9 +1,10 @@
 const Gallery = require("../models/phoneImage");
+const { v2: cloudinary } = require("cloudinary");
 
 // Upload Image
 const uploadImage = async (req, res) => {
-  console.log("req.file =>");
-  console.log(req.file);
+  // console.log("req.file =>");
+  // console.log(req.file);
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -13,7 +14,8 @@ const uploadImage = async (req, res) => {
     }
 
     const image = await Gallery.create({
-      image: req.file.path, // Cloudinary URL
+      image: req.file.path,
+      public_id: req.file.filename,
     });
 
     console.log(req.file);
@@ -74,6 +76,31 @@ const getImageById = async (req, res) => {
 };
 
 // Delete Image
+// const deleteImage = async (req, res) => {
+//   try {
+//     const image = await Gallery.findById(req.params.id);
+
+//     if (!image) {
+//       return res.status(404).json({
+//         status: false,
+//         message: "Image not found",
+//       });
+//     }
+
+//     await Gallery.findByIdAndDelete(req.params.id);
+
+//     return res.status(200).json({
+//       status: true,
+//       message: "Image deleted successfully",
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       status: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
 const deleteImage = async (req, res) => {
   try {
     const image = await Gallery.findById(req.params.id);
@@ -85,6 +112,10 @@ const deleteImage = async (req, res) => {
       });
     }
 
+    // Cloudinary se delete
+    await cloudinary.uploader.destroy(image.public_id);
+
+    // MongoDB se delete
     await Gallery.findByIdAndDelete(req.params.id);
 
     return res.status(200).json({
@@ -103,5 +134,5 @@ module.exports = {
   uploadImage,
   getAllImages,
   getImageById,
-  deleteImage
+  deleteImage,
 };

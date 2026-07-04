@@ -7,6 +7,11 @@ const phoneImageSchema = new mongoose.Schema(
       required: [true, "Image is required"],
       trim: true,
     },
+
+     public_id: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
