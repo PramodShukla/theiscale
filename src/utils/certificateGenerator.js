@@ -266,12 +266,16 @@ const generateCertificatePDF = async (
       color: config.certNoColor,
     });
 
+    // const pdfBytes = await pdfDoc.save();
+    // fs.writeFileSync(
+    //   path.join(assetsDir, "certificates", `Cert_${certNo}.pdf`),
+    //   pdfBytes,
+    // );
+    // return `assets/certificates/Cert_${certNo}.pdf`;
+
     const pdfBytes = await pdfDoc.save();
-    fs.writeFileSync(
-      path.join(assetsDir, "certificates", `Cert_${certNo}.pdf`),
-      pdfBytes,
-    );
-    return `assets/certificates/Cert_${certNo}.pdf`;
+
+    return pdfBytes;
   } catch (error) {
     throw error;
   }

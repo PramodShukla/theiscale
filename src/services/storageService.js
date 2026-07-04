@@ -22,6 +22,7 @@ const uploadFile = async (localFilePath, folderName) => {
         folder: folderName,
         resource_type: "auto", // handles image/video/pdf automatically
       });
+      // console.log(uploadResult);
       return uploadResult.secure_url;
     } catch (error) {
       console.error("Cloudinary upload error:", error);
@@ -35,42 +36,86 @@ const uploadFile = async (localFilePath, folderName) => {
 /**
  * Deletes file from Cloudinary or local disk.
  */
-const deleteFile = async (fileUrlOrPath) => {
-  if (!fileUrlOrPath) return false;
+const deleteFile = async (fileIdentifier) => {
+  if (!fileIdentifier) return false;
 
   if (STORAGE_PROVIDER === "cloudinary") {
     try {
-      const parts = fileUrlOrPath.split("/");
-      const filenameWithExtension = parts.pop();
-      const folder = parts.pop();
-      const publicId = `${folder}/${filenameWithExtension.split(".")[0]}`;
-
       let resourceType = "image";
-      if (fileUrlOrPath.match(/\.(mp4|mkv|avi|mov)$/i)) {
+
+      if (fileIdentifier.match(/\.(mp4|mkv|avi|mov)$/i)) {
         resourceType = "video";
-      } else if (fileUrlOrPath.match(/\.pdf$/i)) {
+      } else if (fileIdentifier.match(/\.pdf$/i)) {
         resourceType = "raw";
       }
 
-      const result = await cloudinary.uploader.destroy(publicId, {
+      const result = await cloudinary.uploader.destroy(fileIdentifier, {
         resource_type: resourceType,
       });
-      return result.result === "ok";
+
+      // console.log("Cloudinary Delete Result =>", result);
+
+      return result.result === "ok" || result.result === "not found";
     } catch (error) {
       console.error("Cloudinary delete error:", error);
       return false;
     }
   }
 
-  // Local fallback
-  if (fs.existsSync(fileUrlOrPath)) {
-    fs.unlinkSync(fileUrlOrPath);
+  // Local Storage
+  if (fs.existsSync(fileIdentifier)) {
+    fs.unlinkSync(fileIdentifier);
     return true;
   }
+
   return false;
+};
+
+const extractUploadedFile = (file) => {
+  if (!file) {
+    return null;
+  }
+
+  return {
+    url: file.path,
+    public_id: file.filename,
+  };
+};
+
+const uploadFileWithMeta = async (localFilePath, folderName) => {
+  if (!localFilePath) return null;
+
+  if (STORAGE_PROVIDER === "cloudinary") {
+    try {
+      const uploadResult = await cloudinary.uploader.upload(localFilePath, {
+        folder: folderName,
+        resource_type: "auto",
+      });
+
+      // console.log(uploadResult);
+
+      return {
+        url: uploadResult.secure_url,
+        public_id: uploadResult.public_id,
+        resource_type: uploadResult.resource_type,
+      };
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
+      throw error;
+    }
+  }
+
+  return {
+    url: localFilePath,
+    public_id: null,
+    resource_type: null,
+  };
 };
 
 module.exports = {
   uploadFile,
   deleteFile,
+  extractUploadedFile,
+  uploadFileWithMeta
+  
 };

@@ -176,6 +176,11 @@ const courseEnrollmentSchema = new mongoose.Schema(
       default: null,
     },
 
+    certificate_public_id: {
+      type: String,
+      default: null,
+    },
+
     admin_note: {
       type: String,
       default: null,
@@ -210,8 +215,6 @@ const courseEnrollmentSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-
-    
   },
   {
     timestamps: true,

@@ -13,7 +13,7 @@ const {
   requestCertificate,
   getCertificateRequests,
   updateCertificateStatus,
-  downloadCertificate,
+  // downloadCertificate,
   downloadCertificateByEnrollmentId
 } = require("../controllers/certificateController");
 
@@ -32,7 +32,7 @@ router.get(
 
 router.post("/request", authMiddleware, userMiddleware, requestCertificate);
 
-router.get("/download/:course_id",authMiddleware, userMiddleware, downloadCertificate);
+// router.get("/download/:course_id",authMiddleware, userMiddleware, downloadCertificate);
 
 // ADMIN
 router.get(

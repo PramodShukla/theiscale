@@ -1,5 +1,6 @@
 const Gallery = require("../models/phoneImage");
 const { v2: cloudinary } = require("cloudinary");
+const { extractUploadedFile } = require("../services/storageService");
 
 // Upload Image
 const uploadImage = async (req, res) => {
@@ -13,12 +14,19 @@ const uploadImage = async (req, res) => {
       });
     }
 
+    // const image = await Gallery.create({
+    //   image: req.file.path,
+    //   public_id: req.file.filename,
+    // });
+
+    const uploaded = extractUploadedFile(req.file);
+
     const image = await Gallery.create({
-      image: req.file.path,
-      public_id: req.file.filename,
+      image: uploaded.url,
+      public_id: uploaded.public_id,
     });
 
-    console.log(req.file);
+    // console.log(req.file);
 
     return res.status(201).json({
       status: true,
