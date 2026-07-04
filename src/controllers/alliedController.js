@@ -1,16 +1,17 @@
 const Allied = require("../models/allied");
 const fs = require("fs");
+const { deleteFromCloudinary } = require("../utils/cloudinaryHelper");
 
-const deleteUploadedFiles = (files) => {
+const deleteUploadedFiles = async (files) => {
   if (!files) return;
 
-  Object.values(files).forEach((fileArray) => {
-    fileArray.forEach((file) => {
-      if (file.path && fs.existsSync(file.path)) {
-        fs.unlinkSync(file.path);
+  for (const fileArray of Object.values(files)) {
+    for (const file of fileArray) {
+      if (file.path) {
+        await deleteFromCloudinary(file.path);
       }
-    });
-  });
+    }
+  }
 };
 
 const addAllied = async (req, res) => {
@@ -86,8 +87,8 @@ const updateAllied = async (req, res) => {
 
       await item.save();
 
-      if (oldImage && fs.existsSync(oldImage)) {
-        fs.unlinkSync(oldImage);
+      if (oldImage) {
+        await deleteFromCloudinary(oldImage);
       }
     } else {
       await item.save();
@@ -173,8 +174,8 @@ const deleteAllied = async (req, res) => {
       });
     }
 
-    if (item.m_allied_image && fs.existsSync(item.m_allied_image)) {
-      fs.unlinkSync(item.m_allied_image);
+    if (item.m_allied_image) {
+      await deleteFromCloudinary(item.m_allied_image);
     }
 
     await Allied.findByIdAndDelete(req.params.id);

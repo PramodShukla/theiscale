@@ -54,6 +54,17 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
+app.use((err, req, res, next) => {
+  console.error("🔥 ERROR START 🔥");
+  console.error(err);
+  console.error("🔥 ERROR END 🔥");
+
+  res.status(500).json({
+    status: false,
+    message: err.message,
+  });
+});
+
 //  404 handler
 app.use((req, res) => {
   res.status(404).send({ message: "Route not found" });

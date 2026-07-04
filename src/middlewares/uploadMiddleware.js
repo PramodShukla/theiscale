@@ -1,129 +1,128 @@
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
 
-// dynamic storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    let folder = "";
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+// console.log("Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
+// console.log("API Key:", process.env.CLOUDINARY_API_KEY);
+// console.log("API Secret:", process.env.CLOUDINARY_API_SECRET);
 
-    // ==================
-    // CATEGORY UPLOADS (Already Existing)
-    // ==================
+// console.log(cloudinary.config());
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    let folder = "others";
+
     if (file.fieldname === "category_icon") {
-      folder = "src/uploads/categories/category-icon";
+      folder = "categories/category-icon";
     } else if (file.fieldname === "category_banner") {
-      folder = "src/uploads/categories/category-banner";
-    }
-
-    // ==================
-    // COURSE UPLOADS (Newly Added)
-    // ==================
-    else if (file.fieldname === "m_course_banner") {
-      folder = "src/uploads/courses/banner";
+      folder = "categories/category-banner";
+    } else if (file.fieldname === "m_course_banner") {
+      folder = "courses/banner";
     } else if (file.fieldname === "m_course_pdf") {
-      folder = "src/uploads/courses/pdf";
+      folder = "courses/pdf";
     } else if (file.fieldname === "m_course_feestructure") {
-      folder = "src/uploads/courses/fee-structure";
+      folder = "courses/fee-structure";
     } else if (file.fieldname === "m_course_brochure") {
-      folder = "src/uploads/courses/brochure";
+      folder = "courses/brochure";
     } else if (file.fieldname === "m_feature_image") {
-      folder = "src/uploads/features";
+      folder = "features";
     } else if (file.fieldname === "c_tool_img") {
-      folder = "src/uploads/tools";
+      folder = "tools";
     } else if (file.fieldname === "m_subject_icon") {
-      folder = "src/uploads/subjects/icon";
+      folder = "subjects/icon";
     } else if (file.fieldname === "ml_file") {
-      folder = "src/uploads/topics/video";
+      folder = "topics/video";
     } else if (file.fieldname === "ml_pdffile") {
-      folder = "src/uploads/topics/pdf";
+      folder = "topics/pdf";
     } else if (file.fieldname === "m_package_image") {
-      folder = "src/uploads/test-packages";
+      folder = "test-packages";
     } else if (file.fieldname === "th_icon") {
-      folder = "src/uploads/training-highlights";
+      folder = "training-highlights";
     } else if (file.fieldname === "m_quiz_icon") {
-      folder = "src/uploads/quiz/icon";
+      folder = "quiz/icon";
     } else if (file.fieldname === "m_quiz_banner") {
-      folder = "src/uploads/quiz/banner";
+      folder = "quiz/banner";
     } else if (file.fieldname === "m_instructor_profile") {
-      folder = "src/uploads/instructors";
+      folder = "instructors";
     } else if (file.fieldname === "m_st_video") {
-      folder = "src/uploads/testimonials/video";
+      folder = "testimonials/video";
     } else if (file.fieldname === "company_logo") {
-      folder = "src/uploads/jobs/company-logo";
+      folder = "jobs/company-logo";
     } else if (file.fieldname === "m_ec_icon") {
-      folder = "src/uploads/event-category/icon";
+      folder = "event-category/icon";
     } else if (file.fieldname === "m_ec_banner") {
-      folder = "src/uploads/event-category/banner";
+      folder = "event-category/banner";
     } else if (file.fieldname === "m_event_banner") {
-      folder = "src/uploads/events/banner";
+      folder = "events/banner";
     } else if (file.fieldname === "m_event_file") {
-      folder = "src/uploads/events/files";
+      folder = "events/files";
     } else if (file.fieldname === "m_pre_image") {
-      folder = "src/uploads/ppt/person";
+      folder = "ppt/person";
     } else if (file.fieldname === "m_pre_company_img") {
-      folder = "src/uploads/ppt/company";
+      folder = "ppt/company";
     } else if (file.fieldname === "m_client_logo") {
-      folder = "src/uploads/clients/logo";
+      folder = "clients/logo";
     } else if (file.fieldname === "m_allied_image") {
-      folder = "src/uploads/allied";
+      folder = "allied";
     } else if (file.fieldname === "m_news_image") {
-      folder = "src/uploads/news&updates";
+      folder = "news&updates";
     } else if (file.fieldname === "m_snews_image") {
-      folder = "src/uploads/news";
+      folder = "news";
     } else if (file.fieldname === "certificate_pdf") {
-      folder = "src/uploads/certificates";
+      folder = "certificates";
     } else if (file.fieldname === "test_category_icon") {
-      folder = "src/uploads/test-category/icon";
+      folder = "test-category/icon";
     } else if (file.fieldname === "test_category_banner") {
-      folder = "src/uploads/test-category/banner";
+      folder = "test-category/banner";
     } else if (file.fieldname === "nc_icon") {
-      folder = "src/uploads/notes-category/icon";
+      folder = "notes-category/icon";
     } else if (file.fieldname === "nc_banner") {
-      folder = "src/uploads/notes-category/banner";
+      folder = "notes-category/banner";
     } else if (file.fieldname === "notes_subcategory_icon") {
-      folder = "src/uploads/notes-subcategory/icon";
+      folder = "notes-subcategory/icon";
     } else if (file.fieldname === "notes_subcategory_banner") {
-      folder = "src/uploads/notes-subcategory/banner";
+      folder = "notes-subcategory/banner";
     } else if (file.fieldname === "notes_image") {
-      folder = "src/uploads/notes/notesimage";
+      folder = "notes/notesimage";
     } else if (file.fieldname === "notes_pdf") {
-      folder = "src/uploads/notes/pdf";
+      folder = "notes/pdf";
     } else if (file.fieldname === "m_batch_image") {
-      folder = "src/uploads/batches";
+      folder = "batches";
     } else if (file.fieldname === "member_image") {
-      folder = "src/uploads/team";
+      folder = "team";
     } else if (file.fieldname === "c_profile_image") {
-      folder = "src/uploads/candidates/profile";
+      folder = "candidates/profile";
     } else if (file.fieldname === "m_offer_image") {
-      folder = "src/uploads/offers";
+      folder = "offers";
     } else if (file.fieldname === "partner_image") {
-      folder = "src/uploads/partners";
+      folder = "partners";
     } else if (file.fieldname === "user_image") {
-      folder = "src/uploads/user-reviews";
+      folder = "user-reviews";
     } else if (file.fieldname === "banner_image") {
-      folder = "src/uploads/banners";
+      folder = "banners";
     } else if (file.fieldname === "m_ss_image") {
-      folder = "src/uploads/success-story";
+      folder = "success-story";
     } else if (file.fieldname === "kh_pic") {
-      folder = "src/uploads/admins";
+      folder = "admins";
     } else if (file.fieldname === "video_file") {
-      folder = "src/uploads/brand-videos";
+      folder = "brand-videos";
     } else if (file.fieldname === "setting_file") {
-  folder = "src/uploads/settings";
-}
-
-    // folder create if not exists
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder, { recursive: true });
+      folder = "settings";
+    } else if (file.fieldname === "phone_image") {
+      folder = "phone-images";
     }
 
-    cb(null, folder);
-  },
-
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + "-" + file.originalname;
-    cb(null, uniqueName);
+    return {
+      folder: folder,
+      resource_type: "auto",
+      public_id: Date.now() + "-" + file.originalname.split(".")[0],
+    };
   },
 });
 
@@ -524,16 +523,22 @@ const fileFilter = (req, file, cb) => {
 
   // Admin app settings upload - only images
   else if (file.fieldname === "setting_file") {
-  if (
-    allowedImageTypes.includes(file.mimetype)
-  ) {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image allowed"), false);
+    }
+  }
+
+
+  // Phone image upload - only images
+  else if (file.fieldname === "phone_image") {
+  if (allowedImageTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Only image allowed"), false);
+    cb(new Error("Only image files allowed"), false);
   }
 }
-
-  
 
   // Other fields
   else {
@@ -717,7 +722,6 @@ const brandVideoUpload = brandVideoMulter.fields([
   },
 ]);
 
-
 const settingUpload = upload.fields([
   {
     name: "setting_file",
@@ -725,6 +729,8 @@ const settingUpload = upload.fields([
   },
 ]);
 
+
+const phoneImageUpload = upload.single("phone_image");
 
 module.exports = {
   upload,
@@ -761,5 +767,6 @@ module.exports = {
   successStoryUpload,
   adminUpload,
   brandVideoUpload,
-  settingUpload
+  settingUpload,
+  phoneImageUpload
 };

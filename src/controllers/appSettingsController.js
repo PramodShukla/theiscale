@@ -1,15 +1,13 @@
 const ApplicationSetting = require("../models/application_settings");
 const fs = require("fs");
 const mongoose = require("mongoose");
+const { deleteFromCloudinary } = require("../utils/cloudinaryHelper");
 
-const deleteFile = (req) => {
+const deleteFile = async (req) => {
   try {
     if (req.files?.setting_file?.length > 0) {
       const filePath = req.files.setting_file[0].path;
-
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      await deleteFromCloudinary(filePath);
     }
   } catch (error) {
     console.log("File delete error:", error.message);
@@ -44,7 +42,7 @@ const addSetting = async (req, res) => {
     let settingFile = "";
 
     if (req.files?.setting_file?.length > 0) {
-      settingFile = req.files.setting_file[0].filename;
+      settingFile = req.files.setting_file[0].path;
     }
 
     const setting = await ApplicationSetting.create({
@@ -112,14 +110,15 @@ const updateSetting = async (req, res) => {
 
     // New image uploaded
     if (req.files?.setting_file?.length > 0) {
-      if (
-        setting.setting_file &&
-        fs.existsSync(`src/uploads/settings/${setting.setting_file}`)
-      ) {
-        fs.unlinkSync(`src/uploads/settings/${setting.setting_file}`);
+      if (setting.setting_file) {
+        if (setting.setting_file.startsWith("http")) {
+          await deleteFromCloudinary(setting.setting_file);
+        } else if (fs.existsSync(`src/uploads/settings/${setting.setting_file}`)) {
+          fs.unlinkSync(`src/uploads/settings/${setting.setting_file}`);
+        }
       }
 
-      setting.setting_file = req.files.setting_file[0].filename;
+      setting.setting_file = req.files.setting_file[0].path;
     } else if (m_app_value !== undefined) {
       setting.m_app_value = m_app_value;
     }
@@ -152,7 +151,7 @@ const getAllSettings = async (req, res) => {
     const data = settings.map((item) => ({
       ...item.toObject(),
       setting_file: item.setting_file
-        ? `${req.protocol}://${req.get("host")}/uploads/settings/${item.setting_file}`
+        ? (item.setting_file.startsWith("http") ? item.setting_file : `${req.protocol}://${req.get("host")}/uploads/settings/${item.setting_file}`)
         : null,
     }));
 

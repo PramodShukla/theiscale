@@ -1,5 +1,6 @@
 const Banner = require("../models/banners");
 const fs = require("fs");
+const { deleteFromCloudinary } = require("../utils/cloudinaryHelper");
 
 
 const addBanner = async (req, res) => {
@@ -15,7 +16,7 @@ const addBanner = async (req, res) => {
 
       // delete uploaded image if validation fails
       if (req.files?.banner_image?.[0]?.path) {
-        fs.unlinkSync(req.files.banner_image[0].path);
+        await deleteFromCloudinary(req.files.banner_image[0].path);
       }
 
       return res.status(400).send({
@@ -57,7 +58,7 @@ const addBanner = async (req, res) => {
 
     // delete uploaded image if error comes
     if (req.files?.banner_image?.[0]?.path) {
-      fs.unlinkSync(req.files.banner_image[0].path);
+      await deleteFromCloudinary(req.files.banner_image[0].path);
     }
 
     return res.status(500).send({
@@ -246,7 +247,7 @@ const updateBanner = async (req, res) => {
     if (!banner) {
 
       if (req.files?.banner_image?.[0]?.path) {
-        fs.unlinkSync(req.files.banner_image[0].path);
+        await deleteFromCloudinary(req.files.banner_image[0].path);
       }
 
       return res.status(404).send({
@@ -286,12 +287,8 @@ const updateBanner = async (req, res) => {
 
     
 
-    if (
-      req.files?.banner_image &&
-      oldImage &&
-      fs.existsSync(oldImage)
-    ) {
-      fs.unlinkSync(oldImage);
+    if (req.files?.banner_image && oldImage) {
+      await deleteFromCloudinary(oldImage);
     }
 
   
@@ -306,7 +303,7 @@ const updateBanner = async (req, res) => {
 
     // delete new uploaded image if error comes
     if (req.files?.banner_image?.[0]?.path) {
-      fs.unlinkSync(req.files.banner_image[0].path);
+      await deleteFromCloudinary(req.files.banner_image[0].path);
     }
 
     return res.status(500).send({
@@ -333,13 +330,8 @@ const deleteBanner = async (req, res) => {
 
 
 
-    if (
-      banner.m_banner_image &&
-      fs.existsSync(banner.m_banner_image)
-    ) {
-      fs.unlinkSync(
-        banner.m_banner_image
-      );
+    if (banner.m_banner_image) {
+      await deleteFromCloudinary(banner.m_banner_image);
     }
 
    

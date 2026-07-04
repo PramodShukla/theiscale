@@ -9,11 +9,15 @@ const Course = require("../models/course");
 const mongoose = require("mongoose");
 
 const Batch = require("../models/batch");
+const { deleteFromCloudinary } = require("../utils/cloudinaryHelper");
 
 // DELETE FILE HELPER
-const deleteFile = (filePath) => {
+const deleteFile = async (filePath) => {
   try {
-    if (fs.existsSync(filePath)) {
+    if (!filePath) return;
+    if (filePath.startsWith("http")) {
+      await deleteFromCloudinary(filePath);
+    } else if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
   } catch (error) {
@@ -71,7 +75,7 @@ const parseDays = (days) => {
 // ADD BATCH
 const addBatch = async (req, res) => {
   try {
-    const uploadedImage = req.files?.m_batch_image?.[0]?.filename || "";
+    const uploadedImage = req.files?.m_batch_image?.[0]?.path || "";
 
     const {
       batch_name,
@@ -93,7 +97,7 @@ const addBatch = async (req, res) => {
     // VALIDATION
     if (!isValidValue(batch_name)) {
       if (uploadedImage) {
-        deleteFile(path.join("src/uploads/batches", uploadedImage));
+        await deleteFile(uploadedImage);
       }
 
       return res.status(400).json({
@@ -238,10 +242,8 @@ const addBatch = async (req, res) => {
     });
   } catch (error) {
     // delete uploaded image if error
-    if (req.files?.m_batch_image?.[0]?.filename) {
-      deleteFile(
-        path.join("src/uploads/batches", req.files.m_batch_image[0].filename),
-      );
+    if (req.files?.m_batch_image?.[0]?.path) {
+      await deleteFile(req.files.m_batch_image[0].path);
     }
 
     return res.status(500).json({
@@ -256,7 +258,7 @@ const updateBatch = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const uploadedImage = req.files?.m_batch_image?.[0]?.filename || "";
+    const uploadedImage = req.files?.m_batch_image?.[0]?.path || "";
 
 
     // FIND BATCH
@@ -319,7 +321,7 @@ if (isValidValue(req.body.batch_course)) {
 
     if (!existingBatch) {
       if (uploadedImage) {
-        deleteFile(path.join("src/uploads/batches", uploadedImage));
+        await deleteFile(uploadedImage);
       }
 
       return res.status(404).json({
@@ -441,7 +443,7 @@ if (isValidValue(req.body.batch_course)) {
     
     // DELETE OLD IMAGE
     if (uploadedImage && existingBatch.m_batch_image) {
-      deleteFile(path.join("src/uploads/batches", existingBatch.m_batch_image));
+      await deleteFile(existingBatch.m_batch_image);
     }
 
     return res.status(200).json({
@@ -451,10 +453,8 @@ if (isValidValue(req.body.batch_course)) {
     });
   } catch (error) {
     // delete newly uploaded image if error
-    if (req.files?.m_batch_image?.[0]?.filename) {
-      deleteFile(
-        path.join("src/uploads/batches", req.files.m_batch_image[0].filename),
-      );
+    if (req.files?.m_batch_image?.[0]?.path) {
+      await deleteFile(req.files.m_batch_image[0].path);
     }
 
     return res.status(500).json({
@@ -589,7 +589,7 @@ const deleteBatch = async (req, res) => {
 
     // delete image
     if (batch.m_batch_image) {
-      deleteFile(path.join("src/uploads/batches", batch.m_batch_image));
+      await deleteFile(batch.m_batch_image);
     }
 
     // delete batch

@@ -2,13 +2,15 @@ const fs = require("fs");
 const path = require("path");
 
 const Team = require("../models/our_teams");
-
+const { deleteFromCloudinary } = require("../utils/cloudinaryHelper");
 
 // DELETE FILE HELPER
-
-const deleteFile = (filePath) => {
+const deleteFile = async (filePath) => {
   try {
-    if (fs.existsSync(filePath)) {
+    if (!filePath) return;
+    if (filePath.startsWith("http")) {
+      await deleteFromCloudinary(filePath);
+    } else if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
   } catch (error) {
@@ -33,12 +35,12 @@ const addTeam = async (req, res) => {
     } = req.body;
 
     const uploadedImage =
-      req.files?.member_image?.[0]?.filename || "";
+      req.files?.member_image?.[0]?.path || "";
 
     // validation
     if (!member_name) {
       if (uploadedImage) {
-        deleteFile(path.join("src/uploads/team", uploadedImage));
+        await deleteFile(uploadedImage);
       }
 
       return res.status(400).json({
@@ -93,13 +95,8 @@ const addTeam = async (req, res) => {
       data: team,
     });
   } catch (error) {
-    if (req.files?.member_image?.[0]?.filename) {
-      deleteFile(
-        path.join(
-          "src/uploads/team",
-          req.files.member_image[0].filename
-        )
-      );
+    if (req.files?.member_image?.[0]?.path) {
+      await deleteFile(req.files.member_image[0].path);
     }
 
     return res.status(500).json({
@@ -117,11 +114,11 @@ const updateTeam = async (req, res) => {
     const existingTeam = await Team.findById(id);
 
     const uploadedImage =
-      req.files?.member_image?.[0]?.filename || "";
+      req.files?.member_image?.[0]?.path || "";
 
     if (!existingTeam) {
       if (uploadedImage) {
-        deleteFile(path.join("src/uploads/team", uploadedImage));
+        await deleteFile(uploadedImage);
       }
 
       return res.status(404).json({
@@ -168,16 +165,8 @@ const updateTeam = async (req, res) => {
     );
 
     // delete old image after successful update
-    if (
-      uploadedImage &&
-      existingTeam.member_image
-    ) {
-      deleteFile(
-        path.join(
-          "src/uploads/team",
-          existingTeam.member_image
-        )
-      );
+    if (uploadedImage && existingTeam.member_image) {
+      await deleteFile(existingTeam.member_image);
     }
 
     return res.status(200).json({
@@ -187,13 +176,8 @@ const updateTeam = async (req, res) => {
     });
   } catch (error) {
     // delete new uploaded image if error
-    if (req.files?.member_image?.[0]?.filename) {
-      deleteFile(
-        path.join(
-          "src/uploads/team",
-          req.files.member_image[0].filename
-        )
-      );
+    if (req.files?.member_image?.[0]?.path) {
+      await deleteFile(req.files.member_image[0].path);
     }
 
     return res.status(500).json({
@@ -352,12 +336,7 @@ const deleteTeam = async (req, res) => {
 
     // delete image
     if (team.member_image) {
-      deleteFile(
-        path.join(
-          "src/uploads/team",
-          team.member_image
-        )
-      );
+      await deleteFile(team.member_image);
     }
 
     await Team.findByIdAndDelete(id);

@@ -1,0 +1,107 @@
+const Gallery = require("../models/phoneImage");
+
+// Upload Image
+const uploadImage = async (req, res) => {
+  console.log("req.file =>");
+  console.log(req.file);
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        status: false,
+        message: "Image is required",
+      });
+    }
+
+    const image = await Gallery.create({
+      image: req.file.path, // Cloudinary URL
+    });
+
+    console.log(req.file);
+
+    return res.status(201).json({
+      status: true,
+      message: "Image uploaded successfully",
+      data: image,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get All Images
+const getAllImages = async (req, res) => {
+  try {
+    const images = await Gallery.find().sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      status: true,
+      count: images.length,
+      data: images,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get Single Image
+const getImageById = async (req, res) => {
+  try {
+    const image = await Gallery.findById(req.params.id);
+
+    if (!image) {
+      return res.status(404).json({
+        status: false,
+        message: "Image not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      data: image,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+// Delete Image
+const deleteImage = async (req, res) => {
+  try {
+    const image = await Gallery.findById(req.params.id);
+
+    if (!image) {
+      return res.status(404).json({
+        status: false,
+        message: "Image not found",
+      });
+    }
+
+    await Gallery.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json({
+      status: true,
+      message: "Image deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+module.exports = {
+  uploadImage,
+  getAllImages,
+  getImageById,
+  deleteImage
+};

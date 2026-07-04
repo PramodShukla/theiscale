@@ -1,29 +1,48 @@
 const BrandVideo = require("../models/video");
 const fs = require("fs");
+const storageService = require("../services/storageService");
+// const fs = require("fs");
 
 const addBrandVideo = async (req, res) => {
-  let uploadedVideo = null;
+  // let uploadedVideo = null;
 
   try {
     const { name, url, status } = req.body;
 
-    uploadedVideo = req.files?.video_file?.[0]?.path || null;
+    // uploadedVideo = req.files?.video_file?.[0]?.path || null;
 
-    if (!name || !name.trim()) {
-      if (uploadedVideo && fs.existsSync(uploadedVideo)) {
-        fs.unlinkSync(uploadedVideo);
-      }
+    // if (!name || !name.trim()) {
+    //   if (uploadedVideo && fs.existsSync(uploadedVideo)) {
+    //     fs.unlinkSync(uploadedVideo);
+    //   }
 
-      return res.status(400).json({
-        status: false,
-        message: "Name is required",
-      });
+    //   return res.status(400).json({
+    //     status: false,
+    //     message: "Name is required",
+    //   });
+    // }
+
+    // const brandVideo = await BrandVideo.create({
+    //   name: name.trim(),
+    //   url: url || null,
+    //   video_file: uploadedVideo,
+    //   status: status || "active",
+    // });
+
+    const localTempPath = req.files?.video_file?.[0]?.path;
+    let uploadedVideo = null;
+    if (localTempPath) {
+      uploadedVideo = await storageService.uploadFile(
+        localTempPath,
+        "brand-videos",
+      );
+      if (fs.existsSync(localTempPath)) fs.unlinkSync(localTempPath);
     }
 
     const brandVideo = await BrandVideo.create({
       name: name.trim(),
       url: url || null,
-      video_file: uploadedVideo,
+      video_file: uploadedVideo, // Saves the Cloudinary URL or local path depending on env
       status: status || "active",
     });
 
@@ -64,32 +83,48 @@ const updateBrandVideo = async (req, res) => {
       });
     }
 
-    uploadedVideo = req.files?.video_file?.[0]?.path || null;
+    // uploadedVideo = req.files?.video_file?.[0]?.path || null;
 
-    const oldVideo = brandVideo.video_file;
+    // const oldVideo = brandVideo.video_file;
 
-    if (name !== undefined) {
-      brandVideo.name = name;
-    }
+    // if (name !== undefined) {
+    //   brandVideo.name = name;
+    // }
 
-    if (url !== undefined) {
-      brandVideo.url = url;
-    }
+    // if (url !== undefined) {
+    //   brandVideo.url = url;
+    // }
 
-    if (status !== undefined) {
-      brandVideo.status = status;
-    }
+    // if (status !== undefined) {
+    //   brandVideo.status = status;
+    // }
 
-    if (uploadedVideo) {
+    // if (uploadedVideo) {
+    //   brandVideo.video_file = uploadedVideo;
+    // }
+
+    // await brandVideo.save();
+
+    // // New video saved successfully
+    // // delete old video
+    // if (uploadedVideo && oldVideo && fs.existsSync(oldVideo)) {
+    //   fs.unlinkSync(oldVideo);
+    // }
+
+    const localTempPath = req.files?.video_file?.[0]?.path;
+    let uploadedVideo = null;
+    if (localTempPath) {
+      uploadedVideo = await storageService.uploadFile(
+        localTempPath,
+        "brand-videos",
+      );
+      if (fs.existsSync(localTempPath)) fs.unlinkSync(localTempPath);
+
+      const oldVideo = brandVideo.video_file;
       brandVideo.video_file = uploadedVideo;
-    }
-
-    await brandVideo.save();
-
-    // New video saved successfully
-    // delete old video
-    if (uploadedVideo && oldVideo && fs.existsSync(oldVideo)) {
-      fs.unlinkSync(oldVideo);
+      if (oldVideo) {
+        await storageService.deleteFile(oldVideo);
+      }
     }
 
     return res.status(200).json({
@@ -192,8 +227,12 @@ const deleteBrandVideo = async (req, res) => {
       });
     }
 
-    if (brandVideo.video_file && fs.existsSync(brandVideo.video_file)) {
-      fs.unlinkSync(brandVideo.video_file);
+    // if (brandVideo.video_file && fs.existsSync(brandVideo.video_file)) {
+    //   fs.unlinkSync(brandVideo.video_file);
+    // }
+
+    if (brandVideo.video_file) {
+      await storageService.deleteFile(brandVideo.video_file);
     }
 
     await BrandVideo.findByIdAndDelete(id);

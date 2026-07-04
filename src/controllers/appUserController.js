@@ -392,8 +392,8 @@ const editUser = async (req, res) => {
     // PROFILE IMAGE
     // ======================================
 
-    if (req.files?.c_profile_image?.[0]?.filename) {
-      updateData.c_profile_image = req.files.c_profile_image[0].filename;
+    if (req.files?.c_profile_image?.[0]?.path) {
+      updateData.c_profile_image = req.files.c_profile_image[0].path;
     }
 
     // ======================================

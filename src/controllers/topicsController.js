@@ -14,13 +14,31 @@ const addTopic = async (req, res) => {
       ml_type,
       ml_status,
       ml_stype,
-      ml_video_id
+      ml_yt_type,
+      ml_video_id,
+      ml_vdocipher_id,
     } = req.body;
 
     if (!ml_subject || !ml_title) {
       return res.status(400).json({
         status: false,
         message: "Subject and title are required",
+      });
+    }
+
+    // YouTube validation
+    if (ml_yt_type == "1" && !ml_video_id) {
+      return res.status(400).json({
+        status: false,
+        message: "YouTube Video ID is required",
+      });
+    }
+
+    // VdoCipher validation
+    if (ml_yt_type == "2" && !ml_vdocipher_id) {
+      return res.status(400).json({
+        status: false,
+        message: "VdoCipher Video ID is required",
       });
     }
 
@@ -43,6 +61,15 @@ const addTopic = async (req, res) => {
       pdfFile = req.files["ml_pdffile"][0].path;
     }
 
+    let youtubeVideoId = "";
+    let vdocipherVideoId = "";
+
+    if (ml_yt_type == "1") {
+      youtubeVideoId = ml_video_id;
+    } else if (ml_yt_type == "2") {
+      vdocipherVideoId = ml_vdocipher_id;
+    }
+
     const newTopic = new Lecture({
       ml_course: subject.m_subject_course,
       ml_subject,
@@ -50,7 +77,9 @@ const addTopic = async (req, res) => {
       ml_code,
       ml_type,
       ml_stype,
-      ml_video_id: ml_video_id || "",
+      ml_yt_type,
+      ml_video_id: youtubeVideoId,
+      ml_vdocipher_id: vdocipherVideoId,
       ml_file: videoFile,
       ml_pdffile: pdfFile,
       ml_status: ml_status ? Number(ml_status) : 1,
@@ -64,12 +93,10 @@ const addTopic = async (req, res) => {
       message: "Topic added successfully",
       data: saved,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // get public topics (for users, only active topics with id and title)
 const getPublicTopics = async (req, res) => {
@@ -116,7 +143,6 @@ const getPrivateTopics = async (req, res) => {
   }
 };
 
-
 // ===============================
 // GET TOPICS BY SUBJECT
 // ===============================
@@ -132,12 +158,10 @@ const getTopicsBySubject = async (req, res) => {
       status: true,
       data,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // ===============================
 // UPDATE TOPIC
@@ -160,15 +184,44 @@ const updateTopic = async (req, res) => {
       ml_type,
       ml_status,
       ml_stype,
-      ml_video_id
+      ml_yt_type,
+      ml_video_id,
+      ml_vdocipher_id,
     } = req.body;
 
+    if (ml_yt_type !== undefined) {
+      if (ml_yt_type == "1" && !ml_video_id) {
+        return res.status(400).json({
+          status: false,
+          message: "YouTube Video ID is required",
+        });
+      }
+
+      if (ml_yt_type == "2" && !ml_vdocipher_id) {
+        return res.status(400).json({
+          status: false,
+          message: "VdoCipher Video ID is required",
+        });
+      }
+    }
+
     // UPDATE FIELDS
-    if (ml_title) topic.ml_title = ml_title;
-    if (ml_code) topic.ml_code = ml_code;
-    if (ml_type) topic.ml_type = ml_type;
-    if (ml_stype) topic.ml_stype = ml_stype;
-    if (ml_video_id) topic.ml_video_id = ml_video_id;
+    if (ml_title !== undefined) topic.ml_title = ml_title;
+    if (ml_code !== undefined) topic.ml_code = ml_code;
+    if (ml_type !== undefined) topic.ml_type = ml_type;
+    if (ml_stype !== undefined) topic.ml_stype = ml_stype;
+    // if (ml_video_id) topic.ml_video_id = ml_video_id;
+    if (ml_yt_type !== undefined) {
+      topic.ml_yt_type = ml_yt_type;
+
+      if (ml_yt_type == "1") {
+        topic.ml_video_id = ml_video_id;
+        topic.ml_vdocipher_id = "";
+      } else if (ml_yt_type == "2") {
+        topic.ml_vdocipher_id = ml_vdocipher_id;
+        topic.ml_video_id = "";
+      }
+    }
     if (ml_status !== undefined) topic.ml_status = Number(ml_status);
     if (!topic.ml_course) {
       const subject = await Subject.findById(topic.ml_subject);
@@ -206,12 +259,10 @@ const updateTopic = async (req, res) => {
       message: "Topic updated successfully",
       data: updated,
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 // ===============================
 // DELETE TOPIC
@@ -242,7 +293,6 @@ const deleteTopic = async (req, res) => {
       status: true,
       message: "Topic deleted successfully",
     });
-
   } catch (err) {
     res.status(500).json({ status: false, message: err.message });
   }
