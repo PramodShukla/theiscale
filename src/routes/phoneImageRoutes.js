@@ -18,10 +18,13 @@ router.post(
 // Get All Images
 router.get(
   "/",
-  // authMiddleware,
-  // adminMiddleware,
+  authMiddleware,
+  adminMiddleware,
   galleryController.getAllImages,
 );
+
+// Get All Images
+router.get("/public/all", galleryController.getAllImages);
 
 // Get Single Image
 router.get(
