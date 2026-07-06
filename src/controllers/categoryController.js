@@ -2,6 +2,10 @@ const Category = require("../models/category");
 const Course = require("../models/course");
 const Subject = require("../models/subject");
 
+const {
+  extractUploadedFile,
+  deleteFile,
+} = require("../services/storageService");
 
 // helper slug function
 const generateSlug = (name) => {
@@ -19,24 +23,37 @@ exports.createCategory = async (req, res) => {
     } = req.body;
 
     // validation
-    if (!m_category_name || !m_category_desc) {
+    if (!m_category_name) {
       return res.status(400).send({
         status: false,
-        message: "Name and Description are required",
+        message: "Name is required",
       });
     }
 
     // files
-    const icon = req.files["category_icon"]?.[0]?.path || "";
-    const banner = req.files["category_banner"]?.[0]?.path || "";
+    // const icon = req.files["category_icon"]?.[0]?.path || "";
+    // const banner = req.files["category_banner"]?.[0]?.path || "";
+
+    const icon = req.files?.category_icon?.[0]
+      ? extractUploadedFile(req.files.category_icon[0])
+      : null;
+
+    const banner = req.files?.category_banner?.[0]
+      ? extractUploadedFile(req.files.category_banner[0])
+      : null;
 
     const newCategory = new Category({
       m_category_for: 1, // course category
       m_category_name,
       m_category_slug: generateSlug(m_category_name),
       m_category_desc,
-      m_category_icon: icon,
-      m_category_banner: banner,
+      // m_category_icon: icon,
+      // m_category_banner: banner,
+
+      m_category_icon: icon?.url || "",
+      m_category_icon_public_id: icon?.public_id || "",
+      m_category_banner: banner?.url || "",
+      m_category_banner_public_id: banner?.public_id || "",
       m_category_status: m_category_status || 1,
       m_category_order: m_category_order || 0,
       m_category_keywords,
@@ -56,8 +73,6 @@ exports.createCategory = async (req, res) => {
     });
   }
 };
-
-
 
 exports.getAllCategories = async (req, res) => {
   try {
@@ -113,6 +128,10 @@ exports.updateCategory = async (req, res) => {
       });
     }
 
+    const oldIconPublicId = category.m_category_icon_public_id;
+
+    const oldBannerPublicId = category.m_category_banner_public_id;
+
     const {
       m_category_name,
       m_category_desc,
@@ -122,26 +141,61 @@ exports.updateCategory = async (req, res) => {
     } = req.body;
 
     // files
-    const icon = req.files?.category_icon?.[0]?.path;
-    const banner = req.files?.category_banner?.[0]?.path;
+    // const icon = req.files?.category_icon?.[0]?.path;
+    // const banner = req.files?.category_banner?.[0]?.path;
+
+    if (req.files?.category_icon?.[0]) {
+      const uploadedIcon = extractUploadedFile(req.files.category_icon[0]);
+
+      category.m_category_icon = uploadedIcon.url;
+
+      category.m_category_icon_public_id = uploadedIcon.public_id;
+    }
+
+    if (req.files?.category_banner?.[0]) {
+      const uploadedBanner = extractUploadedFile(req.files.category_banner[0]);
+
+      category.m_category_banner = uploadedBanner.url;
+
+      category.m_category_banner_public_id = uploadedBanner.public_id;
+    }
 
     // update fields
-    if (m_category_name) {
+    // if (m_category_name) {
+    //   category.m_category_name = m_category_name;
+    //   category.m_category_slug = generateSlug(m_category_name);
+    // }
+
+    if (m_category_name !== undefined) {
       category.m_category_name = m_category_name;
       category.m_category_slug = generateSlug(m_category_name);
     }
 
-    if (m_category_desc) category.m_category_desc = m_category_desc;
+    // if (m_category_desc) category.m_category_desc = m_category_desc;
+    if (m_category_desc !== undefined) {
+      category.m_category_desc = m_category_desc;
+    }
     if (m_category_status !== undefined)
       category.m_category_status = m_category_status;
     if (m_category_order !== undefined)
       category.m_category_order = m_category_order;
-    if (m_category_keywords) category.m_category_keywords = m_category_keywords;
+    // if (m_category_keywords) category.m_category_keywords = m_category_keywords;
+    if (m_category_keywords !== undefined) {
+      category.m_category_keywords = m_category_keywords;
+    }
 
-    if (icon) category.m_category_icon = icon;
-    if (banner) category.m_category_banner = banner;
+    // if (icon) category.m_category_icon = icon;
+    // if (banner) category.m_category_banner = banner;
 
     const updated = await category.save();
+
+    if (req.files?.category_icon?.[0] && oldIconPublicId) {
+      await deleteFile(oldIconPublicId);
+    }
+
+    if (req.files?.category_banner?.[0] && oldBannerPublicId) {
+      await deleteFile(oldBannerPublicId);
+    }
 
     res.send({
       status: true,
@@ -167,6 +221,18 @@ exports.deleteCategory = async (req, res) => {
         status: false,
         message: "Category not found",
       });
+    }
+
+    try {
+      if (category.m_category_icon_public_id) {
+        await deleteFile(category.m_category_icon_public_id);
+      }
+
+      if (category.m_category_banner_public_id) {
+        await deleteFile(category.m_category_banner_public_id);
+      }
+    } catch (err) {
+      console.log(err);
     }
 
     await Category.findByIdAndDelete(id);
@@ -241,7 +307,6 @@ exports.appGetCategoryWiseCourses = async (req, res) => {
   }
 };
 
-
 exports.appGetCategories = async (req, res) => {
   try {
     const categories = await Category.find({
@@ -283,7 +348,6 @@ exports.appGetCategories = async (req, res) => {
   }
 };
 
-
 exports.appGetCoursesByCategory = async (req, res) => {
   try {
     const { category_id } = req.body;
@@ -303,7 +367,6 @@ exports.appGetCoursesByCategory = async (req, res) => {
 
     const formattedCourses = await Promise.all(
       courses.map(async (course) => {
-
         let totalSubjects = 0;
 
         try {
@@ -319,13 +382,9 @@ exports.appGetCoursesByCategory = async (req, res) => {
 
         let totalPercent = 0;
 
-        if (
-          actualPrice > 0 &&
-          offerPrice >= 0 &&
-          actualPrice > offerPrice
-        ) {
+        if (actualPrice > 0 && offerPrice >= 0 && actualPrice > offerPrice) {
           totalPercent = Math.round(
-            ((actualPrice - offerPrice) / actualPrice) * 100
+            ((actualPrice - offerPrice) / actualPrice) * 100,
           );
         }
 
@@ -341,23 +400,17 @@ exports.appGetCoursesByCategory = async (req, res) => {
 
           course_rating: String(course.m_course_rating || 0),
 
-          course_duration: String(
-            course.m_course_duration_app || 0
-          ),
+          course_duration: String(course.m_course_duration_app || 0),
 
-          course_reviews: String(
-            course.m_course_reviews || 0
-          ),
+          course_reviews: String(course.m_course_reviews || 0),
 
-          total_rating: String(
-            course.m_course_rating || 0
-          ),
+          total_rating: String(course.m_course_rating || 0),
 
           totalPercent,
 
           total_subjects: String(totalSubjects),
         };
-      })
+      }),
     );
 
     return res.status(200).json({

@@ -10,7 +10,7 @@ const categorySchema = new mongoose.Schema({
   m_category_for: {
     type: Number,
     // required: true,
-    enum:[1,2,3] // 1=course, 2=testseries, 3=notes
+    enum: [1, 2, 3], // 1=course, 2=testseries, 3=notes
   },
 
   m_category_name: {
@@ -28,7 +28,7 @@ const categorySchema = new mongoose.Schema({
 
   m_category_desc: {
     type: String,
-    required: true,
+    // required: true,
     trim: true,
   },
 
@@ -37,16 +37,24 @@ const categorySchema = new mongoose.Schema({
     // required: true
   },
 
+  m_category_icon_public_id: {
+    type: String,
+  },
+
   m_category_banner: {
     type: String,
     // required: true
   },
 
+  m_category_banner_public_id: {
+    type: String,
+  },
+
   m_category_status: {
     type: Number,
     // required: true,
-    enum:[0,1], // 0=active, 1=inactive
-    default:1
+    enum: [0, 1], // 0=active, 1=inactive
+    default: 1,
   },
 
   m_category_order: {
@@ -56,14 +64,14 @@ const categorySchema = new mongoose.Schema({
 
   m_category_keywords: {
     type: String,
-    default: null
+    default: null,
   },
 
   last_modified: {
     type: Date,
     required: true,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("category", categorySchema);
