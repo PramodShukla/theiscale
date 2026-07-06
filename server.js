@@ -11,8 +11,8 @@ const connectDB = require("./src/config/db");
 connectDB();
 
 //  middlewares
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb",extended: true }));
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ limit: "100mb",extended: true }));
 app.use(cors());
 
 
@@ -54,10 +54,14 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
+// cloudinary.api.ping()
+// .then(console.log)
+// .catch(console.error);
+
 app.use((err, req, res, next) => {
-  console.error("🔥 ERROR START 🔥");
+  console.error(" ERROR START ");
   console.error(err);
-  console.error("🔥 ERROR END 🔥");
+  console.error(" ERROR END ");
 
   res.status(500).json({
     status: false,

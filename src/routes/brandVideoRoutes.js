@@ -18,7 +18,16 @@ router.post(
   "/add",
   authMiddleware,
   adminMiddleware,
+  (req,res,next)=>{
+      console.log("Before Multer");
+      next();
+  },
   brandVideoUpload,
+   (req, res, next) => {
+    console.log("Upload Success");
+    console.log(req.files);
+    next();
+  },
   addBrandVideo,
 );
 

@@ -1,6 +1,6 @@
 const Gallery = require("../models/phoneImage");
 const { v2: cloudinary } = require("cloudinary");
-const { extractUploadedFile } = require("../services/storageService");
+const { extractUploadedFile,deleteFile } = require("../services/storageService");
 
 // Upload Image
 const uploadImage = async (req, res) => {
@@ -121,7 +121,8 @@ const deleteImage = async (req, res) => {
     }
 
     // Cloudinary se delete
-    await cloudinary.uploader.destroy(image.public_id);
+    // await cloudinary.uploader.destroy(image.public_id);
+    await deleteFile(image.public_id);
 
     // MongoDB se delete
     await Gallery.findByIdAndDelete(req.params.id);

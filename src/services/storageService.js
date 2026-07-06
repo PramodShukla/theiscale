@@ -71,6 +71,32 @@ const deleteFile = async (fileIdentifier) => {
   return false;
 };
 
+const deleteVideoFromCloud = async (publicId) => {
+  if (!publicId) return false;
+
+  if (STORAGE_PROVIDER === "cloudinary") {
+    try {
+      const result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: "video",
+      });
+
+      console.log("Cloudinary Video Delete:", result);
+
+      return result.result === "ok" || result.result === "not found";
+    } catch (error) {
+      console.error("Cloudinary video delete error:", error);
+      return false;
+    }
+  }
+
+  if (fs.existsSync(publicId)) {
+    fs.unlinkSync(publicId);
+    return true;
+  }
+
+  return false;
+};
+
 const extractUploadedFile = (file) => {
   if (!file) {
     return null;
@@ -115,7 +141,7 @@ const uploadFileWithMeta = async (localFilePath, folderName) => {
 module.exports = {
   uploadFile,
   deleteFile,
+  deleteVideoFromCloud,
   extractUploadedFile,
-  uploadFileWithMeta
-  
+  uploadFileWithMeta,
 };
