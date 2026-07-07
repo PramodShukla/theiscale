@@ -6,6 +6,7 @@ const courseSchema = new mongoose.Schema(
     m_course_lang: {
       type: Number,
       required: true,
+      enum: [1, 2, 3], //1=english, 2=hindi , 3=hinglish 
     },
 
     m_course_category: {
@@ -55,15 +56,35 @@ const courseSchema = new mongoose.Schema(
       // unique: true,
     },
 
+    // m_course_banner: {
+    //   type: String,
+    //   // required: true,
+    //   maxlength: 200,
+    // },
+
     m_course_banner: {
       type: String,
-      // required: true,
-      maxlength: 200,
+      default: "",
     },
+
+    m_course_banner_public_id: {
+      type: String,
+      default: "",
+    },
+
+    // m_course_pdf: {
+    //   type: String,
+    //   default: null,
+    // },
 
     m_course_pdf: {
       type: String,
-      default: null,
+      default: "",
+    },
+
+    m_course_pdf_public_id: {
+      type: String,
+      default: "",
     },
 
     m_course_video_link: {
@@ -80,7 +101,7 @@ const courseSchema = new mongoose.Schema(
       type: String,
       trim: true,
       // required: true,
-      trim:true
+      trim: true,
     },
 
     m_course_type: {
@@ -127,7 +148,7 @@ const courseSchema = new mongoose.Schema(
     m_course_status: {
       type: Number,
       // required: true,
-      enum: [1,0],
+      enum: [1, 0],
       default: 1,
     },
 
@@ -135,7 +156,7 @@ const courseSchema = new mongoose.Schema(
       type: Number,
       // required: true,
       enum: [0, 1],
-      default:1
+      default: 1,
     },
 
     m_course_view: {
@@ -165,9 +186,19 @@ const courseSchema = new mongoose.Schema(
       default: 0,
     },
 
+    // m_course_brochure: {
+    //   type: String,
+    //   default: null,
+    // },
+
     m_course_brochure: {
       type: String,
-      default: null,
+      default: "",
+    },
+
+    m_course_brochure_public_id: {
+      type: String,
+      default: "",
     },
 
     m_course_duration_app: {
@@ -196,9 +227,19 @@ const courseSchema = new mongoose.Schema(
       default: [],
     },
 
+    // m_course_feestructure: {
+    //   type: String,
+    //   // required: true,
+    // },
+
     m_course_feestructure: {
       type: String,
-      // required: true,
+      default: "",
+    },
+
+    m_course_feestructure_public_id: {
+      type: String,
+      default: "",
     },
 
     m_course_certificate: {
@@ -254,23 +295,16 @@ const courseSchema = new mongoose.Schema(
 //   // next();
 // });
 
-
-courseSchema.pre("save", function(next) {
-
+courseSchema.pre("save", function (next) {
   if (this.m_course_title && !this.m_course_slug) {
-
-    this.m_course_slug = slugify(
-      this.m_course_title,
-      {
-        lower:true,
-        strict:true,
-        replacement:"-"
-      }
-    );
+    this.m_course_slug = slugify(this.m_course_title, {
+      lower: true,
+      strict: true,
+      replacement: "-",
+    });
   }
 
   // next();
 });
 
 module.exports = mongoose.model("course", courseSchema);
-   

@@ -2,25 +2,54 @@ const Candidate = require("../models/candidates");
 const bcrypt = require("bcrypt");
 
 //  GET PROFILE (prefill data)
+// exports.getProfile = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+
+//     const user = await Candidate.findById(userId).select("-c_password");
+
+//     if (!user) {
+//       return res.status(404).send({
+//         status: false,
+//         message: "User not found",
+//       });
+//     }
+
+//     res.send({
+//       status: true,
+//       data: user,
+//     });
+//   } catch (e) {
+//     res.status(500).send({
+//       status: false,
+//       message: e.message,
+//     });
+//   }
+// };
+
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const user = await Candidate.findById(userId).select("-c_password");
+    const user = await Candidate.findById(userId)
+      .populate("c_current_country", "m_country_name")
+      .populate("c_current_state", "m_state_name")
+      .populate("c_current_city", "m_city_city")
+      .select("-c_password");
 
     if (!user) {
-      return res.status(404).send({
+      return res.status(404).json({
         status: false,
         message: "User not found",
       });
     }
 
-    res.send({
+    return res.json({
       status: true,
       data: user,
     });
   } catch (e) {
-    res.status(500).send({
+    return res.status(500).json({
       status: false,
       message: e.message,
     });
@@ -33,13 +62,60 @@ exports.updateProfile = async (req, res) => {
     const userId = req.user.id;
 
     // only sent fields will update
-    const updateData = req.body;
+    // const updateData = req.body;
+
+    const updateData = { ...req.body };
+
+    if (
+      updateData.c_current_country &&
+      !mongoose.Types.ObjectId.isValid(updateData.c_current_country)
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid country id",
+      });
+    }
+
+    if (
+      updateData.c_current_state &&
+      !mongoose.Types.ObjectId.isValid(updateData.c_current_state)
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid state id",
+      });
+    }
+
+    if (
+      updateData.c_current_city &&
+      !mongoose.Types.ObjectId.isValid(updateData.c_current_city)
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid city id",
+      });
+    }
+
+    // const updatedUser = await Candidate.findByIdAndUpdate(
+    //   userId,
+    //   { $set: updateData },
+    //   { new: true },
+    // ).select("-c_password");
 
     const updatedUser = await Candidate.findByIdAndUpdate(
       userId,
-      { $set: updateData },
-      { new: true },
-    ).select("-c_password");
+      {
+        $set: updateData,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+      .populate("c_current_country", "country_name")
+      .populate("c_current_state", "state_name")
+      .populate("c_current_city", "city_name")
+      .select("-c_password");
 
     if (!updatedUser) {
       return res.status(404).send({

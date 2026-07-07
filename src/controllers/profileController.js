@@ -1,11 +1,61 @@
 const Candidate = require("../models/candidates");
 
 
+// const getMyProfile = async (req, res) => {
+//   try {
+//     const userId = req.user.id; // from JWT middleware
+
+//     const user = await Candidate.findById(userId);
+
+//     if (!user) {
+//       return res.status(404).send({
+//         status: false,
+//         message: "User not found",
+//       });
+//     }
+
+//     res.status(200).send({
+//       status: true,
+//       data: {
+//         registrationDate: user.c_register_date,
+//         firstName: user.c_first_name,
+//         lastName: user.c_last_name,
+//         parentName: user.c_user_parent,
+//         mobileNumber: user.c_contact,
+//         altMobileNumber: user.c_alt_contact,
+//         whatsappNumber: user.c_whatsapp,
+//         email: user.c_email,
+//         dob: user.c_dob,
+//         gender: user.c_gender,
+//         state: user.c_current_state,
+//         city: user.c_current_city,
+//         pincode: user.c_current_pincode,
+//         address: `${user.c_current_address1} ${user.c_current_address2}`,
+//         occupation: user.m_occupation,
+//         biography: user.c_bio,
+//       },
+//     });
+
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({
+//       status: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
+// Mobile Apis=============================================================================================================================
+
 const getMyProfile = async (req, res) => {
   try {
     const userId = req.user.id; // from JWT middleware
 
-    const user = await Candidate.findById(userId);
+    const user = await Candidate.findById(userId)
+      .populate("c_current_country", "m_country_name")
+      .populate("c_current_state", "m_state_name")
+      .populate("c_current_city", "m_city_city");
 
     if (!user) {
       return res.status(404).send({
@@ -27,27 +77,26 @@ const getMyProfile = async (req, res) => {
         email: user.c_email,
         dob: user.c_dob,
         gender: user.c_gender,
+
+        country: user.c_current_country,
         state: user.c_current_state,
         city: user.c_current_city,
+
         pincode: user.c_current_pincode,
-        address: `${user.c_current_address1} ${user.c_current_address2}`,
+        address: `${user.c_current_address1 || ""} ${user.c_current_address2 || ""}`.trim(),
         occupation: user.m_occupation,
         biography: user.c_bio,
       },
     });
-
   } catch (error) {
     console.log(error);
+
     res.status(500).send({
       status: false,
       message: error.message,
     });
   }
 };
-
-
-// Mobile Apis=============================================================================================================================
-
 
 
 const appGetMyProfile = async (req, res) => {

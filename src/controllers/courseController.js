@@ -1,17 +1,50 @@
 const Course = require("../models/course");
 const slugify = require("slugify");
-const fs = require("fs");
+// const fs = require("fs");
 const Category = require("../models/category");
 const mongoose = require("mongoose");
 const LectureProgress = require("../models/lecture_progress");
 const Subject = require("../models/subject");
 const Lecture = require("../models/lecture");
-const Enrollment = require("../models/course_enrollment");
-// const CourseEnrollment = require("../models/course_enrollment");
 const CourseEnrollment = require("../models/course_enrollment");
+
+const {
+  extractUploadedFile,
+  deleteFile,
+} = require("../services/storageService");
+
+const rollbackUploadedFiles = async (files = []) => {
+  for (const publicId of files) {
+    try {
+      await deleteFile(publicId);
+    } catch (err) {
+      console.error("Rollback failed:", err.message);
+    }
+  }
+};
 
 // ADD COURSE
 const addCourse = async (req, res) => {
+  const uploadedFiles = [];
+
+  const banner = req.files?.m_course_banner?.[0]
+    ? extractUploadedFile(req.files.m_course_banner[0])
+    : null;
+
+  if (banner?.public_id) uploadedFiles.push(banner.public_id);
+
+  const pdf = req.files?.m_course_pdf?.[0]
+    ? extractUploadedFile(req.files.m_course_pdf[0])
+    : null;
+
+  if (pdf?.public_id) uploadedFiles.push(pdf.public_id);
+
+  const feeStructure = req.files?.m_course_feestructure?.[0]
+    ? extractUploadedFile(req.files.m_course_feestructure[0])
+    : null;
+
+  if (feeStructure?.public_id) uploadedFiles.push(feeStructure.public_id);
+
   try {
     const {
       m_course_lang,
@@ -67,6 +100,8 @@ const addCourse = async (req, res) => {
       .map(([key]) => key);
 
     if (missingFields.length > 0) {
+      await rollbackUploadedFiles(uploadedFiles);
+
       return res.status(400).json({
         status: false,
         message: "Required fields are missing",
@@ -79,9 +114,22 @@ const addCourse = async (req, res) => {
       m_course_category &&
       !mongoose.Types.ObjectId.isValid(m_course_category)
     ) {
+      await rollbackUploadedFiles(uploadedFiles);
+
       return res
         .status(400)
         .json({ status: false, message: "Invalid category id" });
+    }
+
+    const category = await Category.findById(m_course_category);
+
+    if (!category) {
+      await rollbackUploadedFiles(uploadedFiles);
+
+      return res.status(404).json({
+        status: false,
+        message: "Category not found",
+      });
     }
 
     // if (
@@ -95,6 +143,7 @@ const addCourse = async (req, res) => {
 
     if (m_course_trainee) {
       if (!Array.isArray(m_course_trainee)) {
+        await rollbackUploadedFiles(uploadedFiles);
         return res.status(400).json({
           status: false,
           message: "m_course_trainee must be an array",
@@ -106,6 +155,8 @@ const addCourse = async (req, res) => {
       );
 
       if (invalidIds.length > 0) {
+        await rollbackUploadedFiles(uploadedFiles);
+
         return res.status(400).json({
           status: false,
           message: "Invalid trainee ids",
@@ -118,6 +169,8 @@ const addCourse = async (req, res) => {
       m_course_type !== undefined &&
       ![1, 2].includes(Number(m_course_type))
     ) {
+      await rollbackUploadedFiles(uploadedFiles);
+
       return res.status(400).json({
         status: false,
         message: "Invalid course type (1=Free, 2=Paid)",
@@ -128,6 +181,8 @@ const addCourse = async (req, res) => {
       m_course_access_type &&
       !["lifetime", "limited"].includes(m_course_access_type)
     ) {
+      await rollbackUploadedFiles(uploadedFiles);
+
       return res
         .status(400)
         .json({ status: false, message: "Invalid access type" });
@@ -135,6 +190,8 @@ const addCourse = async (req, res) => {
 
     if (m_course_access_type === "limited") {
       if (!m_course_access_days || Number(m_course_access_days) <= 0) {
+        await rollbackUploadedFiles(uploadedFiles);
+
         return res.status(400).json({
           status: false,
           message: "Access days required for limited course",
@@ -143,9 +200,23 @@ const addCourse = async (req, res) => {
     }
 
     if (
+      m_course_lang !== undefined &&
+      ![1, 2, 3].includes(Number(m_course_lang))
+    ) {
+      await rollbackUploadedFiles(uploadedFiles);
+
+      return res.status(400).json({
+        status: false,
+        message: "Invalid course language",
+      });
+    }
+
+    if (
       m_course_certificate !== undefined &&
       ![1, 2].includes(Number(m_course_certificate))
     ) {
+      await rollbackUploadedFiles(uploadedFiles);
+
       return res
         .status(400)
         .json({ status: false, message: "Invalid certificate value" });
@@ -161,6 +232,8 @@ const addCourse = async (req, res) => {
       m_course_status !== undefined &&
       ![0, 1, "0", "1"].includes(m_course_status)
     ) {
+      await rollbackUploadedFiles(uploadedFiles);
+
       return res.status(400).json({
         status: false,
         message: "Invalid course status. Use 0 or 1",
@@ -168,6 +241,8 @@ const addCourse = async (req, res) => {
     }
 
     if (![0, 1].includes(Number(m_course_status_web))) {
+      await rollbackUploadedFiles(uploadedFiles);
+
       return res
         .status(400)
         .json({ status: false, message: "Invalid course status web" });
@@ -176,6 +251,8 @@ const addCourse = async (req, res) => {
     // PRICE VALIDATION
     if (Number(m_course_type) === 2) {
       if (!m_course_price || Number(m_course_price) <= 0) {
+        await rollbackUploadedFiles(uploadedFiles);
+
         return res.status(400).json({
           status: false,
           message: "Price required for paid course",
@@ -188,6 +265,8 @@ const addCourse = async (req, res) => {
       m_course_price &&
       Number(m_course_offer_price) > Number(m_course_price)
     ) {
+      await rollbackUploadedFiles(uploadedFiles);
+
       return res.status(400).json({
         status: false,
         message: "Offer price cannot be greater than actual price",
@@ -200,7 +279,7 @@ const addCourse = async (req, res) => {
         m_course_code: m_course_code.trim(),
       });
       if (exists) {
-        deleteUploadedFiles(req.files);
+        await rollbackUploadedFiles(uploadedFiles);
         return res.status(409).json({
           status: false,
           message: "Course code already exists",
@@ -212,6 +291,7 @@ const addCourse = async (req, res) => {
       m_course_rating !== undefined &&
       (Number(m_course_rating) < 0 || Number(m_course_rating) > 10)
     ) {
+      await rollbackUploadedFiles(uploadedFiles);
       return res.status(400).json({
         status: false,
         message: "Course rating must be between 0 and 10",
@@ -219,12 +299,40 @@ const addCourse = async (req, res) => {
     }
 
     // FILE HANDLING (SAFE)
-    const getFile = (name) => req.files?.[name]?.[0]?.path || null;
+    // const getFile = (name) => req.files?.[name]?.[0]?.path || null;
 
-    const m_course_banner = getFile("m_course_banner");
-    const m_course_pdf = getFile("m_course_pdf");
-    const m_course_feestructure = getFile("m_course_feestructure");
-    const m_course_brochure = getFile("m_course_brochure");
+    // const m_course_banner = getFile("m_course_banner");
+    // const m_course_pdf = getFile("m_course_pdf");
+    // const m_course_feestructure = getFile("m_course_feestructure");
+    // const m_course_brochure = getFile("m_course_brochure");
+
+    // const banner = req.files?.m_course_banner?.[0]
+    //   ? extractUploadedFile(req.files.m_course_banner[0])
+    //   : null;
+
+    // if (banner?.public_id) {
+    //   uploadedFiles.push(banner.public_id);
+    // }
+
+    // const pdf = req.files?.m_course_pdf?.[0]
+    //   ? extractUploadedFile(req.files.m_course_pdf[0])
+    //   : null;
+
+    // if (pdf?.public_id) {
+    //   uploadedFiles.push(pdf.public_id);
+    // }
+
+    // const feeStructure = req.files?.m_course_feestructure?.[0]
+    //   ? extractUploadedFile(req.files.m_course_feestructure[0])
+    //   : null;
+
+    // if (feeStructure?.public_id) {
+    //   uploadedFiles.push(feeStructure.public_id);
+    // }
+
+    // const brochure = req.files?.m_course_brochure?.[0]
+    //   ? extractUploadedFile(req.files.m_course_brochure[0])
+    //   : null;
 
     // SLUG GENERATION
     let slug = slugify(m_course_title, { lower: true, strict: true });
@@ -253,10 +361,22 @@ const addCourse = async (req, res) => {
       m_course_intro: m_course_intro || null,
       m_course_code: m_course_code?.trim() || null,
 
-      m_course_banner,
-      m_course_pdf,
-      m_course_feestructure,
-      m_course_brochure,
+      // m_course_banner,
+      // m_course_pdf,
+      // m_course_feestructure,
+      // m_course_brochure,
+
+      m_course_banner: banner?.url || "",
+      m_course_banner_public_id: banner?.public_id || "",
+
+      m_course_pdf: pdf?.url || "",
+      m_course_pdf_public_id: pdf?.public_id || "",
+
+      m_course_feestructure: feeStructure?.url || "",
+      m_course_feestructure_public_id: feeStructure?.public_id || "",
+
+      // m_course_brochure: brochure?.url || "",
+      // m_course_brochure_public_id: brochure?.public_id || "",
 
       m_course_video_link: m_course_video_link || null,
       m_course_video_id: videoId,
@@ -330,9 +450,11 @@ const addCourse = async (req, res) => {
       data: savedCourse,
     });
   } catch (error) {
-    console.error("Add Course Error:", error);
+    // console.error("Add Course Error:", error);
 
-    if (req.files) deleteUploadedFiles(req.files);
+    await rollbackUploadedFiles(uploadedFiles);
+
+    // if (req.files) deleteUploadedFiles(req.files);
 
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
@@ -351,101 +473,17 @@ const addCourse = async (req, res) => {
 };
 
 // HELPER - DELETE UPLOADED FILES
-const deleteUploadedFiles = (files) => {
-  if (!files) return;
-  Object.values(files).forEach((fileArray) => {
-    fileArray.forEach((file) => {
-      if (fs.existsSync(file.path)) {
-        fs.unlink(file.path, (err) => {
-          if (err) console.log(err);
-        });
-      }
-    });
-  });
-};
-
-// const getAllCourses = async (req, res) => {
-//   try {
-//     let {
-//       page = 1,
-//       limit = 10,
-//       search = "",
-//       category,
-//       course_type,
-//       status,
-//     } = req.query;
-
-//     page = parseInt(page) || 1;
-//     limit = parseInt(limit) || 10;
-
-//     let filter = {};
-
-//     // SEARCH
-//     if (search) {
-//       filter.$or = [
-//         { m_course_title: { $regex: search, $options: "i" } },
-//         { m_course_code: { $regex: search, $options: "i" } },
-//       ];
-//     }
-
-//     // CATEGORY FILTER
-//     if (category && mongoose.Types.ObjectId.isValid(category)) {
-//       filter.m_course_category = category;
-//     }
-
-//     // COURSE TYPE FILTER
-//     if (course_type) {
-//       filter.m_course_type = Number(course_type);
-//     }
-
-//     // STATUS FILTER
-//     if (status !== undefined) {
-//       filter.m_course_status = Number(status);
-//     }
-
-//     // TOTAL COUNT
-//     const total = await Course.countDocuments(filter);
-
-//     // FETCH COURSES WITH POPULATE
-//     const courses = await Course.find(filter)
-//       .populate("m_course_category", "m_category_name") // Sirf name fetch karega
-//       .sort({ m_course_order: 1, _id: -1 })
-//       .skip((page - 1) * limit)
-//       .limit(limit);
-
-//     // FINAL RESPONSE MAPPING
-//     const finalData = courses.map((course) => ({
-//       _id: course._id,
-//       title: course.m_course_title,
-//       code: course.m_course_code,
-//       // Yahan change kiya hai: populated object se seedha name nikalna hai
-//       category: course.m_course_category ? course.m_course_category.m_category_name : "N/A",
-//       banner: course.m_course_banner,
-//       video: course.m_course_video_link,
-//       course_type: course.m_course_type === 1 ? "Free" : "Paid",
-//       price: course.m_course_type === 1 ? "N/A" : course.m_course_price,
-//       offer_price: course.m_course_type === 1 ? "N/A" : course.m_course_offer_price,
-//       status: course.m_course_status === 1 ? "Active" : "Inactive",
-//       slug: course.m_course_slug,
-//     }));
-
-//     res.send({
-//       status: true,
-//       message: "Courses fetched successfully",
-//       pagination: {
-//         total,
-//         page,
-//         limit,
-//         totalPages: Math.ceil(total / limit),
-//       },
-//       data: finalData,
+// const deleteUploadedFiles = (files) => {
+//   if (!files) return;
+//   Object.values(files).forEach((fileArray) => {
+//     fileArray.forEach((file) => {
+//       if (fs.existsSync(file.path)) {
+//         fs.unlink(file.path, (err) => {
+//           if (err) console.log(err);
+//         });
+//       }
 //     });
-//   } catch (e) {
-//     res.status(500).send({
-//       status: false,
-//       message: e.message,
-//     });
-//   }
+//   });
 // };
 
 const getAllCourses = async (req, res) => {
@@ -597,56 +635,660 @@ const getCategoryDropdown = async (req, res) => {
 };
 
 // UPDATE COURSE
+// const updateCourse = async (req, res) => {
+//   const uploadedFiles = [];
+
+//   const banner = req.files?.m_course_banner?.[0]
+//     ? extractUploadedFile(req.files.m_course_banner[0])
+//     : null;
+
+//   if (banner?.public_id) uploadedFiles.push(banner.public_id);
+
+//   const pdf = req.files?.m_course_pdf?.[0]
+//     ? extractUploadedFile(req.files.m_course_pdf[0])
+//     : null;
+
+//   if (pdf?.public_id) uploadedFiles.push(pdf.public_id);
+
+//   const feeStructure = req.files?.m_course_feestructure?.[0]
+//     ? extractUploadedFile(req.files.m_course_feestructure[0])
+//     : null;
+
+//   if (feeStructure?.public_id) uploadedFiles.push(feeStructure.public_id);
+
+//   try {
+//     const { id } = req.params;
+
+//     // VALIDATION
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//       await rollbackUploadedFiles(uploadedFiles);
+//       return res.status(400).json({
+//         status: false,
+//         message: "Invalid course id",
+//       });
+//     }
+
+//     const course = await Course.findById(id);
+//     if (!course) {
+//       await rollbackUploadedFiles(uploadedFiles);
+//       return res.status(404).json({
+//         status: false,
+//         message: "Course not found",
+//       });
+//     }
+
+//     const oldBanner = course.m_course_banner_public_id;
+
+//     const oldPdf = course.m_course_pdf_public_id;
+
+//     const oldFee = course.m_course_feestructure_public_id;
+
+//     // const oldBrochure = course.m_course_brochure_public_id;
+
+//     // HELPER FUNCTION
+//     const isValid = (val) => {
+      
+//       return val !== undefined && val !== null && val.toString().trim() !== "";
+//     };
+
+//     const body = req.body;
+//     let updateData = {};
+
+//     // BASIC FIELDS
+//     // if (isValid(body.m_course_lang))
+//     //   updateData.m_course_lang = Number(body.m_course_lang);
+
+//     if (isValid(body.m_course_lang)) {
+//       const lang = Number(body.m_course_lang);
+
+//       if (![1, 2, 3].includes(lang)) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Invalid course language",
+//         });
+//       }
+
+//       updateData.m_course_lang = lang;
+//     }
+
+//     // if (isValid(body.m_course_category))
+//     //   updateData.m_course_category = body.m_course_category;
+
+//     if (isValid(body.m_course_category)) {
+//       if (!mongoose.Types.ObjectId.isValid(body.m_course_category)) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Invalid category id",
+//         });
+//       }
+
+//       updateData.m_course_category = body.m_course_category;
+//     }
+
+//     if (isValid(body.m_course_cat_slug))
+//       updateData.m_course_cat_slug = body.m_course_cat_slug;
+
+//     if (isValid(body.m_course_title)) {
+//       updateData.m_course_title = body.m_course_title.trim();
+
+//       // SLUG UPDATE
+//       let slug = slugify(body.m_course_title, {
+//         lower: true,
+//         strict: true,
+//       });
+
+//       const slugExists = await Course.findOne({
+//         m_course_slug: slug,
+//         _id: { $ne: id },
+//       });
+
+//       if (slugExists) {
+//         slug = `${slug}-${Date.now()}`;
+//       }
+
+//       updateData.m_course_slug = slug;
+//     }
+
+//     if (isValid(body.m_course_intro))
+//       updateData.m_course_intro = body.m_course_intro;
+
+//     // ACCESS TYPE ( NEW)
+//     if (isValid(body.m_course_access_type)) {
+//       if (!["lifetime", "limited"].includes(body.m_course_access_type)) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Invalid access type",
+//         });
+//       }
+
+//       updateData.m_course_access_type = body.m_course_access_type;
+//     }
+
+//     // ACCESS DAYS ( IMPORTANT)
+//     if (body.m_course_access_type === "limited") {
+//       if (!isValid(body.m_course_access_days)) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Access days required for limited course",
+//         });
+//       }
+
+//       updateData.m_course_access_days = Number(body.m_course_access_days);
+//     }
+
+//     // Lifetime case
+//     if (body.m_course_access_type === "lifetime") {
+//       updateData.m_course_access_days = null;
+//     }
+
+//     // COURSE CODE (UNIQUE)
+//     if (isValid(body.m_course_code)) {
+//       const existing = await Course.findOne({
+//         m_course_code: body.m_course_code.trim(),
+//         _id: { $ne: id },
+//       });
+
+//       if (existing) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(409).json({
+//           status: false,
+//           message: "Course code already exists",
+//         });
+//       }
+
+//       updateData.m_course_code = body.m_course_code.trim();
+//     }
+
+//     if (isValid(body.m_course_description))
+//       updateData.m_course_description = body.m_course_description;
+
+//     // VIDEO
+//     if (isValid(body.m_course_video_link)) {
+//       updateData.m_course_video_link = body.m_course_video_link;
+
+//       let videoId = null;
+//       const match = body.m_course_video_link.match(
+//         /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/,
+//       );
+//       if (match) videoId = match[1];
+
+//       updateData.m_course_video_id = videoId;
+//     }
+
+//     // TYPE & PRICE
+//     if (isValid(body.m_course_type)) {
+//       if (![1, 2].includes(Number(body.m_course_type))) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Invalid course type",
+//         });
+//       }
+//       updateData.m_course_type = Number(body.m_course_type);
+//     }
+
+//     if (Number(body.m_course_type) === 2) {
+//       if (!isValid(body.m_course_price) || Number(body.m_course_price) <= 0) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Price required for paid course",
+//         });
+//       }
+//     }
+
+//     if (isValid(body.m_course_price))
+//       updateData.m_course_price = Number(body.m_course_price);
+
+//     // OFFER PRICE VALIDATION
+//     const actualPrice = isValid(body.m_course_price)
+//       ? Number(body.m_course_price)
+//       : course.m_course_price;
+
+//     const offerPrice = isValid(body.m_course_offer_price)
+//       ? Number(body.m_course_offer_price)
+//       : course.m_course_offer_price;
+
+//     if (offerPrice > actualPrice) {
+//       await rollbackUploadedFiles(uploadedFiles);
+//       return res.status(400).json({
+//         status: false,
+//         message: "Offer price cannot be greater than actual price",
+//       });
+//     }
+
+//     if (isValid(body.m_course_offer_price))
+//       updateData.m_course_offer_price = Number(body.m_course_offer_price);
+
+//     // SETTINGS
+//     if (isValid(body.m_course_popular))
+//       updateData.m_course_popular = Number(body.m_course_popular);
+
+//     if (isValid(body.m_course_recomended))
+//       updateData.m_course_recomended = Number(body.m_course_recomended);
+
+//     if (isValid(body.m_course_keyword))
+//       updateData.m_course_keyword = body.m_course_keyword;
+
+//     if (isValid(body.m_course_status)) {
+//       const status = Number(body.m_course_status);
+
+//       if (![0, 1].includes(status)) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Invalid course status. Use 0 or 1",
+//         });
+//       }
+
+//       updateData.m_course_status = status;
+//     }
+//     // if (isValid(body.m_course_status_web))
+//     //   updateData.m_course_status_web = Number(body.m_course_status_web);
+
+//     if (isValid(body.m_course_status_web)) {
+//       const statusWeb = Number(body.m_course_status_web);
+
+//       if (![0, 1].includes(statusWeb)) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Invalid course status web. Use 0 or 1",
+//         });
+//       }
+
+//       updateData.m_course_status_web = statusWeb;
+//     }
+
+//     // DURATION
+//     if (isValid(body.m_course_duration_app))
+//       updateData.m_course_duration_app = body.m_course_duration_app.toString();
+
+//     if (isValid(body.m_course_duration_web))
+//       updateData.m_course_duration_web = Number(body.m_course_duration_web);
+
+//     // INSTRUCTOR
+//     // if (body.m_course_trainee === null) {
+//     //   updateData.m_course_trainee = null;
+//     // } else if (isValid(body.m_course_trainee)) {
+//     //   if (!mongoose.Types.ObjectId.isValid(body.m_course_trainee)) {
+//     //     return res.status(400).json({
+//     //       status: false,
+//     //       message: "Invalid instructor id",
+//     //     });
+//     //   }
+
+//     //   updateData.m_course_trainee = new mongoose.Types.ObjectId(
+//     //     body.m_course_trainee,
+//     //   );
+//     // }
+
+//     if (body.m_course_trainee !== undefined) {
+//       if (!Array.isArray(body.m_course_trainee)) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "m_course_trainee must be an array",
+//         });
+//       }
+
+//       const invalidIds = body.m_course_trainee.filter(
+//         (id) => !mongoose.Types.ObjectId.isValid(id),
+//       );
+
+//       if (invalidIds.length > 0) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Invalid trainee ids",
+//         });
+//       }
+
+//       updateData.m_course_trainee = body.m_course_trainee.map(
+//         (id) => new mongoose.Types.ObjectId(id),
+//       );
+//     }
+
+//     // CERTIFICATE
+//     // if (isValid(body.m_course_certificate))
+//     //   updateData.m_course_certificate = Number(body.m_course_certificate);
+
+//     if (isValid(body.m_course_certificate)) {
+//       const certificate = Number(body.m_course_certificate);
+
+//       if (![1, 2].includes(certificate)) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Invalid certificate value",
+//         });
+//       }
+
+//       updateData.m_course_certificate = certificate;
+//     }
+
+//     // GRAPHY
+//     if (isValid(body.m_course_app_g_link))
+//       updateData.m_course_app_g_link = body.m_course_app_g_link;
+
+//     if (isValid(body.m_course_web_g_link))
+//       updateData.m_course_web_g_link = body.m_course_web_g_link;
+
+//     if (isValid(body.m_course_graphy_instruction))
+//       updateData.m_course_graphy_instruction = body.m_course_graphy_instruction;
+
+//     // ORDER
+//     if (isValid(body.m_course_order))
+//       updateData.m_course_order = Number(body.m_course_order);
+
+//     if (isValid(body.m_course_view)) {
+//       updateData.m_course_view = Number(body.m_course_view);
+//     }
+
+//     if (isValid(body.m_course_reviews)) {
+//       updateData.m_course_reviews = Number(body.m_course_reviews);
+//     }
+
+//     if (isValid(body.m_course_rating)) {
+//       const rating = Number(body.m_course_rating);
+
+//       if (rating < 0 || rating > 10) {
+//         await rollbackUploadedFiles(uploadedFiles);
+//         return res.status(400).json({
+//           status: false,
+//           message: "Course rating must be between 0 and 10",
+//         });
+//       }
+
+//       updateData.m_course_rating = rating;
+//     }
+
+//     // FILE UPDATE
+//     if (req.files) {
+//       // if (req.files["m_course_banner"]) {
+//       //   updateData.m_course_banner = req.files["m_course_banner"][0].path;
+//       // }
+
+//       // if (req.files["m_course_pdf"]) {
+//       //   updateData.m_course_pdf = req.files["m_course_pdf"][0].path;
+//       // }
+
+//       // if (req.files["m_course_feestructure"]) {
+//       //   updateData.m_course_feestructure =
+//       //     req.files["m_course_feestructure"][0].path;
+//       // }
+
+//       // if (req.files["m_course_brochure"]) {
+//       //   updateData.m_course_brochure = req.files["m_course_brochure"][0].path;
+//       // }
+
+//       if (req.files?.m_course_banner?.[0]) {
+//         // const uploaded = extractUploadedFile(req.files.m_course_banner[0]);
+
+//         updateData.m_course_banner = uploaded.url;
+
+//         updateData.m_course_banner_public_id = uploaded.public_id;
+
+//         // uploadedFiles.push(uploaded.public_id);
+//       }
+
+//       if (req.files?.m_course_pdf?.[0]) {
+//         // const uploaded = extractUploadedFile(req.files.m_course_pdf[0]);
+
+//         updateData.m_course_pdf = uploaded.url;
+
+//         updateData.m_course_pdf_public_id = uploaded.public_id;
+
+//         // uploadedFiles.push(uploaded.public_id);
+//       }
+
+//       if (req.files?.m_course_feestructure?.[0]) {
+//         // const uploaded = extractUploadedFile(
+//         //   req.files.m_course_feestructure[0],
+//         // );
+
+//         updateData.m_course_feestructure = uploaded.url;
+
+//         updateData.m_course_feestructure_public_id = uploaded.public_id;
+
+//         // uploadedFiles.push(uploaded.public_id);
+//       }
+
+//       // if (req.files?.m_course_brochure?.[0]) {
+//       //   const uploaded = extractUploadedFile(req.files.m_course_brochure[0]);
+
+//       //   updateData.m_course_brochure = uploaded.url;
+
+//       //   updateData.m_course_brochure_public_id = uploaded.public_id;
+//       // }
+
+//       // MODIFIED DATE
+//       updateData.m_course_modified = new Date();
+
+//       // UPDATE
+//       const updatedCourse = await Course.findByIdAndUpdate(
+//         id,
+//         { $set: updateData },
+//         { new: true },
+//       );
+
+//       // if (req.files?.m_course_banner?.[0] && oldBanner) {
+//       //   await deleteFile(oldBanner);
+//       // }
+
+//       // if (req.files?.m_course_pdf?.[0] && oldPdf) {
+//       //   await deleteFile(oldPdf);
+//       // }
+
+//       // if (req.files?.m_course_feestructure?.[0] && oldFee) {
+//       //   await deleteFile(oldFee);
+//       // }
+
+//       if (req.files?.m_course_banner?.[0] && oldBanner) {
+//         try {
+//           await deleteFile(oldBanner);
+//         } catch (err) {
+//           console.error("Old banner delete failed", err.message);
+//         }
+//       }
+
+//       if (req.files?.m_course_pdf?.[0] && oldPdf) {
+//         try {
+//           await deleteFile(oldPdf);
+//         } catch (err) {
+//           console.error("Old pdf delete failed", err.message);
+//         }
+//       }
+
+//       if (req.files?.m_course_feestructure?.[0] && oldFee) {
+//         try {
+//           await deleteFile(oldFee);
+//         } catch (err) {
+//           console.error("Old fee structure delete failed", err.message);
+//         }
+//       }
+//     }
+
+//     // if (req.files?.m_course_brochure?.[0] && oldBrochure) {
+//     //   await deleteFile(oldBrochure);
+//     // }
+
+//     return res.status(200).json({
+//       status: true,
+//       message: "Course updated successfully",
+//       // data: updatedCourse,
+//     });
+//   } catch (error) {
+//     console.error("Update Course Error:", error);
+
+//     // for (const publicId of uploadedFiles) {
+//     //   try {
+//     //     await deleteFile(publicId);
+//     //   } catch (err) {
+//     //     console.error(err.message);
+//     //   }
+//     // }
+
+//     await rollbackUploadedFiles(uploadedFiles);
+
+//     return res.status(500).json({
+//       status: false,
+//       message: "Internal server error",
+//       error: error.message,
+//     });
+//   }
+// };
+
 const updateCourse = async (req, res) => {
+  const uploadedFiles = [];
+
+  // =========================
+  // Extract uploaded files once
+  // =========================
+
+  const banner = req.files?.m_course_banner?.[0]
+    ? extractUploadedFile(req.files.m_course_banner[0])
+    : null;
+
+  if (banner?.public_id) {
+    uploadedFiles.push(banner.public_id);
+  }
+
+  const pdf = req.files?.m_course_pdf?.[0]
+    ? extractUploadedFile(req.files.m_course_pdf[0])
+    : null;
+
+  if (pdf?.public_id) {
+    uploadedFiles.push(pdf.public_id);
+  }
+
+  const feeStructure = req.files?.m_course_feestructure?.[0]
+    ? extractUploadedFile(req.files.m_course_feestructure[0])
+    : null;
+
+  if (feeStructure?.public_id) {
+    uploadedFiles.push(feeStructure.public_id);
+  }
+
   try {
     const { id } = req.params;
+    const body = req.body;
 
-    // VALIDATION
+    const updateData = {};
+
+    const isValid = (value) =>
+      value !== undefined &&
+      value !== null &&
+      value.toString().trim() !== "";
+
+    // =========================
+    // Course Id Validation
+    // =========================
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
+      await rollbackUploadedFiles(uploadedFiles);
+
       return res.status(400).json({
         status: false,
         message: "Invalid course id",
       });
     }
 
+    // =========================
+    // Find Course
+    // =========================
+
     const course = await Course.findById(id);
+
     if (!course) {
+      await rollbackUploadedFiles(uploadedFiles);
+
       return res.status(404).json({
         status: false,
         message: "Course not found",
       });
     }
 
-    // HELPER FUNCTION
-    const isValid = (val) => {
-      return val !== undefined && val !== null && val.toString().trim() !== "";
-    };
+    // old cloudinary public ids
 
-    const body = req.body;
-    let updateData = {};
+    const oldBanner = course.m_course_banner_public_id;
+    const oldPdf = course.m_course_pdf_public_id;
+    const oldFee = course.m_course_feestructure_public_id;
 
-    // BASIC FIELDS
-    if (isValid(body.m_course_lang))
-      updateData.m_course_lang = Number(body.m_course_lang);
+    // =========================
+    // Language
+    // =========================
 
-    if (isValid(body.m_course_category))
+    if (isValid(body.m_course_lang)) {
+      const lang = Number(body.m_course_lang);
+
+      if (![1, 2, 3].includes(lang)) {
+        await rollbackUploadedFiles(uploadedFiles);
+
+        return res.status(400).json({
+          status: false,
+          message: "Invalid course language",
+        });
+      }
+
+      updateData.m_course_lang = lang;
+    }
+
+    // =========================
+    // Category
+    // =========================
+
+    if (isValid(body.m_course_category)) {
+      if (!mongoose.Types.ObjectId.isValid(body.m_course_category)) {
+        await rollbackUploadedFiles(uploadedFiles);
+
+        return res.status(400).json({
+          status: false,
+          message: "Invalid category id",
+        });
+      }
+
+      const category = await Category.findById(body.m_course_category);
+
+      if (!category) {
+        await rollbackUploadedFiles(uploadedFiles);
+
+        return res.status(404).json({
+          status: false,
+          message: "Category not found",
+        });
+      }
+
       updateData.m_course_category = body.m_course_category;
+    }
 
-    if (isValid(body.m_course_cat_slug))
+    // =========================
+    // Category Slug
+    // =========================
+
+    if (isValid(body.m_course_cat_slug)) {
       updateData.m_course_cat_slug = body.m_course_cat_slug;
+    }
+
+    // =========================
+    // Course Title + Slug
+    // =========================
 
     if (isValid(body.m_course_title)) {
       updateData.m_course_title = body.m_course_title.trim();
 
-      // SLUG UPDATE
       let slug = slugify(body.m_course_title, {
         lower: true,
         strict: true,
       });
 
       const slugExists = await Course.findOne({
-        m_course_slug: slug,
         _id: { $ne: id },
+        m_course_slug: slug,
       });
 
       if (slugExists) {
@@ -656,46 +1298,27 @@ const updateCourse = async (req, res) => {
       updateData.m_course_slug = slug;
     }
 
-    if (isValid(body.m_course_intro))
+    // =========================
+    // Intro
+    // =========================
+
+    if (isValid(body.m_course_intro)) {
       updateData.m_course_intro = body.m_course_intro;
-
-    // ACCESS TYPE ( NEW)
-    if (isValid(body.m_course_access_type)) {
-      if (!["lifetime", "limited"].includes(body.m_course_access_type)) {
-        return res.status(400).json({
-          status: false,
-          message: "Invalid access type",
-        });
-      }
-
-      updateData.m_course_access_type = body.m_course_access_type;
     }
 
-    // ACCESS DAYS ( IMPORTANT)
-    if (body.m_course_access_type === "limited") {
-      if (!isValid(body.m_course_access_days)) {
-        return res.status(400).json({
-          status: false,
-          message: "Access days required for limited course",
-        });
-      }
+    // =========================
+    // Course Code
+    // =========================
 
-      updateData.m_course_access_days = Number(body.m_course_access_days);
-    }
-
-    // Lifetime case
-    if (body.m_course_access_type === "lifetime") {
-      updateData.m_course_access_days = null;
-    }
-
-    // COURSE CODE (UNIQUE)
     if (isValid(body.m_course_code)) {
-      const existing = await Course.findOne({
-        m_course_code: body.m_course_code.trim(),
+      const exists = await Course.findOne({
         _id: { $ne: id },
+        m_course_code: body.m_course_code.trim(),
       });
 
-      if (existing) {
+      if (exists) {
+        await rollbackUploadedFiles(uploadedFiles);
+
         return res.status(409).json({
           status: false,
           message: "Course code already exists",
@@ -705,125 +1328,268 @@ const updateCourse = async (req, res) => {
       updateData.m_course_code = body.m_course_code.trim();
     }
 
-    if (isValid(body.m_course_description))
-      updateData.m_course_description = body.m_course_description;
+    // =========================
+    // Description
+    // =========================
 
-    // VIDEO
+    if (isValid(body.m_course_description)) {
+      updateData.m_course_description = body.m_course_description;
+    }
+
+    // =========================
+    // Youtube Link
+    // =========================
+
     if (isValid(body.m_course_video_link)) {
       updateData.m_course_video_link = body.m_course_video_link;
 
       let videoId = null;
+
       const match = body.m_course_video_link.match(
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/,
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/
       );
-      if (match) videoId = match[1];
+
+      if (match) {
+        videoId = match[1];
+      }
 
       updateData.m_course_video_id = videoId;
     }
 
-    // TYPE & PRICE
+        // =========================
+    // Course Type
+    // =========================
+
     if (isValid(body.m_course_type)) {
-      if (![1, 2].includes(Number(body.m_course_type))) {
+      const courseType = Number(body.m_course_type);
+
+      if (![1, 2].includes(courseType)) {
+        await rollbackUploadedFiles(uploadedFiles);
+
         return res.status(400).json({
           status: false,
           message: "Invalid course type",
         });
       }
-      updateData.m_course_type = Number(body.m_course_type);
+
+      updateData.m_course_type = courseType;
     }
 
-    if (Number(body.m_course_type) === 2) {
-      if (!isValid(body.m_course_price) || Number(body.m_course_price) <= 0) {
+    // =========================
+    // Price Validation
+    // =========================
+
+    const finalCourseType = isValid(body.m_course_type)
+      ? Number(body.m_course_type)
+      : course.m_course_type;
+
+    const actualPrice = isValid(body.m_course_price)
+      ? Number(body.m_course_price)
+      : course.m_course_price;
+
+    const offerPrice = isValid(body.m_course_offer_price)
+      ? Number(body.m_course_offer_price)
+      : course.m_course_offer_price;
+
+    if (finalCourseType === 2 && actualPrice <= 0) {
+      await rollbackUploadedFiles(uploadedFiles);
+
+      return res.status(400).json({
+        status: false,
+        message: "Price required for paid course",
+      });
+    }
+
+    if (offerPrice > actualPrice) {
+      await rollbackUploadedFiles(uploadedFiles);
+
+      return res.status(400).json({
+        status: false,
+        message: "Offer price cannot be greater than actual price",
+      });
+    }
+
+    if (isValid(body.m_course_price)) {
+      updateData.m_course_price = actualPrice;
+    }
+
+    if (isValid(body.m_course_offer_price)) {
+      updateData.m_course_offer_price = offerPrice;
+    }
+
+    // =========================
+    // Access Type
+    // =========================
+
+    if (isValid(body.m_course_access_type)) {
+
+      if (!["lifetime", "limited"].includes(body.m_course_access_type)) {
+
+        await rollbackUploadedFiles(uploadedFiles);
+
         return res.status(400).json({
           status: false,
-          message: "Price required for paid course",
+          message: "Invalid access type",
         });
       }
+
+      updateData.m_course_access_type = body.m_course_access_type;
     }
 
-    if (isValid(body.m_course_price))
-      updateData.m_course_price = Number(body.m_course_price);
+    if (
+      (body.m_course_access_type || course.m_course_access_type) === "limited"
+    ) {
 
-    if (isValid(body.m_course_offer_price))
-      updateData.m_course_offer_price = Number(body.m_course_offer_price);
+      const accessDays = isValid(body.m_course_access_days)
+        ? Number(body.m_course_access_days)
+        : course.m_course_access_days;
 
-    // SETTINGS
-    if (isValid(body.m_course_popular))
-      updateData.m_course_popular = Number(body.m_course_popular);
+      if (!accessDays || accessDays <= 0) {
 
-    if (isValid(body.m_course_recomended))
-      updateData.m_course_recomended = Number(body.m_course_recomended);
+        await rollbackUploadedFiles(uploadedFiles);
 
-    if (isValid(body.m_course_keyword))
-      updateData.m_course_keyword = body.m_course_keyword;
-
-    if (isValid(body.m_course_status)) {
-      const status = Number(body.m_course_status);
-
-      if (![0, 1].includes(status)) {
         return res.status(400).json({
           status: false,
-          message: "Invalid course status. Use 0 or 1",
+          message: "Access days required",
+        });
+      }
+
+      updateData.m_course_access_days = accessDays;
+    }
+
+    if (body.m_course_access_type === "lifetime") {
+      updateData.m_course_access_days = null;
+    }
+
+    // =========================
+    // Popular / Recommended
+    // =========================
+
+    if (isValid(body.m_course_popular)) {
+      updateData.m_course_popular = Number(body.m_course_popular);
+    }
+
+    if (isValid(body.m_course_recomended)) {
+      updateData.m_course_recomended = Number(body.m_course_recomended);
+    }
+
+    if (isValid(body.m_course_keyword)) {
+      updateData.m_course_keyword = body.m_course_keyword;
+    }
+
+    // =========================
+    // Status
+    // =========================
+
+    if (isValid(body.m_course_status)) {
+
+      const status = Number(body.m_course_status);
+
+      if (![0,1].includes(status)) {
+
+        await rollbackUploadedFiles(uploadedFiles);
+
+        return res.status(400).json({
+          status:false,
+          message:"Invalid course status"
         });
       }
 
       updateData.m_course_status = status;
     }
-    if (isValid(body.m_course_status_web))
-      updateData.m_course_status_web = Number(body.m_course_status_web);
 
-    // DURATION
-    if (isValid(body.m_course_duration_app))
-      updateData.m_course_duration_app = body.m_course_duration_app.toString();
+    if (isValid(body.m_course_status_web)) {
 
-    if (isValid(body.m_course_duration_web))
-      updateData.m_course_duration_web = Number(body.m_course_duration_web);
+      const statusWeb = Number(body.m_course_status_web);
 
-    // INSTRUCTOR
-    // if (body.m_course_trainee === null) {
-    //   updateData.m_course_trainee = null;
-    // } else if (isValid(body.m_course_trainee)) {
-    //   if (!mongoose.Types.ObjectId.isValid(body.m_course_trainee)) {
-    //     return res.status(400).json({
-    //       status: false,
-    //       message: "Invalid instructor id",
-    //     });
-    //   }
+      if (![0,1].includes(statusWeb)) {
 
-    //   updateData.m_course_trainee = new mongoose.Types.ObjectId(
-    //     body.m_course_trainee,
-    //   );
-    // }
+        await rollbackUploadedFiles(uploadedFiles);
+
+        return res.status(400).json({
+          status:false,
+          message:"Invalid course web status"
+        });
+      }
+
+      updateData.m_course_status_web = statusWeb;
+    }
+
+    // =========================
+    // Duration
+    // =========================
+
+    if (isValid(body.m_course_duration_app)) {
+      updateData.m_course_duration_app =
+        body.m_course_duration_app.toString();
+    }
+
+    if (isValid(body.m_course_duration_web)) {
+      updateData.m_course_duration_web =
+        Number(body.m_course_duration_web);
+    }
+
+    // =========================
+    // Trainee
+    // =========================
 
     if (body.m_course_trainee !== undefined) {
+
       if (!Array.isArray(body.m_course_trainee)) {
+
+        await rollbackUploadedFiles(uploadedFiles);
+
         return res.status(400).json({
-          status: false,
-          message: "m_course_trainee must be an array",
+          status:false,
+          message:"m_course_trainee must be array"
         });
       }
 
       const invalidIds = body.m_course_trainee.filter(
-        (id) => !mongoose.Types.ObjectId.isValid(id),
+        id => !mongoose.Types.ObjectId.isValid(id)
       );
 
-      if (invalidIds.length > 0) {
+      if (invalidIds.length) {
+
+        await rollbackUploadedFiles(uploadedFiles);
+
         return res.status(400).json({
-          status: false,
-          message: "Invalid trainee ids",
+          status:false,
+          message:"Invalid trainee ids"
         });
       }
 
-      updateData.m_course_trainee = body.m_course_trainee.map(
-        (id) => new mongoose.Types.ObjectId(id),
-      );
+      updateData.m_course_trainee =
+        body.m_course_trainee.map(
+          id => new mongoose.Types.ObjectId(id)
+        );
     }
 
-    // CERTIFICATE
-    if (isValid(body.m_course_certificate))
-      updateData.m_course_certificate = Number(body.m_course_certificate);
+    // =========================
+    // Certificate
+    // =========================
 
-    // GRAPHY
+    if (isValid(body.m_course_certificate)) {
+
+      const certificate = Number(body.m_course_certificate);
+
+      if (![1,2].includes(certificate)) {
+
+        await rollbackUploadedFiles(uploadedFiles);
+
+        return res.status(400).json({
+          status:false,
+          message:"Invalid certificate value"
+        });
+      }
+
+      updateData.m_course_certificate = certificate;
+    }
+
+    // =========================
+    // Graphy
+    // =========================
+
     if (isValid(body.m_course_app_g_link))
       updateData.m_course_app_g_link = body.m_course_app_g_link;
 
@@ -831,70 +1597,114 @@ const updateCourse = async (req, res) => {
       updateData.m_course_web_g_link = body.m_course_web_g_link;
 
     if (isValid(body.m_course_graphy_instruction))
-      updateData.m_course_graphy_instruction = body.m_course_graphy_instruction;
+      updateData.m_course_graphy_instruction =
+        body.m_course_graphy_instruction;
 
-    // ORDER
+    // =========================
+    // Order / View / Review / Rating
+    // =========================
+
     if (isValid(body.m_course_order))
       updateData.m_course_order = Number(body.m_course_order);
 
-    if (isValid(body.m_course_view)) {
+    if (isValid(body.m_course_view))
       updateData.m_course_view = Number(body.m_course_view);
-    }
 
-    if (isValid(body.m_course_reviews)) {
+    if (isValid(body.m_course_reviews))
       updateData.m_course_reviews = Number(body.m_course_reviews);
-    }
 
     if (isValid(body.m_course_rating)) {
+
       const rating = Number(body.m_course_rating);
 
       if (rating < 0 || rating > 10) {
+
+        await rollbackUploadedFiles(uploadedFiles);
+
         return res.status(400).json({
-          status: false,
-          message: "Course rating must be between 0 and 10",
+          status:false,
+          message:"Course rating must be between 0 and 10"
         });
       }
 
       updateData.m_course_rating = rating;
     }
 
-    // FILE UPDATE
-    if (req.files) {
-      if (req.files["m_course_banner"]) {
-        updateData.m_course_banner = req.files["m_course_banner"][0].path;
-      }
+        // =========================
+    // FILES
+    // =========================
 
-      if (req.files["m_course_pdf"]) {
-        updateData.m_course_pdf = req.files["m_course_pdf"][0].path;
-      }
+    if (banner) {
+      updateData.m_course_banner = banner.url;
+      updateData.m_course_banner_public_id = banner.public_id;
+    }
 
-      if (req.files["m_course_feestructure"]) {
-        updateData.m_course_feestructure =
-          req.files["m_course_feestructure"][0].path;
-      }
+    if (pdf) {
+      updateData.m_course_pdf = pdf.url;
+      updateData.m_course_pdf_public_id = pdf.public_id;
+    }
 
-      if (req.files["m_course_brochure"]) {
-        updateData.m_course_brochure = req.files["m_course_brochure"][0].path;
+    if (feeStructure) {
+      updateData.m_course_feestructure = feeStructure.url;
+      updateData.m_course_feestructure_public_id =
+        feeStructure.public_id;
+    }
+
+    updateData.m_course_modified = new Date();
+
+    // =========================
+    // UPDATE COURSE
+    // =========================
+
+    const updatedCourse = await Course.findByIdAndUpdate(
+      id,
+      {
+        $set: updateData,
+      },
+      {
+        new: true,
+      }
+    );
+
+    // =========================
+    // DELETE OLD FILES
+    // =========================
+
+    if (banner && oldBanner) {
+      try {
+        await deleteFile(oldBanner);
+      } catch (err) {
+        console.error("Old banner delete failed:", err.message);
       }
     }
 
-    // MODIFIED DATE
-    updateData.m_course_modified = new Date();
+    if (pdf && oldPdf) {
+      try {
+        await deleteFile(oldPdf);
+      } catch (err) {
+        console.error("Old pdf delete failed:", err.message);
+      }
+    }
 
-    // UPDATE
-    const updatedCourse = await Course.findByIdAndUpdate(
-      id,
-      { $set: updateData },
-      { new: true },
-    );
+    if (feeStructure && oldFee) {
+      try {
+        await deleteFile(oldFee);
+      } catch (err) {
+        console.error("Old fee structure delete failed:", err.message);
+      }
+    }
 
     return res.status(200).json({
       status: true,
       message: "Course updated successfully",
       data: updatedCourse,
     });
-  } catch (error) {
+
+      } catch (error) {
     console.error("Update Course Error:", error);
+
+    // Rollback newly uploaded files
+    await rollbackUploadedFiles(uploadedFiles);
 
     return res.status(500).json({
       status: false,
@@ -927,18 +1737,36 @@ const deleteCourse = async (req, res) => {
     }
 
     // DELETE FILES (IMPORTANT)
-    const filesToDelete = [
-      course.m_course_banner,
-      course.m_course_pdf,
-      course.m_course_feestructure,
-      course.m_course_brochure,
-    ];
+    // const filesToDelete = [
+    //   course.m_course_banner,
+    //   course.m_course_pdf,
+    //   course.m_course_feestructure,
+    //   course.m_course_brochure,
+    // ];
 
-    filesToDelete.forEach((filePath) => {
-      if (filePath && fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    });
+    //     filesToDelete.forEach((filePath) => {
+    //       if (filePath && fs.existsSync(filePath)) {
+    //         // fs.unlinkSync(filePath);
+
+    // await Course.findByIdAndDelete(id);
+    //       }
+    //     });
+
+    if (course.m_course_banner_public_id) {
+      await deleteFile(course.m_course_banner_public_id);
+    }
+
+    if (course.m_course_pdf_public_id) {
+      await deleteFile(course.m_course_pdf_public_id);
+    }
+
+    if (course.m_course_feestructure_public_id) {
+      await deleteFile(course.m_course_feestructure_public_id);
+    }
+
+    // if (course.m_course_brochure_public_id) {
+    //   await deleteFile(course.m_course_brochure_public_id);
+    // }
 
     // DELETE FROM DB
     await Course.findByIdAndDelete(id);
@@ -968,7 +1796,7 @@ const getPopularCourses = async (req, res) => {
 
     const filter = {
       m_course_popular: 1,
-      // m_course_status: "active",
+      m_course_status: 1,
     };
 
     // Search by course title
@@ -1026,7 +1854,7 @@ const getRecommendedCourses = async (req, res) => {
 
     const filter = {
       m_course_recomended: 1,
-      // m_course_status: "active",
+      m_course_status: 1,
     };
 
     // Search by course title
