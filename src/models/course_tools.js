@@ -18,9 +18,15 @@ const toolSchema = new mongoose.Schema(
       type: String,
       required: true,
       maxlength: 255,
+      trim: true,
     },
 
     c_tool_img: {
+      type: String,
+      default: null,
+    },
+
+    c_tool_img_public_id: {
       type: String,
       default: null,
     },
@@ -29,10 +35,12 @@ const toolSchema = new mongoose.Schema(
       type: String,
       default: null,
       maxlength: 500,
+      trim:true
     },
 
     c_tool_status: {
       type: Number,
+      enum:[0,1],
       default: 1, // 1 = active, 0 = inactive
     },
 

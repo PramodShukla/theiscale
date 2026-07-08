@@ -1,10 +1,20 @@
 const Tool = require("../models/course_tools");
 const Course = require("../models/course");
-const fs = require("fs");
+// const fs = require("fs");
+const {
+  extractUploadedFile,
+  deleteFile,
+} = require("../services/storageService");
 const mongoose = require("mongoose");
 
 // ADD TOOL
 const addTool = async (req, res) => {
+  let uploaded = null;
+
+  if (req.files?.c_tool_img?.length) {
+    uploaded = extractUploadedFile(req.files.c_tool_img[0]);
+  }
+
   try {
     const {
       c_tool_course,
@@ -15,6 +25,9 @@ const addTool = async (req, res) => {
     } = req.body;
 
     if (!c_tool_course || !c_tool_title) {
+      if (uploaded?.public_id) {
+    await deleteFile(uploaded.public_id);
+}
       return res.status(400).json({
         status: false,
         message: "course and title are required",
@@ -23,13 +36,23 @@ const addTool = async (req, res) => {
 
     const course = await Course.findById(c_tool_course);
     if (!course) {
+      if (uploaded?.public_id) {
+    await deleteFile(uploaded.public_id);
+}
       return res.status(404).json({
         status: false,
         message: "Course not found",
       });
     }
 
-    const image = req.files?.c_tool_img ? req.files.c_tool_img[0].path : null;
+    // const image = req.files?.c_tool_img ? req.files.c_tool_img[0].path : null;
+    let image = null;
+let public_id = null;
+
+if (uploaded) {
+    image = uploaded.url;
+    public_id = uploaded.public_id;
+}
 
     const newTool = new Tool({
       c_tool_course,
@@ -37,6 +60,7 @@ const addTool = async (req, res) => {
       c_tool_title,
       c_tool_description,
       c_tool_img: image,
+      c_tool_img_public_id: public_id,
       c_tool_status: c_tool_status ? Number(c_tool_status) : 1,
     });
 
@@ -47,9 +71,17 @@ const addTool = async (req, res) => {
       message: "Tool added successfully",
       data: saved,
     });
-  } catch (err) {
-    res.status(500).json({ status: false, message: err.message });
-  }
+  } catch(err){
+
+    if(uploaded?.public_id){
+        await deleteFile(uploaded.public_id);
+    }
+
+    return res.status(500).json({
+        status:false,
+        message:err.message
+    });
+}
 };
 
 // GET TOOLS BY COURSE
@@ -79,6 +111,7 @@ const getToolsByCourse = async (req, res) => {
 
 // UPDATE TOOL
 const updateTool = async (req, res) => {
+  let uploaded = null;
   try {
     const { id } = req.params;
 
@@ -96,24 +129,46 @@ const updateTool = async (req, res) => {
     if (c_tool_description) tool.c_tool_description = c_tool_description;
     if (c_tool_status !== undefined) tool.c_tool_status = Number(c_tool_status);
 
-    if (req.files?.c_tool_img) {
-      if (tool.c_tool_img && fs.existsSync(tool.c_tool_img)) {
-        fs.unlinkSync(tool.c_tool_img);
-      }
+    // if (req.files?.c_tool_img) {
+    //   if (tool.c_tool_img && fs.existsSync(tool.c_tool_img)) {
+    //     fs.unlinkSync(tool.c_tool_img);
+    //   }
 
-      tool.c_tool_img = req.files.c_tool_img[0].path;
-    }
+    //   tool.c_tool_img = req.files.c_tool_img[0].path;
+    // }
+
+    const oldPublicId = tool.c_tool_img_public_id;
+
+if (req.files?.c_tool_img?.length) {
+
+    uploaded = extractUploadedFile(req.files.c_tool_img[0]);
+
+    tool.c_tool_img = uploaded.url;
+    tool.c_tool_img_public_id = uploaded.public_id;
+}
 
     const updated = await tool.save();
+
+    if (oldPublicId) {
+    await deleteFile(oldPublicId);
+}
 
     res.json({
       status: true,
       message: "Tool updated successfully",
       data: updated,
     });
-  } catch (err) {
-    res.status(500).json({ status: false, message: err.message });
-  }
+  } catch(err){
+
+    if(uploaded?.public_id){
+        await deleteFile(uploaded.public_id);
+    }
+
+    return res.status(500).json({
+        status:false,
+        message:err.message
+    });
+}
 };
 
 // DELETE TOOL
@@ -129,9 +184,13 @@ const deleteTool = async (req, res) => {
       });
     }
 
-    if (tool.c_tool_img && fs.existsSync(tool.c_tool_img)) {
-      fs.unlinkSync(tool.c_tool_img);
-    }
+    // if (tool.c_tool_img && fs.existsSync(tool.c_tool_img)) {
+    //   fs.unlinkSync(tool.c_tool_img);
+    // }
+
+    if (tool.c_tool_img_public_id) {
+    await deleteFile(tool.c_tool_img_public_id);
+}
 
     await Tool.findByIdAndDelete(id);
 
@@ -144,9 +203,7 @@ const deleteTool = async (req, res) => {
   }
 };
 
-
 // Mobile phone apis===============================================================================================================
-
 
 const appGetCourseTools = async (req, res) => {
   try {
@@ -211,5 +268,5 @@ module.exports = {
   getToolsByCourse,
   updateTool,
   deleteTool,
-  appGetCourseTools
+  appGetCourseTools,
 };
