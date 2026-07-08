@@ -3,6 +3,7 @@
 const Candidate = require("../models/candidates");
 const State = require("../models/state");
 const City = require("../models/city");
+const Enrollment = require("../models/course_enrollment");
 
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
@@ -550,10 +551,72 @@ const searchUsersForDropdown = async (req, res) => {
   }
 };
 
+// ======================================
+// DELETE USER
+// ======================================
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // ======================================
+    // VALIDATE ID
+    // ======================================
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid user id",
+      });
+    }
+
+    // ======================================
+    // CHECK USER
+    // ======================================
+
+    const candidate = await Candidate.findById(id);
+
+    if (!candidate) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    // ======================================
+    // DELETE ENROLLMENTS
+    // ======================================
+
+    const deletedEnrollments = await Enrollment.deleteMany({
+      user_id: id,
+    });
+
+    // ======================================
+    // DELETE USER
+    // ======================================
+
+    await Candidate.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      status: true,
+      message: "User deleted successfully",
+      deleted_enrollments: deletedEnrollments.deletedCount,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+
 module.exports = {
   getAllUsers,
   getSingleUser,
   editUser,
-
+  deleteUser,
   searchUsersForDropdown,
 };

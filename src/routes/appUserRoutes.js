@@ -5,7 +5,8 @@ const {
   getAllUsers,
   getSingleUser,
   editUser,
-  searchUsersForDropdown
+  searchUsersForDropdown,
+  deleteUser,
 } = require("../controllers/appUserController");
 const { candidateUpload } = require("../middlewares/uploadMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
@@ -24,5 +25,6 @@ router.put(
 );
 
 router.get("/search", authMiddleware, adminMiddleware, searchUsersForDropdown);
+router.delete("/delete/:id", authMiddleware, adminMiddleware, deleteUser);
 
 module.exports = router;
