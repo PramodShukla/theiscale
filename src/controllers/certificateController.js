@@ -356,12 +356,7 @@ const updateCertificateStatus = async (req, res) => {
       const categoryName =
         enrollment.course_id.m_course_category?.m_category_name || "bootcamp";
 
-      // const filePath = await generateCertificatePDF(
-      //   userName,
-      //   courseTitle,
-      //   categoryName,
-      //   uniqueCertNo,
-      // );
+      
       const pdfBytes = await generateCertificatePDF(
         userName,
         courseTitle,
@@ -369,37 +364,7 @@ const updateCertificateStatus = async (req, res) => {
         uniqueCertNo,
       );
 
-      // const tempFilePath = path.join(os.tmpdir(), `Cert_${uniqueCertNo}.pdf`);
-
-      // fs.writeFileSync(tempFilePath, pdfBytes);
-
-      // const uploaded = await uploadFileWithMeta(tempFilePath, "certificates");
-
-      // if (fs.existsSync(tempFilePath)) {
-      //   fs.unlinkSync(tempFilePath);
-      // }
-
-      // const tempFilePath = path.join(os.tmpdir(), `Cert_${uniqueCertNo}.pdf`);
-
-      // let uploaded;
-
-      // try {
-      //   fs.writeFileSync(tempFilePath, pdfBytes);
-
-      //   // console.log("Temp PDF Path:", tempFilePath);
-
-      //   uploaded = await uploadFileWithMeta(tempFilePath, "certificates");
-      // } finally {
-      //   if (fs.existsSync(tempFilePath)) {
-      //     fs.unlinkSync(tempFilePath);
-      //   }
-      // }
-
-      // const uploaded = await uploadBufferToCloudinary(
-      //   pdfBytes,
-      //   `Cert_${uniqueCertNo}`,
-      //   "certificates",
-      // );
+      
 
       const uploaded = await uploadBufferWithMeta(
         pdfBytes,
@@ -420,14 +385,7 @@ const updateCertificateStatus = async (req, res) => {
       message = "Certificate approved successfully";
     }
 
-    // DECLINED
-    // else if (Number(status) === 3) {
-    //   enrollment.certificate_status = 3;
-    //   enrollment.certificate_declined_reason =
-    //     declined_reason || "Criteria not met";
-    //   enrollment.certificate_no = null;
-    //   enrollment.certificate_pdf = null;
-    // }
+    
     else if (Number(status) === 3) {
       if (enrollment.certificate_public_id) {
         await deleteCertificateFile(enrollment.certificate_public_id);
@@ -447,12 +405,7 @@ const updateCertificateStatus = async (req, res) => {
       message = "Certificate declined successfully";
     }
 
-    // PENDING (Status 1)
-    // else {
-    //   enrollment.certificate_status = 1;
-    //   enrollment.certificate_no = null;
-    //   enrollment.certificate_pdf = null;
-    // }
+    
     else {
       if (enrollment.certificate_public_id) {
         await deleteCertificateFile(enrollment.certificate_public_id);

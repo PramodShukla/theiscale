@@ -7,10 +7,11 @@ const path = require("path");
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "bcbhmpgp",
   api_key: process.env.CLOUDINARY_API_KEY || "699654349155336",
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  api_secret: process.env.CLOUDINARY_API_SECRET || "giVEO20Bg-44zljrpZdnZqFu2Nw",
 });
 
-const STORAGE_PROVIDER = process.env.STORAGE_PROVIDER || "local";
+// const STORAGE_PROVIDER = process.env.STORAGE_PROVIDER || "local";
+const STORAGE_PROVIDER = process.env.STORAGE_PROVIDER || "cloudinary";
 
 /**
  * Uploads local file to Cloudinary or falls back to local path.
@@ -236,5 +237,5 @@ module.exports = {
   extractUploadedFile,
   uploadFileWithMeta,
   uploadBufferWithMeta,
-  deleteCertificateFile
+  deleteCertificateFile,
 };
