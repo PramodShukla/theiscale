@@ -198,13 +198,13 @@ const uploadBufferWithMeta = async (
 
   let resourceType = "image";
 
-  if (mimeType === "application/pdf") {
-    resourceType = "raw";
-  }
+  // if (mimeType === "application/pdf") {
+  //   resourceType = "raw";
+  // }
 
-  if (mimeType?.startsWith("video/")) {
-    resourceType = "video";
-  }
+  // if (mimeType?.startsWith("video/")) {
+  //   resourceType = "video";
+  // }
 
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
