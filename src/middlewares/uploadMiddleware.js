@@ -572,7 +572,8 @@ const courseUpload = upload.fields([
   { name: "m_course_brochure", maxCount: 1 }, // Brochure (Optional)
 ]);
 
-const featureUpload = upload.fields([{ name: "m_feature_image", maxCount: 1 }]);
+// const featureUpload = upload.fields([{ name: "m_feature_image", maxCount: 1 }]);
+const featureUpload = upload.single("m_feature_image");
 
 const toolUpload = upload.fields([{ name: "c_tool_img", maxCount: 1 }]);
 

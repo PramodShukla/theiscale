@@ -25,6 +25,11 @@ const featureSchema = new mongoose.Schema(
       default: null,
     },
 
+    m_feature_image_public_id: {
+      type: String,
+      default: null,
+    },
+
     m_feature_title: {
       type: String,
       required: true,
