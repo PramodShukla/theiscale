@@ -46,6 +46,29 @@ const getAllUsers = async (req, res) => {
     // SEARCH
     // ======================================
 
+    // if (isValidValue(search)) {
+    //   filter.$or = [
+    //     {
+    //       c_display_name: {
+    //         $regex: search,
+    //         $options: "i",
+    //       },
+    //     },
+    //     {
+    //       c_email: {
+    //         $regex: search,
+    //         $options: "i",
+    //       },
+    //     },
+    //     // {
+    //     //   c_contact: {
+    //     //     $regex: search,
+    //     //     $options: "i",
+    //     //   },
+    //     // },
+    //   ];
+    // }
+
     if (isValidValue(search)) {
       filter.$or = [
         {
@@ -60,12 +83,14 @@ const getAllUsers = async (req, res) => {
             $options: "i",
           },
         },
-        // {
-        //   c_contact: {
-        //     $regex: search,
-        //     $options: "i",
-        //   },
-        // },
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $toString: "$c_contact" },
+              regex: search,
+            },
+          },
+        },
       ];
     }
 
@@ -609,9 +634,6 @@ const deleteUser = async (req, res) => {
     });
   }
 };
-
-
-
 
 module.exports = {
   getAllUsers,
