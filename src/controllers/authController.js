@@ -286,55 +286,55 @@ exports.verifyOtp = async (req, res) => {
   }
 };
 
-// exports.sendOtp = async (req, res) => {
-//   try {
-//     const { mobile } = req.body;
+exports.resendOtp = async (req, res) => {
+  try {
+    const { mobile } = req.body;
 
-//     if (!mobile) {
-//       return res.status(400).json({
-//         status: false,
-//         message: "Mobile number required",
-//       });
-//     }
+    if (!mobile) {
+      return res.status(400).json({
+        status: false,
+        message: "Mobile number required",
+      });
+    }
 
-//     let user = await Candidate.findOne({
-//       c_contact: mobile,
-//     });
+    let user = await Candidate.findOne({
+      c_contact: mobile,
+    });
 
-//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-//     // Existing User
-//     if (user) {
-//       user.c_user_otp = otp;
-//       user.c_otp_expiry = new Date(Date.now() + 5 * 60 * 1000);
+    // Existing User
+    if (user) {
+      user.c_user_otp = otp;
+      user.c_otp_expiry = new Date(Date.now() + 5 * 60 * 1000);
 
-//       await user.save();
-//     }
+      await user.save();
+    }
 
-//     // New User
-//     else {
-//       user = await Candidate.create({
-//         c_contact: mobile,
-//         c_user_otp: otp,
-//         c_otp_expiry: new Date(Date.now() + 5 * 60 * 1000),
-//       });
-//     }
+    // New User
+    else {
+      user = await Candidate.create({
+        c_contact: mobile,
+        c_user_otp: otp,
+        c_otp_expiry: new Date(Date.now() + 5 * 60 * 1000),
+      });
+    }
 
-//     const message = `${otp} is the OTP to authenticate login credential. Do not share with anyone. - The iScale`;
+    const message = `${otp} is the OTP to authenticate login credential. Do not share with anyone. - The iScale`;
 
-//     await sendSms(message, mobile, "1307173398514201568");
+    await sendSms(message, mobile, "1307173398514201568");
 
-//     return res.status(200).json({
-//       status: true,
-//       message: "OTP sent successfully",
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-//       message: error.message,
-//     });
-//   }
-// };
+    return res.status(200).json({
+      status: true,
+      message: "OTP sent successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
 
 // exports.verifyOtp = async (req, res) => {
 //   try {

@@ -26,6 +26,8 @@ router.post("/login-contact-password", authController.loginWithPassword);
 
 router.post("/send-otp", authController.checkMobile);
 
+router.post("/resend-otp", authController.resendOtp);
+
 router.post("/verify-otp", authController.verifyOtp);
 
 router.post("/register", registerMiddleware, authController.register);
