@@ -9,9 +9,16 @@ const {
   generateUniqueCertNo,
 } = require("../utils/certificateGenerator");
 
+// const {
+//   uploadFileWithMeta,
+//   deleteFile,
+//   uploadBufferToCloudinary
+// } = require("../services/storageService");
+
 const {
-  uploadFileWithMeta,
   deleteFile,
+  uploadBufferWithMeta,
+  deleteCertificateFile
 } = require("../services/storageService");
 
 const fs = require("fs");
@@ -339,7 +346,7 @@ const updateCertificateStatus = async (req, res) => {
     if (Number(status) === 2) {
       // Agar pehle se certificate hai to Cloudinary se delete karo
       if (enrollment.certificate_public_id) {
-        await deleteFile(enrollment.certificate_public_id);
+        await deleteCertificateFile(enrollment.certificate_public_id);
       }
       const uniqueCertNo = await generateUniqueCertNo(Enrollment);
 
@@ -372,21 +379,34 @@ const updateCertificateStatus = async (req, res) => {
       //   fs.unlinkSync(tempFilePath);
       // }
 
-      const tempFilePath = path.join(os.tmpdir(), `Cert_${uniqueCertNo}.pdf`);
+      // const tempFilePath = path.join(os.tmpdir(), `Cert_${uniqueCertNo}.pdf`);
 
-      let uploaded;
+      // let uploaded;
 
-      try {
-        fs.writeFileSync(tempFilePath, pdfBytes);
+      // try {
+      //   fs.writeFileSync(tempFilePath, pdfBytes);
 
-        // console.log("Temp PDF Path:", tempFilePath);
+      //   // console.log("Temp PDF Path:", tempFilePath);
 
-        uploaded = await uploadFileWithMeta(tempFilePath, "certificates");
-      } finally {
-        if (fs.existsSync(tempFilePath)) {
-          fs.unlinkSync(tempFilePath);
-        }
-      }
+      //   uploaded = await uploadFileWithMeta(tempFilePath, "certificates");
+      // } finally {
+      //   if (fs.existsSync(tempFilePath)) {
+      //     fs.unlinkSync(tempFilePath);
+      //   }
+      // }
+
+      // const uploaded = await uploadBufferToCloudinary(
+      //   pdfBytes,
+      //   `Cert_${uniqueCertNo}`,
+      //   "certificates",
+      // );
+
+      const uploaded = await uploadBufferWithMeta(
+        pdfBytes,
+        `Cert_${uniqueCertNo}.pdf`,
+        "application/pdf",
+        "certificates",
+      );
 
       // 4. DB Update
       enrollment.certificate_status = 2;
@@ -410,7 +430,7 @@ const updateCertificateStatus = async (req, res) => {
     // }
     else if (Number(status) === 3) {
       if (enrollment.certificate_public_id) {
-        await deleteFile(enrollment.certificate_public_id);
+        await deleteCertificateFile(enrollment.certificate_public_id);
       }
 
       enrollment.certificate_status = 3;
@@ -435,7 +455,7 @@ const updateCertificateStatus = async (req, res) => {
     // }
     else {
       if (enrollment.certificate_public_id) {
-        await deleteFile(enrollment.certificate_public_id);
+        await deleteCertificateFile(enrollment.certificate_public_id);
       }
 
       enrollment.certificate_status = 1;
@@ -471,7 +491,6 @@ const updateCertificateStatus = async (req, res) => {
 // =======================================================
 // DOWNLOAD CERTIFICATE
 // =======================================================
-
 
 const downloadCertificateByEnrollmentId = async (req, res) => {
   // console.log("Download API Hit");
