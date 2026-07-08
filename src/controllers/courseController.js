@@ -1,3 +1,5 @@
+console.log("course Controller Hit");
+
 const Course = require("../models/course");
 const slugify = require("slugify");
 // const fs = require("fs");

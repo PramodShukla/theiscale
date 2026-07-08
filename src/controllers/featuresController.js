@@ -1,3 +1,5 @@
+console.log("course feature Controller Hit");
+
 const Feature = require("../models/course_feature");
 const Course = require("../models/course");
 // const fs = require("fs");

@@ -1,3 +1,5 @@
+console.log("tools Controller Hit");
+
 const Tool = require("../models/course_tools");
 const Course = require("../models/course");
 // const fs = require("fs");
