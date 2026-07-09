@@ -293,6 +293,35 @@ const getCourseRegistrations = async (req, res) => {
   }
 };
 
+const deleteCourseEnrollment = async (req, res) => {
+  try {
+    const enrollmentId = req.params.id;
+
+    // Check enrollment
+    const enrollment = await Enrollment.findById(enrollmentId);
+
+    if (!enrollment) {
+      return res.status(404).json({
+        status: false,
+        message: "Course enrollment not found",
+      });
+    }
+
+    // Delete enrollment
+    await Enrollment.findByIdAndDelete(enrollmentId);
+
+    return res.status(200).json({
+      status: true,
+      message: "Course enrollment deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
 const getCoursePurchaseDetails = async (req, res) => {
   try {
     const enrollmentId = req.params.enrollment_id;
@@ -609,8 +638,7 @@ const changeTestPackageAccessStatus = async (req, res) => {
     // TOGGLE STATUS
     // =========================
 
-    enrollment.access_status =
-      enrollment.access_status === 1 ? 0 : 1;
+    enrollment.access_status = enrollment.access_status === 1 ? 0 : 1;
 
     await enrollment.save();
 
@@ -1301,8 +1329,6 @@ const deleteEventRegistration = async (req, res) => {
   }
 };
 
-
-
 const getAllJobApplications = async (req, res) => {
   try {
     let {
@@ -1515,8 +1541,7 @@ const toggleAppStatus = async (req, res) => {
       });
     }
 
-    enrollment.app_status =
-      enrollment.app_status === 1 ? 0 : 1;
+    enrollment.app_status = enrollment.app_status === 1 ? 0 : 1;
 
     await enrollment.save();
 
@@ -1546,8 +1571,7 @@ const toggleAndroidStatus = async (req, res) => {
       });
     }
 
-    enrollment.android_status =
-      enrollment.android_status === 1 ? 0 : 1;
+    enrollment.android_status = enrollment.android_status === 1 ? 0 : 1;
 
     await enrollment.save();
 
@@ -1577,8 +1601,7 @@ const toggleIosStatus = async (req, res) => {
       });
     }
 
-    enrollment.ios_status =
-      enrollment.ios_status === 1 ? 0 : 1;
+    enrollment.ios_status = enrollment.ios_status === 1 ? 0 : 1;
 
     await enrollment.save();
 
@@ -1657,6 +1680,7 @@ const toggleLiveClassStatus = async (req, res) => {
 
 module.exports = {
   getCourseRegistrations,
+  deleteCourseEnrollment,
   getCoursePurchaseDetails,
   getAllTestPackageEnrollments,
   getSingleTestPackageEnrollment,

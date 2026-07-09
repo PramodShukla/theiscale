@@ -5,6 +5,7 @@ const { authMiddleware } = require("../middlewares/authMiddleware");
 
 const {
   getCourseRegistrations,
+  deleteCourseEnrollment,
   getCoursePurchaseDetails,
   getAllTestPackageEnrollments,
   getSingleTestPackageEnrollment,
@@ -30,6 +31,13 @@ router.get(
   authMiddleware,
   adminMiddleware,
   getCourseRegistrations,
+);
+
+router.delete(
+  "/course-registration/:id",
+  authMiddleware,
+  adminMiddleware,
+  deleteCourseEnrollment,
 );
 
 router.get(
