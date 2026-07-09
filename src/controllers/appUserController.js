@@ -30,7 +30,7 @@ const getAllUsers = async (req, res) => {
   try {
     let {
       page = 1,
-      limit = 10,
+      limit = 50,
       search = "",
       from_date,
       to_date,
