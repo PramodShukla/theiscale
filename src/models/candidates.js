@@ -137,6 +137,10 @@ const candidateSchema = new mongoose.Schema({
   c_idProof_type: { type: String },
 
   c_profile_image: { type: String, default: null },
+  c_profile_image_public_id: {
+    type: String,
+    default: null,
+  },
   c_sign_image: { type: String, default: null },
 
   c_10schoolName: { type: String },

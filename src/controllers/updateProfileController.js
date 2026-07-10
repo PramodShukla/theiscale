@@ -1,5 +1,9 @@
 const Candidate = require("../models/candidates");
 const bcrypt = require("bcrypt");
+const {
+  extractUploadedFile,
+  deleteFile,
+} = require("../services/storageService");
 
 //  GET PROFILE (prefill data)
 // exports.getProfile = async (req, res) => {
@@ -200,6 +204,98 @@ exports.changePassword = async (req, res) => {
     res.status(500).send({
       status: false,
       message: e.message,
+    });
+  }
+};
+
+exports.updateProfileImage = async (req, res) => {
+  let uploaded = null;
+
+  if (req.files?.c_profile_image?.length) {
+    uploaded = extractUploadedFile(req.files.c_profile_image[0]);
+  }
+
+  try {
+    const userId = req.user.id;
+
+    if (!uploaded) {
+      return res.status(400).json({
+        status: false,
+        message: "Profile image is required",
+      });
+    }
+
+    const user = await Candidate.findById(userId);
+
+    if (!user) {
+      await deleteFile(uploaded.public_id);
+
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    // old image
+    const oldPublicId = user.c_profile_image_public_id;
+
+    user.c_profile_image = uploaded.url;
+    user.c_profile_image_public_id = uploaded.public_id;
+
+    await user.save();
+
+    // save successful hone ke baad purana delete
+    if (oldPublicId) {
+      await deleteFile(oldPublicId);
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Profile image updated successfully",
+      image: user.c_profile_image,
+    });
+  } catch (err) {
+    // agar save fail ho gaya to naya upload delete
+    if (uploaded?.public_id) {
+      await deleteFile(uploaded.public_id);
+    }
+
+    return res.status(500).json({
+      status: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.getProfileImage = async (req, res) => {
+  try {
+    const candidate = await Candidate.findById(req.user.id).select(
+      "c_first_name c_last_name c_display_name c_contact c_profile_image",
+    );
+
+    if (!candidate) {
+      return res.status(404).json({
+        status: false,
+        message: "Candidate not found",
+      });
+    }
+
+    const name =
+      candidate.c_display_name ||
+      `${candidate.c_first_name || ""} ${candidate.c_last_name || ""}`.trim();
+
+    return res.status(200).json({
+      status: true,
+      data: {
+        name,
+        contact: candidate.c_contact,
+        image: candidate.c_profile_image,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
     });
   }
 };
