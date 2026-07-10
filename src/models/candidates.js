@@ -15,7 +15,7 @@ const candidateSchema = new mongoose.Schema({
   c_last_name: { type: String },
   c_display_name: { type: String },
 
-  c_email: { type: String },
+  c_email: { type: String, unique: true, sparse: true, index: true },
 
   c_password: { type: String },
   c_password_update: {
@@ -59,13 +59,25 @@ const candidateSchema = new mongoose.Schema({
 
   c_contact: {
     type: Number,
-    default: null,
     trim: true,
     match: [/^[0-9]{10}$/, "Contact number must be exactly 10 digits"],
     unique: true,
+    sparse: true,
     index: true,
   },
   c_alt_contact: { type: Number, default: null },
+
+  c_google_id: {
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true,
+  },
+  c_login_provider: {
+    type: String,
+    enum: ["mobile", "google"],
+    default: "mobile",
+  },
 
   c_fcm_id: { type: String, default: null },
   c_user_session_token: { type: String },

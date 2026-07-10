@@ -33,6 +33,11 @@ const adminRoutes = require("./src/routes/adminRoutes");
 app.use("/myadmin", adminRoutes);
 
 
+// Google OAuth routes (callback: /auth/google/callback)
+const googleAuthRoutes = require("./src/routes/googleAuthRoutes");
+app.use("/auth", googleAuthRoutes);
+
+
 // User main Routes 
 const userAllRoutes = require("./src/routes/userAllRoutes");
 app.use("/api", userAllRoutes);
