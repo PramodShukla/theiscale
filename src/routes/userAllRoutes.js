@@ -1,0 +1,89 @@
+const express = require("express");
+const router = express.Router();
+
+
+const userRoutes = require("./userRoutes");
+const authRoutes = require("./authRoutes");
+const dashboardRoutes = require("./dashboardRoutes");
+const profileRoutes = require("./profileRoutes");
+const updateProfileRoutes = require("./updateProfileRoutes");
+const stdTestimonialRoutes = require("./stdTestimonialRoutes");
+const compRequirementRoutes = require("./compRequirementRoutes");
+const courseRoutes = require("./courseRoutes");
+const faqRoutes = require("./faqRoutes");
+const subjectRoutes = require("./subjectRoutes");
+const featuresRoutes = require("./featuresRoutes");
+const trainingRoutes = require("./trainingRoutes");
+const toolsRoutes = require("./toolsRoutes");
+const instructorRoutes = require("./instructorRoutes");
+const eventCategoryRoutes = require("./eventCategoryRoutes");
+const eventRoutes = require("./eventRoutes");
+const pptRoutes = require("./pptRoutes");
+const clientRoutes = require("./clientRoutes");
+const successStoryRoutes = require("./successStoryRoutes");
+const alliedRoutes = require("./alliedRoutes");
+const newsupdateRoutes = require("./news&updateRoutes");
+const newsRoutes = require("./newsRoutes");
+const courseEnrollmentRoutes = require("./courseEnrollmentRoutes");
+const topicsRoutes = require("./topicsRoutes");
+const lectureProgressRoutes = require("./lectureProgressRoutes");
+const enrolledCoursesRoutes = require("./enrolledCoursesRoutes");
+const enrolledEventsRoutes = require("./enrolledEventsRoutes");
+const certificateRoutes = require("./certificateRoutes");
+const testCategoryRoutes = require("./testCategoryRoutes");
+const enrolledTestPackageRoutes = require("./enrolledTestPackageRoutes");
+const notesRoutes = require("./notesRoutes");
+const userWishlistRoutes = require("./userWishlistRoutes");
+const contactQueriesRoutes = require("./contactQueriesRoutes");
+const hiringFormRoutes = require("./hiringFormRoutes");
+const userReviewsRoutes = require("./userReviewsRoutes");
+const videoRoutes = require("./videoRoutes");
+const locationSettingRoutes = require("./locationSettingRoutes");
+const brandVideoRoutes = require("./brandVideoRoutes");
+const phoneImageRoutes = require("./phoneImageRoutes");
+
+
+
+
+
+router.use("/users", userRoutes);
+router.use("/auth", authRoutes);
+router.use("/dashboard", dashboardRoutes);
+router.use("/myprofile", profileRoutes);
+router.use("/update-profile", updateProfileRoutes);
+router.use("/stdtestimonials", stdTestimonialRoutes);
+router.use("/comp-requirement", compRequirementRoutes);
+router.use("/course", courseRoutes);
+router.use("/faq", faqRoutes);
+router.use("/subject", subjectRoutes);
+router.use("/features", featuresRoutes);
+router.use("/training", trainingRoutes);
+router.use("/tools", toolsRoutes);
+router.use("/instructors", instructorRoutes);
+router.use("/event-category", eventCategoryRoutes);
+router.use("/event", eventRoutes);
+router.use("/ppt", pptRoutes);
+router.use("/client", clientRoutes);
+router.use("/success-story", successStoryRoutes);
+router.use("/allied", alliedRoutes);
+router.use("/news_updates", newsupdateRoutes);
+router.use("/news", newsRoutes);
+router.use("/enroll-course", courseEnrollmentRoutes);
+router.use("/topics", topicsRoutes);
+router.use("/lecture-progress", lectureProgressRoutes);
+router.use("/enrolled-courses", enrolledCoursesRoutes);
+router.use("/enrolled-events", enrolledEventsRoutes);
+router.use("/certificate", certificateRoutes);
+router.use("/test-category", testCategoryRoutes);
+router.use("/enrolled-test-packages", enrolledTestPackageRoutes);
+router.use("/notes", notesRoutes);
+router.use("/user-wishlist", userWishlistRoutes);
+router.use("/contact-us", contactQueriesRoutes);
+router.use("/hiring-form", hiringFormRoutes);
+router.use("/user-reviews", userReviewsRoutes);
+router.use("/video", videoRoutes);
+router.use("/location", locationSettingRoutes);
+router.use("/brand-videos", brandVideoRoutes);
+router.use("/phone-images", phoneImageRoutes);
+
+module.exports = router; 

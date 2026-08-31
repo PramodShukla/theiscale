@@ -1,0 +1,126 @@
+
+const express = require("express");
+const router = express.Router();
+
+const authAdminRoutes = require("./authAdminRoutes");
+const categoryRoutes = require("./categoryRoutes");
+const courseRoutes = require("./courseRoutes");
+const instructorRoutes = require("./instructorRoutes");
+const faqRoutes = require("./faqRoutes");
+const featuresRoutes = require("./featuresRoutes");
+const toolsRoutes = require("./toolsRoutes");
+const subjectRoutes = require("./subjectRoutes");
+const topicsRoutes = require("./topicsRoutes");
+const testPackageRoutes = require("./testPackageRoutes");
+const trainingRoutes = require("./trainingRoutes");
+const quizRoutes = require("./quizRoutes");
+const instructionsRoutes = require("./instructionsRoutes");
+const questionRoutes = require("./questionRoutes");
+const stdTestimonialRoutes = require("./stdTestimonialRoutes");
+const compRequirementRoutes = require("./compRequirementRoutes");
+const eventCategoryRoutes = require("./eventCategoryRoutes");
+const eventRoutes = require("./eventRoutes");
+const pptRoutes = require("./pptRoutes");
+const clientRoutes = require("./clientRoutes");
+const successStoryRoutes = require("./successStoryRoutes");
+const alliedRoutes = require("./alliedRoutes");
+const newsupdateRoutes = require("./news&updateRoutes");
+const newsRoutes = require("./newsRoutes");
+const adminRegistrationsSectionRoutes = require("./adminRegistrationsSectionRoutes");
+const certificateRoutes = require("./certificateRoutes");
+const testCategoryRoutes = require("./testCategoryRoutes");
+const enrolledTestPackageRoutes = require("./enrolledTestPackageRoutes");
+const notesCategoryRoutes = require("./notesCategoryRoutes");
+const notesSubCategoryRoutes = require("./notesSubCategoryRoutes");
+const notesRoutes = require("./notesRoutes");
+const userWishlistRoutes = require("./userWishlistRoutes");
+const batchRoutes = require("./batchRoutes");
+const teamRoutes = require("./teamRoutes");
+const liveClassRoutes = require("./liveClassRoutes");
+const classesRoutes = require("./classesRoutes");
+const locationSettingRoutes = require("./locationSettingRoutes");
+const appUserRoutes = require("./appUserRoutes");
+const appUserEnrollmentsDetailsRoutes = require("./appUserEnrollmentsDetailsRoutes");
+const appUserWishlistDetailsRoutes = require("./appUserWishlistDetailsRoutes");
+const offersRoutes = require("./offersRoutes");
+const partnersRoutes = require("./partnersRoutes");
+const testimonialRatingRoutes = require("./testimonialRatingRoutes");
+const subjectRatingRoutes = require("./subjectRatingRoutes");
+const userReviewsRoutes = require("./userReviewsRoutes");
+const bannerRoutes = require("./bannerRoutes");
+const leadGenerateRoutes = require("./leadGenerateRoutes");
+const couponRoutes = require("./couponRoutes");
+const myProfileRoutes = require("./myProfileRoutes");
+const adminDashboardRoutes = require("./adminDashboardRoutes");
+const brandVideoRoutes = require("./brandVideoRoutes");
+const contactQueriesRoutes = require("./contactQueriesRoutes");
+const hiringFormRoutes = require("./hiringFormRoutes");
+const appSettingsRoutes = require("./appSettingsRoutes");
+const dataAnalyticsRoutes = require("./dataAnalyticsRoutes");
+const phoneImageRoutes = require("./phoneImageRoutes");
+
+
+
+
+
+router.use("/auth", authAdminRoutes);
+router.use("/category", categoryRoutes);
+router.use("/course", courseRoutes);
+router.use("/instructor", instructorRoutes);
+router.use("/faq", faqRoutes);
+router.use("/feature", featuresRoutes);
+router.use("/tools", toolsRoutes);
+router.use("/subject", subjectRoutes);
+router.use("/topics", topicsRoutes);
+router.use("/test-package", testPackageRoutes);
+router.use("/training", trainingRoutes);
+router.use("/quiz", quizRoutes);
+router.use("/instructions", instructionsRoutes); 
+router.use("/question", questionRoutes);
+router.use("/stdtestimonial", stdTestimonialRoutes);
+router.use("/comp-requirement", compRequirementRoutes);
+router.use("/event-category", eventCategoryRoutes);
+router.use("/event", eventRoutes);
+router.use("/ppt", pptRoutes);
+router.use("/client", clientRoutes);
+router.use("/success-story", successStoryRoutes);
+router.use("/allied", alliedRoutes);
+router.use("/news_updates", newsupdateRoutes);
+router.use("/news", newsRoutes);
+router.use("/registrations", adminRegistrationsSectionRoutes);
+router.use("/certificate", certificateRoutes);
+router.use("/test-category", testCategoryRoutes);
+router.use("/enrolled-test-packages", enrolledTestPackageRoutes);
+router.use("/notes-category", notesCategoryRoutes);
+router.use("/notes-sub-category", notesSubCategoryRoutes);
+router.use("/notes", notesRoutes);
+router.use("/user-wishlist", userWishlistRoutes);
+router.use("/batch", batchRoutes);
+router.use("/team", teamRoutes);
+router.use("/live-class", liveClassRoutes);
+router.use("/classes", classesRoutes);
+router.use("/location", locationSettingRoutes);
+router.use("/app-users", appUserRoutes);
+router.use("/app-users-enrollments-details", appUserEnrollmentsDetailsRoutes);
+router.use("/app-users-wishlist-details", appUserWishlistDetailsRoutes);
+router.use("/offers", offersRoutes);
+router.use("/partners", partnersRoutes);
+router.use("/testimonial-ratings", testimonialRatingRoutes);
+router.use("/subject-ratings", subjectRatingRoutes);
+router.use("/user-reviews", userReviewsRoutes);
+router.use("/banners", bannerRoutes);
+router.use("/lead-generate", leadGenerateRoutes);
+router.use("/coupons", couponRoutes);
+router.use("/profile", myProfileRoutes);
+router.use("/dashboard", adminDashboardRoutes);
+router.use("/brand-video", brandVideoRoutes);
+router.use("/contact-us", contactQueriesRoutes);
+router.use("/hiring-form", hiringFormRoutes);
+router.use("/app-settings", appSettingsRoutes);
+router.use("/data-analytics", dataAnalyticsRoutes);
+router.use("/phone-images", phoneImageRoutes);
+
+
+
+
+module.exports = router;

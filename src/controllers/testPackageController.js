@@ -1,0 +1,264 @@
+const Package = require("../models/test_package");
+const Course = require("../models/course");
+const fs = require("fs");
+
+const addPackage = async (req, res) => {
+  try {
+    const {
+      m_package_course,
+      m_package_test_category,
+      m_package_title,
+      m_package_language,
+      m_package_order,
+      m_package_intro,
+      m_package_description,
+      m_package_status,
+    } = req.body;
+
+    if (!m_package_course || !m_package_title || !m_package_language) {
+      return res.status(400).json({
+        status: false,
+        message: "course, title and language are required",
+      });
+    }
+
+    const course = await Course.findById(m_package_course);
+    if (!course) {
+      return res.status(404).json({
+        status: false,
+        message: "Course not found",
+      });
+    }
+
+    const image = req.files?.m_package_image
+      ? req.files.m_package_image[0].path
+      : null;
+
+    const newPackage = new Package({
+      m_package_course,
+      m_package_test_category: m_package_test_category || null,
+      m_package_title,
+      m_package_language,
+      m_package_image: image,
+      m_package_order,
+      m_package_intro,
+      m_package_description,
+      m_package_status: m_package_status ? Number(m_package_status) : 1,
+    });
+
+    const saved = await newPackage.save();
+
+    res.status(201).json({
+      status: true,
+      message: "Package added successfully",
+      data: saved,
+    });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+const getAllPackages = async (req, res) => {
+  try {
+    const data = await Package.find().sort({ _id: -1 });
+
+    res.json({
+      status: true,
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+const getPackagesByCourse = async (req, res) => {
+  try {
+    const { course_id } = req.params;
+
+    const data = await Package.find({
+      m_package_course: course_id,
+    }).sort({ _id: -1 });
+
+    res.json({
+      status: true,
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+const updatePackage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const pkg = await Package.findById(id);
+    if (!pkg) {
+      return res.status(404).json({
+        status: false,
+        message: "Package not found",
+      });
+    }
+
+    const {
+      m_package_title,
+      m_package_test_category,
+      m_package_language,
+      m_package_order,
+      m_package_intro,
+      m_package_description,
+      m_package_status,
+      m_package_type,
+      m_package_price,
+      m_package_offer_price,
+    } = req.body;
+
+    if (m_package_title) pkg.m_package_title = m_package_title;
+    if (m_package_test_category !== undefined) {
+      pkg.m_package_test_category = m_package_test_category || null;
+    }
+    if (m_package_language) pkg.m_package_language = m_package_language;
+    if (m_package_order) pkg.m_package_order = m_package_order;
+    if (m_package_intro) pkg.m_package_intro = m_package_intro;
+    if (m_package_description)
+      pkg.m_package_description = m_package_description;
+    if (m_package_status !== undefined)
+      pkg.m_package_status = Number(m_package_status);
+    if (m_package_type !== undefined) {
+      pkg.m_package_type = m_package_type;
+    }
+
+    if (m_package_price !== undefined) {
+      pkg.m_package_price = Number(m_package_price);
+    }
+
+    if (m_package_offer_price !== undefined) {
+      pkg.m_package_offer_price = Number(m_package_offer_price);
+    }
+
+    // image update
+    if (req.files?.m_package_image) {
+      if (pkg.m_package_image && fs.existsSync(pkg.m_package_image)) {
+        fs.unlinkSync(pkg.m_package_image);
+      }
+      pkg.m_package_image = req.files.m_package_image[0].path;
+    }
+
+    const updated = await pkg.save();
+
+    res.json({
+      status: true,
+      message: "Package updated successfully",
+      data: updated,
+    });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+const deletePackage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const pkg = await Package.findById(id);
+    if (!pkg) {
+      return res.status(404).json({
+        status: false,
+        message: "Package not found",
+      });
+    }
+
+    if (pkg.m_package_image && fs.existsSync(pkg.m_package_image)) {
+      fs.unlinkSync(pkg.m_package_image);
+    }
+
+    await Package.findByIdAndDelete(id);
+
+    res.json({
+      status: true,
+      message: "Package deleted successfully",
+    });
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
+};
+
+const getTestPackageDropdown = async (req, res) => {
+  try {
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+    } = req.query;
+
+    page = parseInt(page) || 1;
+
+    limit = parseInt(limit) || 10;
+
+    const skip =
+      (page - 1) * limit;
+
+    let filter = {
+      m_package_status: 1,
+    };
+
+    if (search) {
+      filter.m_package_title = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    const total =
+      await Package.countDocuments(
+        filter,
+      );
+
+    const data =
+      await Package.find(filter)
+
+        .select(`
+          _id
+          m_package_title
+        `)
+
+        .sort({
+          m_package_title: 1,
+        })
+
+        .skip(skip)
+
+        .limit(limit)
+
+        .lean();
+
+    return res.status(200).json({
+      status: true,
+
+      current_page: page,
+
+      total_pages: Math.ceil(
+        total / limit,
+      ),
+
+      total_records: total,
+
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+
+      message: error.message,
+    });
+  }
+};
+
+module.exports = {
+  addPackage,
+  getAllPackages,
+  getPackagesByCourse,
+  updatePackage,
+  deletePackage,
+  getTestPackageDropdown,
+};

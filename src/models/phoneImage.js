@@ -1,0 +1,21 @@
+const mongoose = require("mongoose");
+
+const phoneImageSchema = new mongoose.Schema(
+  {
+    image: {
+      type: String,
+      required: [true, "Image is required"],
+      trim: true,
+    },
+
+     public_id: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+module.exports = mongoose.model("phoneImage", phoneImageSchema);
